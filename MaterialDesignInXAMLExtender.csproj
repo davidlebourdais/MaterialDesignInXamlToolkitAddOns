@@ -13,6 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ExtendedWPFVisualTreeHelper" Version="1.0.4" />
     <PackageReference Include="MaterialDesignThemes" Version="3.0.1" />
   </ItemGroup>
 </Project>

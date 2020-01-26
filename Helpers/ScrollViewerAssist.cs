@@ -2,7 +2,7 @@
 using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
+using EMA.ExtendedWPFVisualTreeHelper;
 
 namespace EMA.MaterialDesignInXAMLExtender
 {
@@ -56,7 +56,7 @@ namespace EMA.MaterialDesignInXAMLExtender
                 }
 
                 // Find any items control within:
-                if (FindChild<ItemsControl>(scrollViewer) is ItemsControl itemscontrol)
+                if (scrollViewer.FindChild<ItemsControl>() is ItemsControl itemscontrol)
                 {
                     // Create a weak ref to scroll viewer and affect it to collection change event,
                     // so we scroll this peculiar scrollviewer anytime the inner collection changes:
@@ -105,56 +105,6 @@ namespace EMA.MaterialDesignInXAMLExtender
                 casted.Loaded -= ScrollViewer_Loaded;
                 OnScrollsToEndChanged(casted, new DependencyPropertyChangedEventArgs());
             }
-        }
-
-        /// <summary>
-        /// Finds a child of in the visual tree using its type and (optionnaly) its name.
-        /// </summary>
-        /// <typeparam name="T">The type of the queried item.</typeparam>
-        /// <param name="startNode">The node where to start looking from.</param>
-        /// <param name="child_name">Name of the child to find.</param>
-        /// <returns>A matching child, or null if none existing.</returns>
-        /// <remarks>Adapted from https://stackoverflow.com/questions/636383/how-can-i-find-wpf-controls-by-name-or-type </remarks>
-        private static T FindChild<T>(DependencyObject startNode, string child_name = null)
-        {
-            if (startNode == null) return default;
-
-            var childrenCount = VisualTreeHelper.GetChildrenCount(startNode);
-            for (int i = 0; i < childrenCount; i++)
-            {
-                var child = VisualTreeHelper.GetChild(startNode, i);
-
-                // If the child is not of the requested type:
-                if (!(child is T typedChild))
-                {
-                    // Continue to explore:
-                    var foundChild = FindChild<T>(child, child_name);
-
-                    // If the child is found, just return:
-                    if (foundChild != null) return foundChild;
-                }
-                // Child of correct type, now check name if required:
-                else if (!string.IsNullOrEmpty(child_name))
-                {
-                    // If the child's name is correct, return result:
-                    if (child is FrameworkElement frameworkElement && frameworkElement.Name == child_name)
-                        return typedChild;
-                    else
-                    {
-                        // Continue to explore:
-                        var foundChild = FindChild<T>(child, child_name);
-
-                        // If the child is found, just return:
-                        if (foundChild != null) return foundChild;
-                    }
-                }
-                else // if no name required and type is correct:
-                {
-                    return typedChild;  // just return child result.
-                }
-            }
-
-            return default;  // been at the end and nothing interesting came back.
         }
         #endregion
     }
