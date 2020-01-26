@@ -1,0 +1,15 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:extender="clr-namespace:EMA.MaterialDesignInXAMLExtender">
+
+    <ResourceDictionary.MergedDictionaries>
+        <!-- This Generic.xaml class must be called AFTER MaterialDesignInXAML for WPF MaterialDesignTheme.Defaults.xaml in the app.xaml file
+        of the application, as most of our custom controls rely on it -->
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.CustomColorPicker.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <!-- Default styles setup -->
+    <Style TargetType="{x:Type extender:CustomColorPicker}" BasedOn="{StaticResource MaterialDesignCustomColorPicker}"/>
+
+</ResourceDictionary>

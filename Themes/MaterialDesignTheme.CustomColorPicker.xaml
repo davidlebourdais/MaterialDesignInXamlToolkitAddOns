@@ -1,0 +1,496 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+                    xmlns:converters="clr-namespace:MaterialDesignThemes.Wpf.Converters;assembly=MaterialDesignThemes.Wpf"
+                    xmlns:extender="clr-namespace:EMA.MaterialDesignInXAMLExtender">
+
+    <converters:BooleanToVisibilityConverter x:Key="InverseBoolToVisConverter" TrueValue="Collapsed" FalseValue="Visible"/>
+    <extender:BindingProxy x:Key="MaterialDesignBodyColor" Data="{DynamicResource MaterialDesignBody}" />
+
+    <!-- Tiled background to be shown behing transparent colors -->
+    <DrawingBrush x:Key="TransparentBackground" 
+                  Viewport="0,0,10,10"
+                  ViewportUnits="Absolute" 
+                  TileMode="Tile">
+        <DrawingBrush.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="White">
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="0,0,10,10" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="LightGray">
+                    <GeometryDrawing.Geometry>
+                        <GeometryGroup>
+                            <RectangleGeometry Rect="0,0,10,10" />
+                            <RectangleGeometry Rect="10,10,10,10" />
+                        </GeometryGroup>
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+            </DrawingGroup>
+        </DrawingBrush.Drawing>
+    </DrawingBrush>
+
+    <!-- Template for system color selected item -->
+    <DataTemplate x:Key="SystemColorItemNameOnlyTemplate">
+        <TextBlock Text="{Binding BrushName}" VerticalAlignment="Center"/>
+    </DataTemplate>
+
+    <!-- Template for system color in dropdown menu -->
+    <DataTemplate x:Key="SystemColorItemTemplate">
+        <StackPanel Orientation="Horizontal">
+            <Ellipse Fill="{Binding Brush}" StrokeThickness="1" Stroke="Gray" Width="12" Height="12" VerticalAlignment="Center"/>
+            <TextBlock Text="{Binding BrushName}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+        </StackPanel>
+    </DataTemplate>
+
+    <!-- Style for any predefined or custom colors -->
+    <Style x:Key="BrushItemStyle" TargetType="{x:Type extender:BrushItem}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type extender:BrushItem}">
+                    <Border x:Name="BackgroundBorder" Background="{StaticResource TransparentBackground}" extender:ButtonAssist.UniformCornerRadius="8" Margin="4" ToolTip="{TemplateBinding AsRGBText}">
+                        <Button x:Name="SelectButton" Height="15" Width="15" Background="{TemplateBinding AsSolidColorBrush}" extender:ButtonAssist.UniformCornerRadius="8" 
+                                Command="{Binding SelectColorCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:CustomColorPicker}}}"
+                                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type extender:BrushItem}}}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Margin" Value="0 0 0 0" />
+                                    <Setter Property="md:RippleAssist.IsDisabled" Value="True" />
+                                    <Setter Property="md:ShadowAssist.ShadowDepth" Value="Depth0" />
+                                    <Setter Property="Tag" Value="0" />
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="(extender:ButtonAssist.UniformCornerRadius)" 
+                                                         To="4" Duration="0:0:0.18" />
+                                        <DoubleAnimation Storyboard.TargetName="SelectButton" Storyboard.TargetProperty="(extender:ButtonAssist.UniformCornerRadius)" 
+                                                         To="4" Duration="0:0:0.18" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="(extender:ButtonAssist.UniformCornerRadius)" 
+                                                         From="4" Duration="0:0:0.18" />
+                                        <DoubleAnimation Storyboard.TargetName="SelectButton" Storyboard.TargetProperty="(extender:ButtonAssist.UniformCornerRadius)" 
+                                                         From="4" Duration="0:0:0.18" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect ShadowDepth="2" BlurRadius="3" Direction="280" Opacity="0.2" Color="{Binding Data.Color, Source={StaticResource MaterialDesignBodyColor}}"/>
+                                </Setter.Value>
+                            </Setter>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="(extender:ButtonAssist.UniformCornerRadius)" 
+                                                         To="2" Duration="0:0:0.18" />
+                                        <DoubleAnimation Storyboard.TargetName="SelectButton" Storyboard.TargetProperty="(extender:ButtonAssist.UniformCornerRadius)" 
+                                                         To="2" Duration="0:0:0.18" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="(extender:ButtonAssist.UniformCornerRadius)" 
+                                                         From="2" Duration="0:0:0.18" />
+                                        <DoubleAnimation Storyboard.TargetName="SelectButton" Storyboard.TargetProperty="(extender:ButtonAssist.UniformCornerRadius)" 
+                                                         From="2" Duration="0:0:0.18" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="SeparatorStyle" TargetType="{x:Type Separator}">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignDarkSeparatorBackground}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDarkSeparatorBackground}"/>
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignSelection}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignSelection}"/>
+        <Setter Property="MinHeight" Value="1"/>
+        <Setter Property="SnapsToDevicePixels" Value="true"/>
+        <Setter Property="Height" Value="16"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Separator}">
+                    <Rectangle Height="1" Fill="{TemplateBinding Background}"
+                               HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Raw custom color picker template -->
+    <ControlTemplate x:Key="MaterialDesignCustomColorPickerTemplate" TargetType="{x:Type extender:CustomColorPicker}">
+        <Border CornerRadius="5" Background="{DynamicResource MaterialDesignBackground}" MaxWidth="300"
+                TextElement.FontSize="{Binding FontSize, RelativeSource={RelativeSource AncestorType={x:Type extender:CustomColorPicker}}}"> <!-- Font size is adjusted as sometimes overrided when put into popups-->
+            <Grid Width="270">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Predefined colors picker part -->
+                <Grid Visibility="{Binding IsCustomColorPickingShown, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource InverseBoolToVisConverter}}" VerticalAlignment="Stretch">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Separator Grid.Row="1" Margin="10,-7,10,-4" Height="12" VerticalAlignment="Bottom" Style="{StaticResource SeparatorStyle}"/>
+
+                    <StackPanel Orientation="Horizontal" x:Name="PART_BrightnessSelector" Margin="10,0">
+                        <RadioButton Content="LIGHT" GroupName="GN" IsChecked="{Binding IsLightColorSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" Padding="0" MinWidth="55" Style="{StaticResource MaterialDesignTabRadioButton}"/>
+                        <RadioButton Content="MEDIUM" GroupName="GN" IsChecked="{Binding IsMediumColorSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"  Padding="0" MinWidth="70" Style="{StaticResource MaterialDesignTabRadioButton}"/>
+                        <RadioButton Content="DARK" GroupName="GN" IsChecked="{Binding IsDarkColorSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" Padding="0" MinWidth="55" Style="{StaticResource MaterialDesignTabRadioButton}"/>
+                        <RadioButton Content="GRAY" GroupName="GN" IsChecked="{Binding IsGrayColorSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" Padding="0" MinWidth="50" Style="{StaticResource MaterialDesignTabRadioButton}"/>
+                    </StackPanel>
+
+                    <Separator Grid.Row="1" Margin="10,-4" Height="12" VerticalAlignment="Bottom" Style="{StaticResource SeparatorStyle}"/>
+
+                    <ItemsControl Grid.Row="2" Width="230" HorizontalAlignment="Left" Margin="15,10,10,10"
+                                        ItemsSource="{TemplateBinding PredefinedColors}" 
+                                        ItemContainerStyle="{StaticResource BrushItemStyle}" >
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+
+                    <!-- Custom color display -->
+                    <Grid Grid.Row="3" Visibility="{TemplateBinding CanChooseCustomColor, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Separator  Margin="10,-5" Height="12" VerticalAlignment="Bottom" Style="{StaticResource SeparatorStyle}"/>
+
+                        <DockPanel Margin="5,0" Grid.Row="1">
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto" MaxWidth="140"
+                                            Margin="10,0,0,0" 
+                                            ScrollViewer.CanContentScroll="True" 
+                                            extender:ScrollViewerAssist.ScrollsToEnd="True">
+                                <ItemsControl HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Center" 
+                                            ItemsSource="{TemplateBinding CustomColors}"
+                                            ItemContainerStyle="{StaticResource BrushItemStyle}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </ScrollViewer>
+                            <Button HorizontalAlignment="Right" Margin="0, 3, 15, 2.5" Padding="8 0"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    Command="{Binding ShowCustomColorPickingCommand, RelativeSource={RelativeSource TemplatedParent}}">
+                                <Button.Content>
+                                    <StackPanel Orientation="Horizontal">
+                                        <md:PackIcon Kind="Plus" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignCheckBoxOff}" Margin="-5,0,5,0" Height="20" Width="20"/>
+                                        <TextBlock Text="CUSTOM"/>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
+                        </DockPanel>
+                    </Grid>
+                </Grid>
+
+                <!-- Custom colors picker part -->
+                <Grid Visibility="{Binding IsCustomColorPickingShown, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" VerticalAlignment="Stretch">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Margin="0, 5">
+                        <!-- Stacked layout for text when no system colors are displayed -->
+                        <StackPanel Margin="5,10,5,0" Orientation="Vertical" Visibility="{Binding CanSelectFromSystemColors, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource InverseBoolToVisConverter}}">
+                            <Border Background="{StaticResource TransparentBackground}" Margin="10,0" BorderBrush="LightGray" BorderThickness="2" CornerRadius="4"
+                                        Height="30" HorizontalAlignment="Stretch">
+                                <Rectangle Fill="{TemplateBinding PreviewedCustomSolidColorBrush}" RadiusX="4" RadiusY="4" Stretch="Fill" />
+                            </Border>
+                            <TextBox Margin="10, 5"
+                                            Text="{Binding PreviewedBrushAsText, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                                            Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" FontSize="14" TextAlignment="Center" extender:TextBoxAssist.OverrideBorderPadding="0"
+                                            FontWeight="DemiBold" md:HintAssist.IsFloating="False" md:TextFieldAssist.TextFieldCornerRadius="0"/>
+                        </StackPanel>
+
+                        <!-- Compact layout for text when system colors are here -->
+                        <StackPanel Margin="0, 10" Orientation="Vertical" Visibility="{Binding CanSelectFromSystemColors, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <DockPanel>
+                                <Border Background="{StaticResource TransparentBackground}" Margin="5,0" BorderBrush="LightGray" BorderThickness="2" CornerRadius="4"
+                                            Height="30" Width="{Binding ActualHeight, RelativeSource={RelativeSource Mode=Self}}">
+                                    <Rectangle Fill="{TemplateBinding PreviewedCustomSolidColorBrush}" RadiusX="4" RadiusY="4" Stretch="Fill" />
+                                </Border>
+                                <TextBox DockPanel.Dock="Right" 
+                                                Text="{Binding PreviewedBrushAsText, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                                                Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" FontSize="14" TextAlignment="Center" extender:TextBoxAssist.OverrideBorderPadding="0"
+                                                FontWeight="DemiBold" md:HintAssist.IsFloating="False" md:TextFieldAssist.TextFieldCornerRadius="0"/>
+                            </DockPanel>
+                            <StackPanel Orientation="Horizontal" Margin="5,15,0,0">
+                                <TextBlock Text="System"/>
+                                <ComboBox Margin="5,-1,0,0" FontWeight="DemiBold" 
+                                                SelectedItem="{Binding SelectedSystemBrushItem, RelativeSource={RelativeSource TemplatedParent}}"
+                                                ItemsSource="{x:Static extender:CustomColorPicker.SystemBrushItems}" 
+                                                ItemTemplateSelector="{extender:ComboBoxTemplateSelector SelectedItemTemplate={StaticResource SystemColorItemNameOnlyTemplate},
+                                                                                                         DropdownItemsTemplate={StaticResource SystemColorItemTemplate}}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+
+                    <Separator Grid.Row="1" Margin="10,-4" Height="12" VerticalAlignment="Bottom" Style="{StaticResource SeparatorStyle}"/>
+
+                    <StackPanel Grid.Row="2" Orientation="Horizontal">
+                        <Button HorizontalAlignment="Right" Margin="8,3" Style="{StaticResource MaterialDesignFlatButton}" Command="{Binding HideCustomColorPickingCommand, RelativeSource={RelativeSource TemplatedParent}}">
+                            <md:PackIcon Kind="ArrowLeft" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignCheckBoxOff}" Margin="0,0,5,0" Height="20" Width="20"/>
+                        </Button>
+                        <Button HorizontalAlignment="Right" Margin="3"
+                                    Content="OK"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    Command="{Binding AddCustomColorCommand, RelativeSource={RelativeSource TemplatedParent}}"/>
+                    </StackPanel>
+
+                    <md:ColorPicker x:Name="PART_CustomColorPicker" Grid.Column="1" Grid.RowSpan="3" MinHeight="140" Width="110"
+                                     Color="{Binding PreviewedCustomColor, RelativeSource={RelativeSource TemplatedParent}, Delay=25, Mode=TwoWay}" />
+                </Grid>
+
+                <!-- opacity setting -->
+                <Grid Grid.Row="1" Visibility="{Binding CanSetSelectedColorOpacity, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Separator Margin="10,-5" Height="12" VerticalAlignment="Bottom" Style="{StaticResource SeparatorStyle}"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="5, 8, 5, 5" >
+                        <TextBlock Text="Opacity" VerticalAlignment="Center" Margin="10,0" />
+                        <Slider Value="{Binding SelectedColorOpacity, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                Width="145" Margin="10,3,10,0" Minimum="0" Maximum="1.0" LargeChange="0.1" SmallChange="0.01" VerticalAlignment="Center" HorizontalAlignment="Stretch" />
+                        <TextBlock Width="25" Text="{Binding SelectedColorOpacity, RelativeSource={RelativeSource TemplatedParent}, StringFormat=0.##}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+    </ControlTemplate>
+
+    <!-- Custom color picker 'in a popup' template - WARNING - copy-paste from raw template -->
+    <ControlTemplate x:Key="MaterialDesignPopupCustomColorPickerTemplate" TargetType="{x:Type extender:CustomColorPicker}">
+            <md:PopupBox IsPopupOpen="{Binding IsOpen, RelativeSource={RelativeSource TemplatedParent},Mode=TwoWay}"
+                         md:RippleAssist.Feedback="{x:Null}" StaysOpen="True">
+                
+                <!-- Header shows a preview of the colors and act as button to open settings -->
+                <md:PopupBox.ToggleContent>
+                    <Button HorizontalAlignment="Right" Padding="8 0"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            Command="{Binding OpenCommand, RelativeSource={RelativeSource TemplatedParent}}">
+                        <Button.Content>
+                            <StackPanel Orientation="Horizontal">
+                            <Border Background="{Binding SelectedBrushItem.AsSolidColorBrush, RelativeSource={RelativeSource TemplatedParent}}" 
+                                    CornerRadius="2" Margin="4" Width="16" Height="16" BorderThickness="1" BorderBrush="LightGray"/>
+                                <TextBlock Margin="5,0" Text="{Binding SelectedBrushItem.AsRGBText, RelativeSource={RelativeSource TemplatedParent}}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+                </md:PopupBox.ToggleContent>
+
+            <!-- For the content, we have to recopy everything from the normal template as inheritance nor composition works for control templates -->
+            <Border CornerRadius="5" Background="{DynamicResource MaterialDesignBackground}" MaxWidth="300"
+                    TextElement.FontSize="{Binding FontSize, RelativeSource={RelativeSource AncestorType={x:Type extender:CustomColorPicker}}}">
+                <!-- Font size is adjusted as sometimes  overrided when put into popups-->
+                <Grid Width="270">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Predefined colors picker part -->
+                    <Grid Visibility="{Binding IsCustomColorPickingShown, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource InverseBoolToVisConverter}}" VerticalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Separator Grid.Row="1" Margin="10,-7,10,-4" Height="12" VerticalAlignment="Bottom" Style="{StaticResource SeparatorStyle}"/>
+
+                        <StackPanel Orientation="Horizontal" x:Name="PART_BrightnessSelector" Margin="10,0">
+                            <RadioButton Content="LIGHT" GroupName="GN" IsChecked="{Binding IsLightColorSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" Padding="0" MinWidth="55" Style="{StaticResource MaterialDesignTabRadioButton}"/>
+                            <RadioButton Content="MEDIUM" GroupName="GN" IsChecked="{Binding IsMediumColorSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"  Padding="0" MinWidth="70" Style="{StaticResource MaterialDesignTabRadioButton}"/>
+                            <RadioButton Content="DARK" GroupName="GN" IsChecked="{Binding IsDarkColorSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" Padding="0" MinWidth="55" Style="{StaticResource MaterialDesignTabRadioButton}"/>
+                            <RadioButton Content="GRAY" GroupName="GN" IsChecked="{Binding IsGrayColorSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" Padding="0" MinWidth="50" Style="{StaticResource MaterialDesignTabRadioButton}"/>
+                        </StackPanel>
+
+                        <ItemsControl Grid.Row="2" Width="230" HorizontalAlignment="Left" Margin="15,10,10,10"
+                                        ItemsSource="{TemplateBinding PredefinedColors}" 
+                                        ItemContainerStyle="{StaticResource BrushItemStyle}" >
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+
+                        <!-- Custom color display -->
+                        <Grid Grid.Row="3" Visibility="{TemplateBinding CanChooseCustomColor, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Separator  Margin="10,-5" Height="12" VerticalAlignment="Bottom" Style="{StaticResource SeparatorStyle}"/>
+
+                            <DockPanel Margin="5,0" Grid.Row="1">
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto" MaxWidth="140"
+                                            Margin="10,0,0,0" 
+                                            ScrollViewer.CanContentScroll="True" 
+                                            extender:ScrollViewerAssist.ScrollsToEnd="True">
+                                    <ItemsControl HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Center" 
+                                            ItemsSource="{TemplateBinding CustomColors}"
+                                            ItemContainerStyle="{StaticResource BrushItemStyle}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                                <Button HorizontalAlignment="Right" Margin="0, 3, 15, 2.5" Padding="8 0"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    Command="{Binding ShowCustomColorPickingCommand, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <Button.Content>
+                                        <StackPanel Orientation="Horizontal">
+                                            <md:PackIcon Kind="Plus" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignCheckBoxOff}" Margin="-5,0,5,0" Height="20" Width="20"/>
+                                            <TextBlock Text="CUSTOM"/>
+                                        </StackPanel>
+                                    </Button.Content>
+                                </Button>
+                            </DockPanel>
+                        </Grid>
+                    </Grid>
+
+                    <!-- Custom colors picker part -->
+                    <Grid Visibility="{Binding IsCustomColorPickingShown, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" VerticalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid Margin="0, 5">
+                            <!-- Stacked layout for text when no system colors are displayed -->
+                            <StackPanel Margin="5,10,5,0" Orientation="Vertical" Visibility="{Binding CanSelectFromSystemColors, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource InverseBoolToVisConverter}}">
+                                <Border Background="{StaticResource TransparentBackground}" Margin="10,0" BorderBrush="LightGray" BorderThickness="2" CornerRadius="4"
+                                        Height="30" HorizontalAlignment="Stretch">
+                                    <Rectangle Fill="{TemplateBinding PreviewedCustomSolidColorBrush}" RadiusX="4" RadiusY="4" Stretch="Fill" />
+                                </Border>
+                                <TextBox Margin="10, 5"
+                                            Text="{Binding PreviewedBrushAsText, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                                            Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" FontSize="14" TextAlignment="Center" extender:TextBoxAssist.OverrideBorderPadding="0"
+                                            FontWeight="DemiBold" md:HintAssist.IsFloating="False" md:TextFieldAssist.TextFieldCornerRadius="0"/>
+                            </StackPanel>
+
+                            <!-- Compact layout for text when system colors are here -->
+                            <StackPanel Margin="0, 10" Orientation="Vertical" Visibility="{Binding CanSelectFromSystemColors, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <DockPanel>
+                                    <Border Background="{StaticResource TransparentBackground}" Margin="5,0" BorderBrush="LightGray" BorderThickness="2" CornerRadius="4"
+                                            Height="30" Width="{Binding ActualHeight, RelativeSource={RelativeSource Mode=Self}}">
+                                        <Rectangle Fill="{TemplateBinding PreviewedCustomSolidColorBrush}" RadiusX="4" RadiusY="4" Stretch="Fill" />
+                                    </Border>
+                                    <TextBox DockPanel.Dock="Right" 
+                                                Text="{Binding PreviewedBrushAsText, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                                                Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" FontSize="14" TextAlignment="Center" extender:TextBoxAssist.OverrideBorderPadding="0"
+                                                FontWeight="DemiBold" md:HintAssist.IsFloating="False" md:TextFieldAssist.TextFieldCornerRadius="0"/>
+                                </DockPanel>
+                                <StackPanel Orientation="Horizontal" Margin="5,15,0,0">
+                                    <TextBlock Text="System"/>
+                                    <ComboBox Margin="5,-1,0,0" FontWeight="DemiBold" 
+                                                SelectedItem="{Binding SelectedSystemBrushItem, RelativeSource={RelativeSource TemplatedParent}}"
+                                                ItemsSource="{x:Static extender:CustomColorPicker.SystemBrushItems}" 
+                                                ItemTemplateSelector="{extender:ComboBoxTemplateSelector SelectedItemTemplate={StaticResource SystemColorItemNameOnlyTemplate},
+                                                                                                         DropdownItemsTemplate={StaticResource SystemColorItemTemplate}}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+
+                        <Separator Grid.Row="1" Margin="10,-4" Height="12" VerticalAlignment="Bottom" Style="{StaticResource SeparatorStyle}"/>
+
+                        <StackPanel Grid.Row="2" Orientation="Horizontal">
+                            <Button HorizontalAlignment="Right" Margin="8,3" Style="{StaticResource MaterialDesignFlatButton}" Command="{Binding HideCustomColorPickingCommand, RelativeSource={RelativeSource TemplatedParent}}">
+                                <md:PackIcon Kind="ArrowLeft" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignCheckBoxOff}" Margin="0,0,5,0" Height="20" Width="20"/>
+                            </Button>
+                            <Button HorizontalAlignment="Right" Margin="3"
+                                    Content="OK"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    Command="{Binding AddCustomColorCommand, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </StackPanel>
+
+                        <md:ColorPicker x:Name="PART_CustomColorPicker" Grid.Column="1" Grid.RowSpan="3" MinHeight="140" Width="110"
+                                     Color="{Binding PreviewedCustomColor, RelativeSource={RelativeSource TemplatedParent}, Delay=25, Mode=TwoWay}" />
+                    </Grid>
+
+                    <!-- Opacity setting -->
+                    <Grid Grid.Row="1" Visibility="{Binding CanSetSelectedColorOpacity, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Separator Margin="10,-5" Height="12" VerticalAlignment="Bottom" Style="{StaticResource SeparatorStyle}"/>
+                        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="5, 8, 5, 5" >
+                            <TextBlock Text="Opacity" VerticalAlignment="Center" Margin="10,0" />
+                            <Slider Value="{Binding SelectedColorOpacity, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                Width="145" Margin="10,3,10,0" Minimum="0" Maximum="1.0" LargeChange="0.1" SmallChange="0.01" VerticalAlignment="Center" HorizontalAlignment="Stretch" />
+                            <TextBlock Width="25" Text="{Binding SelectedColorOpacity, RelativeSource={RelativeSource TemplatedParent}, StringFormat=0.##}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+        </md:PopupBox>
+    </ControlTemplate>
+
+    <!-- Raw style for the custom color picker --> 
+    <Style x:Key="MaterialDesignCustomColorPicker" TargetType="{x:Type extender:CustomColorPicker}">
+        <Setter Property="IsOpen" Value="True"/>
+        <Setter Property="CanSetSelectedColorOpacity" Value="True"/>
+        <Setter Property="CanChooseCustomColor" Value="True"/>
+        <Setter Property="CanSelectFromSystemColors" Value="True"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="Template" Value="{StaticResource MaterialDesignCustomColorPickerTemplate}"/>
+    </Style>
+
+    <!-- 'in a popup' custom color picker -->
+    <Style x:Key="MaterialDesignPopupCustomColorPicker" TargetType="{x:Type extender:CustomColorPicker}" BasedOn="{StaticResource MaterialDesignCustomColorPicker}">
+        <Setter Property="IsOpen" Value="False"/>
+        <Setter Property="Template" Value="{StaticResource MaterialDesignPopupCustomColorPickerTemplate}"/>
+    </Style>
+
+</ResourceDictionary>
