@@ -206,7 +206,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// <summary>
         /// Gets the pressed status of the control.
         /// </summary>
-        /// <remarks>A bit different than <see cref="Button.IsPressed"/> as it does not handle
+        /// <remarks>A bit different than Button.IsPressed as it does not handle
         /// space bar and event system.</remarks>
         public bool IsPressed
         {
