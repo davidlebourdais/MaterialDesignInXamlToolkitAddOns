@@ -81,7 +81,10 @@ namespace EMA.MaterialDesignInXAMLExtender
         public static void CanSetSelectedColorOpacityChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
             if (sender is CustomColorPicker picker && args.NewValue is bool)
+            {
                 picker.resetSelectedColorOpacity();
+                picker.resetSelectedColorAsText();
+            }
         }
 
         /// <summary>
@@ -182,19 +185,20 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// Registers <see cref="SelectedColorOpacity"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty SelectedColorOpacityroperty
-            = DependencyProperty.Register(nameof(SelectedColorOpacity), typeof(double), typeof(CustomColorPicker), new FrameworkPropertyMetadata(1.0d, SelectedOpacityChanged));
+            = DependencyProperty.Register(nameof(SelectedColorOpacity), typeof(double), typeof(CustomColorPicker), new FrameworkPropertyMetadata(1.0d, SelectedColorOpacityChanged));
 
         /// <summary>
         /// Called whenever the <see cref="SelectedColorOpacity"/> property changes.
         /// </summary>
         /// <param name="sender">The object whose property changed.</param>
         /// <param name="args">Information about the property change.</param>
-        public static void SelectedOpacityChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        public static void SelectedColorOpacityChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
             if (sender is CustomColorPicker picker && args.NewValue is double)
             {
                 picker.resetSelectedColorOpacity();
                 picker.resetCustomColor();
+                picker.resetSelectedColorAsText();
                 if (picker.AddCustomColorCommand is SimpleCommand addcommand)  // used to lock when last custom is already current color.
                     addcommand.RaiseCanExecuteChanged();
             }
@@ -207,6 +211,17 @@ namespace EMA.MaterialDesignInXAMLExtender
         {
             if (SelectedBrushItems.Count > 0)
                 SelectedBrushItems.ForEach(x => x.setOpacity(CanSetSelectedColorOpacity ? SelectedColorOpacity : 1.0d));
+        }
+
+        /// <summary>
+        /// Changes the selected color text.
+        /// </summary>
+        private void resetSelectedColorAsText()
+        {
+            no_reentrancy = true;
+            var nullable_opacity = CanSetSelectedColorOpacity ? SelectedColorOpacity : (double?)null;
+            SelectedColorAsText = ColorHelper.GetARGBStringFromColor(SelectedBrushItem.Color, nullable_opacity);
+            no_reentrancy = false;
         }
         #endregion
 
@@ -813,9 +828,15 @@ namespace EMA.MaterialDesignInXAMLExtender
         {
             if (sender is CustomColorPicker picker && args.NewValue is BrushItem)
             {
+                if (picker.no_reentrancy) return;
                 picker.no_reentrancy = true;
                 picker.onSelectionChanged();
+                var opacity = picker.CanSetSelectedColorOpacity ? picker.SelectedColorOpacity : 1.0d;
+                picker.SelectedBrushItem.Opacity = opacity;
                 picker.SelectedColor = picker.SelectedBrushItem.Color;
+                picker.SelectedSolidColorBrush = picker.SelectedBrushItem.AsSolidColorBrush;
+                var nullable_opacity = picker.CanSetSelectedColorOpacity ? picker.SelectedColorOpacity : (double?)null;
+                picker.SelectedColorAsText = ColorHelper.GetARGBStringFromColor(picker.SelectedBrushItem.Color, nullable_opacity);
                 picker.no_reentrancy = false;
             }
         }
@@ -847,7 +868,10 @@ namespace EMA.MaterialDesignInXAMLExtender
                 picker.no_reentrancy = true;
                 picker.SelectedBrushItem = new BrushItem(new_value);
                 var opacity = picker.CanSetSelectedColorOpacity ? picker.SelectedColorOpacity : 1.0d;
+                picker.SelectedBrushItem.Opacity = opacity;
                 picker.SelectedSolidColorBrush = new SolidColorBrush(new_value) { Opacity = opacity };
+                var nullable_opacity = picker.CanSetSelectedColorOpacity ? picker.SelectedColorOpacity : (double?)null;
+                picker.SelectedColorAsText = ColorHelper.GetARGBStringFromColor(new_value, nullable_opacity);
                 picker.no_reentrancy = false;
             }
         }
@@ -878,7 +902,45 @@ namespace EMA.MaterialDesignInXAMLExtender
                 if (picker.no_reentrancy) return;
                 picker.no_reentrancy = true;
                 picker.SelectedBrushItem = new BrushItem(new_value.Color);
-                picker.SelectedColorOpacity = new_value.Opacity;
+                picker.SelectedBrushItem.Opacity = picker.CanSetSelectedColorOpacity ? new_value.Opacity : 1.0d;
+                picker.SelectedColor = picker.SelectedBrushItem.Color;
+                picker.SelectedColorOpacity = picker.SelectedBrushItem.Opacity;
+                var nullable_opacity = picker.CanSetSelectedColorOpacity ? picker.SelectedColorOpacity : (double?)null;
+                picker.SelectedColorAsText = ColorHelper.GetARGBStringFromColor(picker.SelectedBrushItem.Color, nullable_opacity);
+                picker.no_reentrancy = false;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the color that was selected, as a <see cref="string"/>.
+        /// </summary>
+        public string SelectedColorAsText
+        {
+            get => (string)GetValue(SelectedColorAsTextProperty);
+            set => SetValue(SelectedColorAsTextProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="SelectedColorAsText"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty SelectedColorAsTextProperty = DependencyProperty.Register(nameof(SelectedColorAsText), typeof(string), typeof(CustomColorPicker),
+            new FrameworkPropertyMetadata(default(string), SelectedColorAsTextChanged));
+
+        /// <summary>
+        /// Called whenever the <see cref="SelectedColorAsText"/> property changes.
+        /// </summary>
+        /// <param name="sender">The object whose property changed.</param>
+        /// <param name="args">Information about the property change.</param>
+        public static void SelectedColorAsTextChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            if (sender is CustomColorPicker picker && args.NewValue is string new_value)
+            {
+                if (picker.no_reentrancy) return;
+                picker.no_reentrancy = true;
+                picker.SelectedBrushItem = new BrushItem(ColorHelper.GetColorFromArgb(new_value));
+                picker.SelectedBrushItem.Opacity = picker.CanSetSelectedColorOpacity ? ColorHelper.GetSolidColorBrushFromArg(new_value).Opacity : 1.0d;
+                picker.SelectedColorOpacity = picker.SelectedBrushItem.Opacity;
+                picker.SelectedSolidColorBrush = new SolidColorBrush(ColorHelper.GetColorFromArgb(new_value)) { Opacity = picker.SelectedColorOpacity };
+                picker.SelectedColor = picker.SelectedBrushItem.Color;
                 picker.no_reentrancy = false;
             }
         }

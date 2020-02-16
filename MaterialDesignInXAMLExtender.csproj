@@ -6,7 +6,7 @@
     <PackageDescription>Offers new features and extra controls based on MaterialDesignInXAML.</PackageDescription>
     <PackageTags>WPF;Xaml;ColorPicker</PackageTags>
     <UseWPF>true</UseWPF>
-    <Version>0.0.3</Version>
+    <Version>0.0.4</Version>
     <Authors>David Le Bourdais</Authors>
     <Copyright>Copyright © 2020</Copyright>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

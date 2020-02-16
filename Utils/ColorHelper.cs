@@ -19,13 +19,13 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// <summary>
         /// Gets the list of system colors as <see cref="BrushItem"/>.
         /// </summary>
-        public static List<BrushItem> SystemColors { get; } = generateSystemColorsFromBrushes();
+        public static List<BrushItem> SystemColors { get; } = GenerateSystemColorsFromBrushes();
 
         /// <summary>
         /// Generates the list of system colors as <see cref="BrushItem"/>.
         /// </summary>
         /// <returns>The list of system colors.</returns>
-        private static List<BrushItem> generateSystemColorsFromBrushes()
+        private static List<BrushItem> GenerateSystemColorsFromBrushes()
         {
             var systemColors = new List<BrushItem>();
 
@@ -130,6 +130,22 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
             if (value != null && value is BrushItem casted)
                 return casted.Color;
             else return default;
+        }
+
+        /// <summary>
+        /// Converts a <see cref="Color"/> as object into a <see cref="string"/>.
+        /// </summary>
+        /// <param name="color">The <see cref="Color"/> to be converted.</param>
+        /// <param name="opacity">An optional opacity value between 0.0 and 1.0 to be added as alpha channel in the final string.</param>
+        /// <returns>The corresponding <see cref="string"/> object.</returns>
+        internal static string GetARGBStringFromColor(Color color, double? opacity = null)
+        {
+            if (opacity != null && opacity >= 0.0f && opacity <= 1.0f)
+            {
+                color.A = (byte)(int)(opacity * 255);
+                return color.ToString();
+            }
+            else return color.ToString().Remove(1, 2);
         }
         #endregion
     }
