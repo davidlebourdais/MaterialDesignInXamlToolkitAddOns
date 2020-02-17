@@ -180,7 +180,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public ICommand PressCommand
         {
             get { return (ICommand)GetValue(PressCommandProperty); }
-            set { SetValue(PressCommandProperty, value); }
+            set { SetCurrentValue(PressCommandProperty, value); }
         }
         /// <summary>
         /// Registers the <see cref="PressCommand"/> as a dependency property.
@@ -194,7 +194,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public ICommand ReleaseCommand
         {
             get { return (ICommand)GetValue(ReleaseCommandProperty); }
-            set { SetValue(ReleaseCommandProperty, value); }
+            set { SetCurrentValue(ReleaseCommandProperty, value); }
         }
         /// <summary>
         /// Registers the <see cref="ReleaseCommand"/> as a dependency property.

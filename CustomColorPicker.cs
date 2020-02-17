@@ -65,7 +65,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public bool CanSetSelectedColorOpacity
         {
             get => (bool)GetValue(CanSetSelectedColorOpacityProperty);
-            set => SetValue(CanSetSelectedColorOpacityProperty, value);
+            set => SetCurrentValue(CanSetSelectedColorOpacityProperty, value);
         }
         /// <summary>
         /// Registers <see cref="CanSetSelectedColorOpacity"/> as a dependency property.
@@ -94,7 +94,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public bool CanChooseCustomColor
         {
             get => (bool)GetValue(CanChooseCustomColorProperty);
-            set => SetValue(CanChooseCustomColorProperty, value);
+            set => SetCurrentValue(CanChooseCustomColorProperty, value);
         }
         /// <summary>
         /// Registers <see cref="CanChooseCustomColor"/> as a dependency property.
@@ -125,7 +125,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public bool CanSelectFromSystemColors
         {
             get => (bool)GetValue(CanSelectFromSystemColorsProperty);
-            set => SetValue(CanSelectFromSystemColorsProperty, value);
+            set => SetCurrentValue(CanSelectFromSystemColorsProperty, value);
         }
         /// <summary>
         /// Registers <see cref="CanSelectFromSystemColors"/> as a dependency property.
@@ -141,7 +141,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public bool IsOpen
         {
             get => (bool)GetValue(IsOpenProperty);
-            set => SetValue(IsOpenProperty, value);
+            set => SetCurrentValue(IsOpenProperty, value);
         }
         /// <summary>
         /// Registers <see cref="IsOpen"/> as a dependency property.
@@ -179,7 +179,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public double SelectedColorOpacity
         {
             get => (double)GetValue(SelectedColorOpacityroperty);
-            set => SetValue(SelectedColorOpacityroperty, value);
+            set => SetCurrentValue(SelectedColorOpacityroperty, value);
         }
         /// <summary>
         /// Registers <see cref="SelectedColorOpacity"/> as a dependency property.
@@ -253,7 +253,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public BrushItem SelectedSystemBrushItem
         {
             get => (BrushItem)GetValue(SelectedSystemBrushItemProperty);
-            set => SetValue(SelectedSystemBrushItemProperty, value);
+            set => SetCurrentValue(SelectedSystemBrushItemProperty, value);
         }
         /// <summary>
         /// Registers <see cref="SelectedSystemBrushItem"/> as a dependency property.
@@ -300,7 +300,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public List<BrushItem> CustomColorsFeed
         {
             get { return (List<BrushItem>)GetValue(CustomColorsFeedProperty); }
-            set { SetValue(CustomColorsFeedProperty, value); }
+            set { SetCurrentValue(CustomColorsFeedProperty, value); }
         }
         /// <summary>
         /// Registers <see cref="CustomColorsFeed"/> as a dependency property.
@@ -314,7 +314,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public uint MaxCustomColorCount
         {
             get { return (uint)GetValue(MaxCustomColorCountProperty); }
-            set { SetValue(MaxCustomColorCountProperty, value); }
+            set { SetCurrentValue(MaxCustomColorCountProperty, value); }
         }
         /// <summary>
         /// Registers <see cref="MaxCustomColorCount"/> as a dependency property.
@@ -381,7 +381,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public bool IsCustomColorPickingShown
         {
             get => (bool)GetValue(IsCustomColorPickingShownProperty);
-            set => SetValue(IsCustomColorPickingShownProperty, value);
+            set => SetCurrentValue(IsCustomColorPickingShownProperty, value);
         }
         /// <summary>
         /// Registers <see cref="IsCustomColorPickingShown"/> as a dependency property.
@@ -406,7 +406,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public Color PreviewedCustomColor
         {
             get => (Color)GetValue(PreviewedCustomColorProperty);
-            set => SetValue(PreviewedCustomColorProperty, value);
+            set => SetCurrentValue(PreviewedCustomColorProperty, value);
         }
         /// <summary>
         /// Registers <see cref="PreviewedCustomColor"/> as a dependency property.
@@ -454,7 +454,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public string PreviewedBrushAsText
         {
             get => (string)GetValue(PreviewedBrushAsTextProperty);
-            set => SetValue(PreviewedBrushAsTextProperty, value);
+            set => SetCurrentValue(PreviewedBrushAsTextProperty, value);
         }
         /// <summary>
         /// Registers <see cref="PreviewedBrushAsText"/> as a dependency property.
@@ -543,7 +543,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public bool IsLightColorSelected
         {
             get => (bool)GetValue(IsLightColorSelectedProperty);
-            set => SetValue(IsLightColorSelectedProperty, value);
+            set => SetCurrentValue(IsLightColorSelectedProperty, value);
         }
         /// <summary>
         /// Registers <see cref="IsLightColorSelected"/> as a dependency property.
@@ -557,7 +557,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public bool IsMediumColorSelected
         {
             get => (bool)GetValue(IsMediumColorSelectedProperty);
-            set => SetValue(IsMediumColorSelectedProperty, value);
+            set => SetCurrentValue(IsMediumColorSelectedProperty, value);
         }
         /// <summary>
         /// Registers <see cref="IsMediumColorSelected"/> as a dependency property.
@@ -571,7 +571,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public bool IsDarkColorSelected
         {
             get => (bool)GetValue(IsDarkColorSelectedProperty);
-            set => SetValue(IsDarkColorSelectedProperty, value);
+            set => SetCurrentValue(IsDarkColorSelectedProperty, value);
         }
         /// <summary>
         /// Registers <see cref="IsDarkColorSelected"/> as a dependency property.
@@ -585,7 +585,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public bool IsGrayColorSelected
         {
             get => (bool)GetValue(IsGrayColorSelectedProperty);
-            set => SetValue(IsGrayColorSelectedProperty, value);
+            set => SetCurrentValue(IsGrayColorSelectedProperty, value);
         }
         /// <summary>
         /// Registers <see cref="IsGrayColorSelected"/> as a dependency property.
@@ -619,7 +619,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public uint PredefinedColorsCount
         {
             get => (uint)GetValue(PredefinedColorsCountProperty);
-            set => SetValue(PredefinedColorsCountProperty, value);
+            set => SetCurrentValue(PredefinedColorsCountProperty, value);
         }
         /// <summary>
         /// Registers <see cref="PredefinedColorsCount"/> as a dependency property.
@@ -811,7 +811,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public BrushItem SelectedBrushItem
         {
             get => (BrushItem)GetValue(SelectedBrushItemProperty);
-            set => SetValue(SelectedBrushItemProperty, value);
+            set => SetCurrentValue(SelectedBrushItemProperty, value);
         }
         /// <summary>
         /// Registers <see cref="SelectedBrushItem"/> as a dependency property.
@@ -847,7 +847,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public Color SelectedColor
         {
             get => (Color)GetValue(SelectedColorProperty);
-            set => SetValue(SelectedColorProperty, value);
+            set => SetCurrentValue(SelectedColorProperty, value);
         }
         /// <summary>
         /// Registers <see cref="SelectedColor"/> as a dependency property.
@@ -882,7 +882,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public SolidColorBrush SelectedSolidColorBrush
         {
             get => (SolidColorBrush)GetValue(SelectedSolidColorBrushProperty);
-            set => SetValue(SelectedSolidColorBrushProperty, value);
+            set => SetCurrentValue(SelectedSolidColorBrushProperty, value);
         }
         /// <summary>
         /// Registers <see cref="SelectedSolidColorBrush"/> as a dependency property.
@@ -917,7 +917,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public string SelectedColorAsText
         {
             get => (string)GetValue(SelectedColorAsTextProperty);
-            set => SetValue(SelectedColorAsTextProperty, value);
+            set => SetCurrentValue(SelectedColorAsTextProperty, value);
         }
         /// <summary>
         /// Registers <see cref="SelectedColorAsText"/> as a dependency property.

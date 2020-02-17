@@ -78,7 +78,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public bool IsSelected
         {
             get { return (bool)GetValue(IsSelectedProperty); }
-            set { SetValue(IsSelectedProperty, value); }
+            set { SetCurrentValue(IsSelectedProperty, value); }
         }
         private static readonly DependencyProperty IsSelectedProperty =
             DependencyProperty.Register(nameof(IsSelected), typeof(bool), typeof(BrushItem), new FrameworkPropertyMetadata(default(bool)));
