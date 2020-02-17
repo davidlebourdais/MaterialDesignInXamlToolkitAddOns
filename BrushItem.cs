@@ -72,6 +72,21 @@ namespace EMA.MaterialDesignInXAMLExtender
         public static readonly DependencyProperty AsARGBTextProperty = AsARGBTextPropertyKey.DependencyProperty;
 
         /// <summary>
+        /// Gets the opacity of the brush. 
+        /// </summary>
+        public double BrushOpacity
+        {
+            get { return (double)GetValue(BrushOpacityProperty); }
+            protected set { SetValue(BrushOpacityPropertyKey, value); }
+        }
+        private static readonly DependencyPropertyKey BrushOpacityPropertyKey =
+            DependencyProperty.RegisterReadOnly(nameof(BrushOpacity), typeof(double), typeof(BrushItem), new FrameworkPropertyMetadata(1.0d));
+        /// <summary>
+        /// Registers the <see cref="BrushOpacity"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty BrushOpacityProperty = BrushOpacityPropertyKey.DependencyProperty;
+
+        /// <summary>
         /// Gets or sets a value indicating if the item is 
         /// selected or not.
         /// </summary>
@@ -96,7 +111,7 @@ namespace EMA.MaterialDesignInXAMLExtender
             BrushName = name;
             Brush = new SolidColorBrush(color);
             Color = color;
-            Opacity = opacity;
+            BrushOpacity = opacity;
             reevaluateSolidColorBrush();
         }
 
@@ -113,7 +128,7 @@ namespace EMA.MaterialDesignInXAMLExtender
             Brush = brush;
             if (brush is SolidColorBrush solid)
                 Color = solid.Color;
-            Opacity = brush.Opacity;
+            BrushOpacity = brush.Opacity;
             reevaluateSolidColorBrush();
         }
 
@@ -122,10 +137,10 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// </summary>
         /// <param name="new_value">The new opacity value.</param>
         /// <returns>Returns true if opacity was succesfully changed.</returns>
-        public bool setOpacity(double new_value)
+        public bool setBrushOpacity(double new_value)
         {
-            if (new_value < 0 || new_value > 1.0d || new_value == Opacity) return false;
-            Opacity = new_value;
+            if (new_value < 0 || new_value > 1.0d || new_value == BrushOpacity) return false;
+            BrushOpacity = new_value;
             reevaluateSolidColorBrush();
             return true;
         }
@@ -165,7 +180,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// </summary>
         private void reevaluateSolidColorBrush()
         {
-            AsSolidColorBrush = new SolidColorBrush(Color) { Opacity = Opacity };
+            AsSolidColorBrush = new SolidColorBrush(Color) { Opacity = BrushOpacity };
             AsRGBText = "#" + Color.ToString().Remove(0, 3) + (string.IsNullOrEmpty(BrushName) ? "" : " (" + BrushName + ")");
             AsARGBText = Color.ToString();
         }

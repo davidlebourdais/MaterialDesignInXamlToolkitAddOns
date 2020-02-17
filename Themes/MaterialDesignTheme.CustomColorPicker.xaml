@@ -9,6 +9,7 @@
 
     <!-- Tiled background to be shown behing transparent colors -->
     <DrawingBrush x:Key="TransparentBackground" 
+                  Opacity="0.8"
                   Viewport="0,0,10,10"
                   ViewportUnits="Absolute" 
                   TileMode="Tile">

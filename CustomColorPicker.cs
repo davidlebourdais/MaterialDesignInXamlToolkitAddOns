@@ -44,7 +44,7 @@ namespace EMA.MaterialDesignInXAMLExtender
             OpenCommand = new SimpleCommand(() => IsOpen = true);
             AddCustomColorCommand = new SimpleCommand(addCurrentlyPickedCustomColor, () =>
                 (CustomColors == null || CustomColors.Count == 0 || CustomColors.Last().Color.ToString() != PreviewedCustomColor.ToString())
-                || CanSetSelectedColorOpacity && CustomColors.Last().Opacity != original_last_item_opacity);
+                || CanSetSelectedColorOpacity && CustomColors.Last().BrushOpacity != original_last_item_opacity);
             ShowCustomColorPickingCommand = new SimpleCommand(() => IsCustomColorPickingShown = true);
             HideCustomColorPickingCommand = new SimpleCommand(() => IsCustomColorPickingShown = false);
             SelectColorCommand = new SimpleParameterizedCommand((rawBrushItem) =>
@@ -93,7 +93,7 @@ namespace EMA.MaterialDesignInXAMLExtender
             if (!SystemBrushItems.Contains(SelectedBrushItem) && !CustomColors.Contains(SelectedBrushItem))
             {
                 var customList = new List<BrushItem>(CustomColors);
-                customList.Add(new BrushItem(SelectedBrushItem.Color, SelectedBrushItem.Opacity));
+                customList.Add(new BrushItem(SelectedBrushItem.Color, SelectedBrushItem.BrushOpacity));
                 CustomColors = customList;
                 if (CustomColors.Count > 0)
                     SelectedBrushItem = CustomColors.Last();
@@ -260,7 +260,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         private void resetSelectedColorOpacity()
         {
             if (SelectedBrushItems.Count > 0)
-                SelectedBrushItems.ForEach(x => x.setOpacity(CanSetSelectedColorOpacity ? SelectedColorOpacity : 1.0d));
+                SelectedBrushItems.ForEach(x => x.setBrushOpacity(CanSetSelectedColorOpacity ? SelectedColorOpacity : 1.0d));
         }
         #endregion
 
@@ -871,7 +871,7 @@ namespace EMA.MaterialDesignInXAMLExtender
                 picker.no_reentrancy = true;
                 picker.onSelectionChanged();
                 var opacity = picker.CanSetSelectedColorOpacity ? picker.SelectedColorOpacity : 1.0d;
-                picker.SelectedBrushItem.Opacity = opacity;
+                picker.SelectedBrushItem.setBrushOpacity(opacity);
                 picker.SelectedColor = picker.SelectedBrushItem.Color;
                 picker.SelectedSolidColorBrush = picker.SelectedBrushItem.AsSolidColorBrush;
                 picker.SelectedColorAsText = ColorHelper.GetRGBStringFromColor(picker.SelectedBrushItem.Color);
@@ -908,7 +908,7 @@ namespace EMA.MaterialDesignInXAMLExtender
                 picker.no_reentrancy = true;
                 picker.SelectedBrushItem = new BrushItem(new_value);
                 var opacity = picker.CanSetSelectedColorOpacity ? picker.SelectedColorOpacity : 1.0d;
-                picker.SelectedBrushItem.Opacity = opacity;
+                picker.SelectedBrushItem.setBrushOpacity(opacity);
                 picker.SelectedSolidColorBrush = new SolidColorBrush(new_value) { Opacity = opacity };
                 picker.SelectedColorAsText = ColorHelper.GetRGBStringFromColor(new_value);
                 picker.no_reentrancy = false;
@@ -943,9 +943,9 @@ namespace EMA.MaterialDesignInXAMLExtender
                 if (picker.no_reentrancy) return;
                 picker.no_reentrancy = true;
                 picker.SelectedBrushItem = new BrushItem(new_value.Color);
-                picker.SelectedBrushItem.Opacity = picker.CanSetSelectedColorOpacity ? new_value.Opacity : 1.0d;
+                picker.SelectedBrushItem.setBrushOpacity(picker.CanSetSelectedColorOpacity ? new_value.Opacity : 1.0d);
                 picker.SelectedColor = picker.SelectedBrushItem.Color;
-                picker.SelectedColorOpacity = picker.SelectedBrushItem.Opacity;
+                picker.SelectedColorOpacity = picker.SelectedBrushItem.BrushOpacity;
                 picker.SelectedColorAsText = ColorHelper.GetRGBStringFromColor(picker.SelectedBrushItem.Color);
                 picker.no_reentrancy = false;
                 if (picker.CanChooseCustomColor)
@@ -982,8 +982,8 @@ namespace EMA.MaterialDesignInXAMLExtender
                 var opacity = ColorHelper.GetOpacityFromArgb(new_value);
                 if (opacity != 1.0d)
                 { 
-                    picker.SelectedBrushItem.Opacity = picker.CanSetSelectedColorOpacity ? opacity : 1.0d;
-                    picker.SelectedColorOpacity = picker.SelectedBrushItem.Opacity;
+                    picker.SelectedBrushItem.setBrushOpacity(picker.CanSetSelectedColorOpacity ? opacity : 1.0d);
+                    picker.SelectedColorOpacity = picker.SelectedBrushItem.BrushOpacity;
 
                     if (picker.CanSetSelectedColorOpacity)
                         picker.SelectedColorAsText = ColorHelper.GetARGBStringFromColor(ColorHelper.GetColorFromArgb(new_value, 1.0d)); // reset color alpha channel to max so we decouple opacity setting from color.
@@ -1008,7 +1008,7 @@ namespace EMA.MaterialDesignInXAMLExtender
             if (brushItem.IsSelected)
             {
                 brushItem.IsSelected = false;
-                brushItem.setOpacity(1.0d);
+                brushItem.setBrushOpacity(1.0d);
                 if (SelectedBrushItems.Contains(brushItem))
                     SelectedBrushItems.Remove(brushItem);
                 if (GrayColorItems.Contains(brushItem))
@@ -1048,7 +1048,7 @@ namespace EMA.MaterialDesignInXAMLExtender
             if (!brushItem.IsSelected)
             {
                 if (CanSetSelectedColorOpacity)
-                    brushItem.setOpacity(SelectedColorOpacity);
+                    brushItem.setBrushOpacity(SelectedColorOpacity);
                 brushItem.IsSelected = true;
                 if (!SelectedBrushItems.Contains(brushItem))
                     SelectedBrushItems.Add(brushItem);
