@@ -40,6 +40,7 @@ namespace EMA.MaterialDesignInXAMLExtender
             if (CustomColorsFeed != null)
                 saveSelectedIntoCustomColorFeed();  // save before startup if user had set any useful custom value
             loadCustomColorFeed();
+
             OpenCommand = new SimpleCommand(() => IsOpen = true);
             AddCustomColorCommand = new SimpleCommand(addCurrentlyPickedCustomColor, () =>
                 (CustomColors == null || CustomColors.Count == 0 || CustomColors.Last().Color.ToString() != PreviewedCustomColor.ToString())
@@ -51,10 +52,54 @@ namespace EMA.MaterialDesignInXAMLExtender
                 if (rawBrushItem is BrushItem brushItem)
                     SelectedBrushItem = brushItem;
             });
+
             if (SystemBrushItems != null)
                 SelectedSystemBrushItem = SystemBrushItems.First();
+           
+            Loaded += CustomColorPicker_Loaded;
+        }
 
-            trySelectCorrespondingGroup();
+        /// <summary>
+        /// Occurs when the control is loaded and bindings are resolved. End some initialization here.
+        /// </summary>
+        /// <param name="sender">Unused. The object that triggered the loaded event.</param>
+        /// <param name="e">unused.</param>
+        private void CustomColorPicker_Loaded(object sender, RoutedEventArgs e)
+        {
+            Loaded -= CustomColorPicker_Loaded;
+
+            // Select predefined group to be displayed at start-up:
+            if (SelectedBrushItem == null)
+            {
+                IsLightColorSelected = true;
+                SelectedBrushItem = LightColorItems.First();
+            }
+            else
+            {
+                var selected_as_string = SelectedBrushItem.Color.ToString();
+                if (LightColorItems.Any(x => x.ToString() == selected_as_string))
+                    IsLightColorSelected = true;
+                else if (MediumColorItems.Any(x => x.ToString() == selected_as_string))
+                    IsMediumColorSelected = true;
+                else if (DarkColorItems.Any(x => x.ToString() == selected_as_string))
+                    IsDarkColorSelected = true;
+                else if (GrayColorItems.Any(x => x.ToString() == selected_as_string))
+                    IsGrayColorSelected = true;
+                else
+                    IsLightColorSelected = true;
+            }
+
+            // Set custom color if not existing:
+            if (!SystemBrushItems.Contains(SelectedBrushItem) && !CustomColors.Contains(SelectedBrushItem))
+            {
+                var customList = new List<BrushItem>(CustomColors);
+                customList.Add(new BrushItem(SelectedBrushItem.Color, SelectedBrushItem.Opacity));
+                CustomColors = customList;
+                if (CustomColors.Count > 0)
+                    SelectedBrushItem = CustomColors.Last();
+                selectBrushItem(SelectedBrushItem);
+                saveSelectedIntoCustomColorFeed();
+            }
         }
 
         #region Dependency properties related to options
@@ -83,7 +128,6 @@ namespace EMA.MaterialDesignInXAMLExtender
             if (sender is CustomColorPicker picker && args.NewValue is bool)
             {
                 picker.resetSelectedColorOpacity();
-                picker.resetSelectedColorAsText();
             }
         }
 
@@ -198,7 +242,6 @@ namespace EMA.MaterialDesignInXAMLExtender
             {
                 picker.resetSelectedColorOpacity();
                 picker.resetCustomColor();
-                picker.resetSelectedColorAsText();
                 if (picker.AddCustomColorCommand is SimpleCommand addcommand)  // used to lock when last custom is already current color.
                     addcommand.RaiseCanExecuteChanged();
             }
@@ -211,17 +254,6 @@ namespace EMA.MaterialDesignInXAMLExtender
         {
             if (SelectedBrushItems.Count > 0)
                 SelectedBrushItems.ForEach(x => x.setOpacity(CanSetSelectedColorOpacity ? SelectedColorOpacity : 1.0d));
-        }
-
-        /// <summary>
-        /// Changes the selected color text.
-        /// </summary>
-        private void resetSelectedColorAsText()
-        {
-            no_reentrancy = true;
-            var nullable_opacity = CanSetSelectedColorOpacity ? SelectedColorOpacity : (double?)null;
-            SelectedColorAsText = ColorHelper.GetARGBStringFromColor(SelectedBrushItem.Color, nullable_opacity);
-            no_reentrancy = false;
         }
         #endregion
 
@@ -549,7 +581,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// Registers <see cref="IsLightColorSelected"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IsLightColorSelectedProperty
-            = DependencyProperty.Register(nameof(IsLightColorSelected), typeof(bool), typeof(CustomColorPicker), new FrameworkPropertyMetadata(true, IsLightColorSelectedChanged));
+            = DependencyProperty.Register(nameof(IsLightColorSelected), typeof(bool), typeof(CustomColorPicker), new FrameworkPropertyMetadata(false, IsLightColorSelectedChanged));
 
         /// <summary>
         /// Gets or sets a value indicating if the middle luminosity colors group is shown or not.
@@ -835,8 +867,7 @@ namespace EMA.MaterialDesignInXAMLExtender
                 picker.SelectedBrushItem.Opacity = opacity;
                 picker.SelectedColor = picker.SelectedBrushItem.Color;
                 picker.SelectedSolidColorBrush = picker.SelectedBrushItem.AsSolidColorBrush;
-                var nullable_opacity = picker.CanSetSelectedColorOpacity ? picker.SelectedColorOpacity : (double?)null;
-                picker.SelectedColorAsText = ColorHelper.GetARGBStringFromColor(picker.SelectedBrushItem.Color, nullable_opacity);
+                picker.SelectedColorAsText = ColorHelper.GetRGBStringFromColor(picker.SelectedBrushItem.Color);
                 picker.no_reentrancy = false;
             }
         }
@@ -870,8 +901,7 @@ namespace EMA.MaterialDesignInXAMLExtender
                 var opacity = picker.CanSetSelectedColorOpacity ? picker.SelectedColorOpacity : 1.0d;
                 picker.SelectedBrushItem.Opacity = opacity;
                 picker.SelectedSolidColorBrush = new SolidColorBrush(new_value) { Opacity = opacity };
-                var nullable_opacity = picker.CanSetSelectedColorOpacity ? picker.SelectedColorOpacity : (double?)null;
-                picker.SelectedColorAsText = ColorHelper.GetARGBStringFromColor(new_value, nullable_opacity);
+                picker.SelectedColorAsText = ColorHelper.GetRGBStringFromColor(new_value);
                 picker.no_reentrancy = false;
             }
         }
@@ -905,8 +935,7 @@ namespace EMA.MaterialDesignInXAMLExtender
                 picker.SelectedBrushItem.Opacity = picker.CanSetSelectedColorOpacity ? new_value.Opacity : 1.0d;
                 picker.SelectedColor = picker.SelectedBrushItem.Color;
                 picker.SelectedColorOpacity = picker.SelectedBrushItem.Opacity;
-                var nullable_opacity = picker.CanSetSelectedColorOpacity ? picker.SelectedColorOpacity : (double?)null;
-                picker.SelectedColorAsText = ColorHelper.GetARGBStringFromColor(picker.SelectedBrushItem.Color, nullable_opacity);
+                picker.SelectedColorAsText = ColorHelper.GetRGBStringFromColor(picker.SelectedBrushItem.Color);
                 picker.no_reentrancy = false;
             }
         }
@@ -937,8 +966,15 @@ namespace EMA.MaterialDesignInXAMLExtender
                 if (picker.no_reentrancy) return;
                 picker.no_reentrancy = true;
                 picker.SelectedBrushItem = new BrushItem(ColorHelper.GetColorFromArgb(new_value));
-                picker.SelectedBrushItem.Opacity = picker.CanSetSelectedColorOpacity ? ColorHelper.GetSolidColorBrushFromArg(new_value).Opacity : 1.0d;
-                picker.SelectedColorOpacity = picker.SelectedBrushItem.Opacity;
+                var opacity = ColorHelper.GetOpacityFromArgb(new_value);
+                if (opacity != 1.0d)
+                { 
+                    picker.SelectedBrushItem.Opacity = picker.CanSetSelectedColorOpacity ? opacity : 1.0d;
+                    picker.SelectedColorOpacity = picker.SelectedBrushItem.Opacity;
+
+                    if (picker.CanSetSelectedColorOpacity)
+                        picker.SelectedColorAsText = ColorHelper.GetARGBStringFromColor(ColorHelper.GetColorFromArgb(new_value, 1.0d)); // reset color alpha channel to max so we decouple opacity setting from color.
+                }
                 picker.SelectedSolidColorBrush = new SolidColorBrush(ColorHelper.GetColorFromArgb(new_value)) { Opacity = picker.SelectedColorOpacity };
                 picker.SelectedColor = picker.SelectedBrushItem.Color;
                 picker.no_reentrancy = false;
@@ -1026,6 +1062,8 @@ namespace EMA.MaterialDesignInXAMLExtender
                     IsDarkColorSelected = true;
                 else if (GrayColorItems.Any(x => x.ToString() == selected_as_string))
                     IsGrayColorSelected = true;
+                else
+                    IsLightColorSelected = true;
             }
         }
 

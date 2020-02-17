@@ -89,10 +89,27 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// brush that matches it.
         /// </summary>
         /// <param name="hexa">The hexa value representing the color.</param>
+        /// <param name="set_opacity">Sets opacity based on the alpha channel.</param>
         /// <returns>A <see cref="SolidColorBrush"/> that matches the passed string hexadecimal value.</returns>
-        internal static SolidColorBrush GetSolidColorBrushFromArg(string hexa)
+        internal static SolidColorBrush GetSolidColorBrushFromArgb(string hexa, bool set_opacity = true)
         {
-            return new SolidColorBrush(GetColorFromArgb(hexa));
+            var baseColor = GetColorFromArgb(hexa);
+            if (set_opacity)
+            {
+                baseColor.A = 255;
+                return new SolidColorBrush(baseColor) { Opacity = GetOpacityFromArgb(hexa) };
+            }
+            else return new SolidColorBrush(baseColor);
+        }
+
+        /// <summary>
+        /// Gets an opacity value (between 0.0d and 1.0d) from a color ARGB representation.
+        /// </summary>
+        /// <param name="hexa">The hexa value representing the color.</param>
+        /// <returns>An opacity value corresponding to the alpha channel of the color.</returns>
+        internal static double GetOpacityFromArgb(string hexa)
+        {
+            return GetColorFromArgb(hexa).A / 255.0d;
         }
 
         /// <summary>
@@ -121,15 +138,13 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         }
 
         /// <summary>
-        /// Converts a <see cref="BrushItem"/> as object into a <see cref="Color"/>.
+        /// Converts a <see cref="Color"/> as object into a <see cref="string"/>.
         /// </summary>
-        /// <param name="value">The <see cref="BrushItem"/> to be converted.</param>
-        /// <returns>The corresponding <see cref="Color"/> object.</returns>
-        internal static Color convertBrushItemToColor(object value)
+        /// <param name="color">The <see cref="Color"/> to be converted.</param>
+        /// <returns>The corresponding <see cref="string"/> object.</returns>
+        internal static string GetRGBStringFromColor(Color color)
         {
-            if (value != null && value is BrushItem casted)
-                return casted.Color;
-            else return default;
+            return GetARGBStringFromColor(color, null);
         }
 
         /// <summary>
