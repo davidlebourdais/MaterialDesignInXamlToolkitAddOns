@@ -370,9 +370,9 @@
                                             ScrollViewer.CanContentScroll="True" 
                                             extender:ScrollViewerAssist.ScrollsToEnd="True">
                                     <ItemsControl HorizontalAlignment="Stretch"
-                                            VerticalAlignment="Center" 
-                                            ItemsSource="{TemplateBinding CustomColors}"
-                                            ItemContainerStyle="{StaticResource BrushItemStyle}">
+                                                  VerticalAlignment="Center" 
+                                                  ItemsSource="{TemplateBinding CustomColors}"
+                                                  ItemContainerStyle="{StaticResource BrushItemStyle}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
                                                 <StackPanel Orientation="Horizontal" />
@@ -381,8 +381,8 @@
                                     </ItemsControl>
                                 </ScrollViewer>
                                 <Button HorizontalAlignment="Right" Margin="0, 3, 15, 2.5" Padding="8 0"
-                                    Style="{StaticResource MaterialDesignFlatButton}"
-                                    Command="{Binding ShowCustomColorPickingCommand, RelativeSource={RelativeSource TemplatedParent}}">
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        Command="{Binding ShowCustomColorPickingCommand, RelativeSource={RelativeSource TemplatedParent}}">
                                     <Button.Content>
                                         <StackPanel Orientation="Horizontal">
                                             <md:PackIcon Kind="Plus" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignCheckBoxOff}" Margin="-5,0,5,0" Height="20" Width="20"/>

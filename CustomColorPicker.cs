@@ -154,6 +154,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         public static void CanChooseCustomColorChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
             if (sender is CustomColorPicker picker && args.NewValue is bool new_value)
+            {
                 if (!new_value)
                 {
                     picker.IsCustomColorPickingShown = false;
@@ -161,6 +162,12 @@ namespace EMA.MaterialDesignInXAMLExtender
                     if (!picker.PredefinedColors.Contains(picker.SelectedBrushItem))
                         picker.SelectedBrushItem = picker.PredefinedColors.First();
                 }
+                else // Set custom color as currently selected color:
+                {
+                    if (picker.CanChooseCustomColor)
+                        picker.PreviewedCustomColor = picker.SelectedColor;
+                }
+            }
         }
 
         /// <summary>
@@ -300,7 +307,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// <param name="args">Information about the property change.</param>
         public static void SelectedSystemBrushItemChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (sender is CustomColorPicker picker && args.NewValue is BrushItem)
+            if (sender is CustomColorPicker picker && args.NewValue is BrushItem && picker.IsLoaded)
                 picker.PreviewedCustomColor = picker.SelectedSystemBrushItem.Color;
         }
         #endregion
@@ -869,6 +876,8 @@ namespace EMA.MaterialDesignInXAMLExtender
                 picker.SelectedSolidColorBrush = picker.SelectedBrushItem.AsSolidColorBrush;
                 picker.SelectedColorAsText = ColorHelper.GetRGBStringFromColor(picker.SelectedBrushItem.Color);
                 picker.no_reentrancy = false;
+                if (picker.CanChooseCustomColor)
+                    picker.PreviewedCustomColor = picker.SelectedColor;
             }
         }
 
@@ -903,6 +912,8 @@ namespace EMA.MaterialDesignInXAMLExtender
                 picker.SelectedSolidColorBrush = new SolidColorBrush(new_value) { Opacity = opacity };
                 picker.SelectedColorAsText = ColorHelper.GetRGBStringFromColor(new_value);
                 picker.no_reentrancy = false;
+                if (picker.CanChooseCustomColor)
+                    picker.PreviewedCustomColor = picker.SelectedColor;
             }
         }
 
@@ -937,6 +948,8 @@ namespace EMA.MaterialDesignInXAMLExtender
                 picker.SelectedColorOpacity = picker.SelectedBrushItem.Opacity;
                 picker.SelectedColorAsText = ColorHelper.GetRGBStringFromColor(picker.SelectedBrushItem.Color);
                 picker.no_reentrancy = false;
+                if (picker.CanChooseCustomColor)
+                    picker.PreviewedCustomColor = picker.SelectedColor;
             }
         }
 
@@ -978,6 +991,8 @@ namespace EMA.MaterialDesignInXAMLExtender
                 picker.SelectedSolidColorBrush = new SolidColorBrush(ColorHelper.GetColorFromArgb(new_value)) { Opacity = picker.SelectedColorOpacity };
                 picker.SelectedColor = picker.SelectedBrushItem.Color;
                 picker.no_reentrancy = false;
+                if (picker.CanChooseCustomColor)
+                    picker.PreviewedCustomColor = picker.SelectedColor;
             }
         }
 
