@@ -49,8 +49,8 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type extender:BrushItem}">
-                    <Border x:Name="BackgroundBorder" Background="{StaticResource TransparentBackground}" extender:ButtonAssist.UniformCornerRadius="8" Margin="4" ToolTip="{TemplateBinding AsRGBText}">
-                        <Button x:Name="SelectButton" Height="15" Width="15" Background="{TemplateBinding AsSolidColorBrush}" extender:ButtonAssist.UniformCornerRadius="8" 
+                    <Border x:Name="BackgroundBorder" Background="{StaticResource TransparentBackground}" extender:ButtonAssistExtended.UniformCornerRadius="8" Margin="4" ToolTip="{TemplateBinding AsRGBText}">
+                        <Button x:Name="SelectButton" Height="15" Width="15" Background="{TemplateBinding AsSolidColorBrush}" extender:ButtonAssistExtended.UniformCornerRadius="8" 
                                 Command="{Binding SelectColorCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:CustomColorPicker}}}"
                                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type extender:BrushItem}}}">
                             <Button.Style>
@@ -69,9 +69,9 @@
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="(extender:ButtonAssist.UniformCornerRadius)" 
+                                        <DoubleAnimation Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="(extender:ButtonAssistExtended.UniformCornerRadius)" 
                                                          To="4" Duration="0:0:0.18" />
-                                        <DoubleAnimation Storyboard.TargetName="SelectButton" Storyboard.TargetProperty="(extender:ButtonAssist.UniformCornerRadius)" 
+                                        <DoubleAnimation Storyboard.TargetName="SelectButton" Storyboard.TargetProperty="(extender:ButtonAssistExtended.UniformCornerRadius)" 
                                                          To="4" Duration="0:0:0.18" />
                                     </Storyboard>
                                 </BeginStoryboard>
@@ -79,9 +79,9 @@
                             <Trigger.ExitActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="(extender:ButtonAssist.UniformCornerRadius)" 
+                                        <DoubleAnimation Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="(extender:ButtonAssistExtended.UniformCornerRadius)" 
                                                          From="4" Duration="0:0:0.18" />
-                                        <DoubleAnimation Storyboard.TargetName="SelectButton" Storyboard.TargetProperty="(extender:ButtonAssist.UniformCornerRadius)" 
+                                        <DoubleAnimation Storyboard.TargetName="SelectButton" Storyboard.TargetProperty="(extender:ButtonAssistExtended.UniformCornerRadius)" 
                                                          From="4" Duration="0:0:0.18" />
                                     </Storyboard>
                                 </BeginStoryboard>
@@ -96,9 +96,9 @@
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="(extender:ButtonAssist.UniformCornerRadius)" 
+                                        <DoubleAnimation Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="(extender:ButtonAssistExtended.UniformCornerRadius)" 
                                                          To="2" Duration="0:0:0.18" />
-                                        <DoubleAnimation Storyboard.TargetName="SelectButton" Storyboard.TargetProperty="(extender:ButtonAssist.UniformCornerRadius)" 
+                                        <DoubleAnimation Storyboard.TargetName="SelectButton" Storyboard.TargetProperty="(extender:ButtonAssistExtended.UniformCornerRadius)" 
                                                          To="2" Duration="0:0:0.18" />
                                     </Storyboard>
                                 </BeginStoryboard>
@@ -106,9 +106,9 @@
                             <Trigger.ExitActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="(extender:ButtonAssist.UniformCornerRadius)" 
+                                        <DoubleAnimation Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="(extender:ButtonAssistExtended.UniformCornerRadius)" 
                                                          From="2" Duration="0:0:0.18" />
-                                        <DoubleAnimation Storyboard.TargetName="SelectButton" Storyboard.TargetProperty="(extender:ButtonAssist.UniformCornerRadius)" 
+                                        <DoubleAnimation Storyboard.TargetName="SelectButton" Storyboard.TargetProperty="(extender:ButtonAssistExtended.UniformCornerRadius)" 
                                                          From="2" Duration="0:0:0.18" />
                                     </Storyboard>
                                 </BeginStoryboard>
@@ -190,7 +190,7 @@
                             <ScrollViewer HorizontalScrollBarVisibility="Auto" MaxWidth="140"
                                             Margin="10,0,0,0" 
                                             ScrollViewer.CanContentScroll="True" 
-                                            extender:ScrollViewerAssist.ScrollsToEnd="True">
+                                            extender:ScrollViewerAssistExtended.ScrollsToEnd="True">
                                 <ItemsControl HorizontalAlignment="Stretch"
                                             VerticalAlignment="Center" 
                                             ItemsSource="{TemplateBinding CustomColors}"
@@ -237,7 +237,7 @@
                             </Border>
                             <TextBox Margin="10, 5"
                                             Text="{Binding PreviewedBrushAsText, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                                            Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" FontSize="14" TextAlignment="Center" extender:TextBoxAssist.OverrideBorderPadding="0"
+                                            Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" FontSize="14" TextAlignment="Center" extender:TextBoxAssistExtended.OverrideBorderPadding="0"
                                             FontWeight="DemiBold" md:HintAssist.IsFloating="False" md:TextFieldAssist.TextFieldCornerRadius="0"/>
                         </StackPanel>
 
@@ -250,16 +250,16 @@
                                 </Border>
                                 <TextBox DockPanel.Dock="Right" 
                                                 Text="{Binding PreviewedBrushAsText, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                                                Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" FontSize="14" TextAlignment="Center" extender:TextBoxAssist.OverrideBorderPadding="0"
+                                                Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" FontSize="14" TextAlignment="Center" extender:TextBoxAssistExtended.OverrideBorderPadding="0"
                                                 FontWeight="DemiBold" md:HintAssist.IsFloating="False" md:TextFieldAssist.TextFieldCornerRadius="0"/>
                             </DockPanel>
                             <StackPanel Orientation="Horizontal" Margin="5,15,0,0">
-                                <TextBlock Text="System"/>
-                                <ComboBox Margin="5,-1,0,0" FontWeight="DemiBold" 
-                                                SelectedItem="{Binding SelectedSystemBrushItem, RelativeSource={RelativeSource TemplatedParent}}"
-                                                ItemsSource="{x:Static extender:CustomColorPicker.SystemBrushItems}" 
-                                                ItemTemplateSelector="{extender:ComboBoxTemplateSelector SelectedItemTemplate={StaticResource SystemColorItemNameOnlyTemplate},
-                                                                                                         DropdownItemsTemplate={StaticResource SystemColorItemTemplate}}"/>
+                                <TextBlock Text="System" VerticalAlignment="Center"/>
+                                <ComboBox Margin="5,-1,0,0" FontWeight="DemiBold" VerticalAlignment="Center"
+                                          SelectedItem="{Binding SelectedSystemBrushItem, RelativeSource={RelativeSource TemplatedParent}}"
+                                          ItemsSource="{x:Static extender:CustomColorPicker.SystemBrushItems}" 
+                                          ItemTemplateSelector="{extender:ComboBoxTemplateSelector SelectedItemTemplate={StaticResource SystemColorItemNameOnlyTemplate},
+                                                                                                   DropdownItemsTemplate={StaticResource SystemColorItemTemplate}}"/>
                             </StackPanel>
                         </StackPanel>
                     </Grid>
@@ -368,7 +368,7 @@
                                 <ScrollViewer HorizontalScrollBarVisibility="Auto" MaxWidth="140"
                                             Margin="10,0,0,0" 
                                             ScrollViewer.CanContentScroll="True" 
-                                            extender:ScrollViewerAssist.ScrollsToEnd="True">
+                                            extender:ScrollViewerAssistExtended.ScrollsToEnd="True">
                                     <ItemsControl HorizontalAlignment="Stretch"
                                                   VerticalAlignment="Center" 
                                                   ItemsSource="{TemplateBinding CustomColors}"
@@ -415,7 +415,7 @@
                                 </Border>
                                 <TextBox Margin="10, 5"
                                             Text="{Binding PreviewedBrushAsText, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                                            Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" FontSize="14" TextAlignment="Center" extender:TextBoxAssist.OverrideBorderPadding="0"
+                                            Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" FontSize="14" TextAlignment="Center" extender:TextBoxAssistExtended.OverrideBorderPadding="0"
                                             FontWeight="DemiBold" md:HintAssist.IsFloating="False" md:TextFieldAssist.TextFieldCornerRadius="0"/>
                             </StackPanel>
 
@@ -428,16 +428,16 @@
                                     </Border>
                                     <TextBox DockPanel.Dock="Right" 
                                                 Text="{Binding PreviewedBrushAsText, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                                                Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" FontSize="14" TextAlignment="Center" extender:TextBoxAssist.OverrideBorderPadding="0"
+                                                Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" FontSize="14" TextAlignment="Center" extender:TextBoxAssistExtended.OverrideBorderPadding="0"
                                                 FontWeight="DemiBold" md:HintAssist.IsFloating="False" md:TextFieldAssist.TextFieldCornerRadius="0"/>
                                 </DockPanel>
                                 <StackPanel Orientation="Horizontal" Margin="5,15,0,0">
-                                    <TextBlock Text="System"/>
-                                    <ComboBox Margin="5,-1,0,0" FontWeight="DemiBold" 
-                                                SelectedItem="{Binding SelectedSystemBrushItem, RelativeSource={RelativeSource TemplatedParent}}"
-                                                ItemsSource="{x:Static extender:CustomColorPicker.SystemBrushItems}" 
-                                                ItemTemplateSelector="{extender:ComboBoxTemplateSelector SelectedItemTemplate={StaticResource SystemColorItemNameOnlyTemplate},
-                                                                                                         DropdownItemsTemplate={StaticResource SystemColorItemTemplate}}"/>
+                                    <TextBlock Text="System" VerticalAlignment="Center"/>
+                                    <ComboBox Margin="5,-1,0,0" FontWeight="DemiBold" VerticalAlignment="Center"
+                                              SelectedItem="{Binding SelectedSystemBrushItem, RelativeSource={RelativeSource TemplatedParent}}"
+                                              ItemsSource="{x:Static extender:CustomColorPicker.SystemBrushItems}" 
+                                              ItemTemplateSelector="{extender:ComboBoxTemplateSelector SelectedItemTemplate={StaticResource SystemColorItemNameOnlyTemplate},
+                                                                                                       DropdownItemsTemplate={StaticResource SystemColorItemTemplate}}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>

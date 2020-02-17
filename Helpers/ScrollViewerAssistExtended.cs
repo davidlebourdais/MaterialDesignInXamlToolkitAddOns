@@ -9,14 +9,14 @@ namespace EMA.MaterialDesignInXAMLExtender
     /// <summary>
     /// Implements helpers for <see cref="ScrollViewer"/> controls.
     /// </summary>
-    public static class ScrollViewerAssist
+    public static class ScrollViewerAssistExtended
     {
         #region Scroll to end when item is added/removed from within internal items control
         /// <summary>
         /// To be set to true to activate this helper.
         /// </summary>
         public static readonly DependencyProperty ScrollsToEndProperty
-            = DependencyProperty.RegisterAttached("ScrollsToEnd", typeof(bool), typeof(ScrollViewerAssist), new FrameworkPropertyMetadata(default(bool), OnScrollsToEndChanged));
+            = DependencyProperty.RegisterAttached("ScrollsToEnd", typeof(bool), typeof(ScrollViewerAssistExtended), new FrameworkPropertyMetadata(default(bool), OnScrollsToEndChanged));
 
         /// <summary>
         /// Gets the value of the <see cref="ScrollsToEndProperty"/> dependency property.

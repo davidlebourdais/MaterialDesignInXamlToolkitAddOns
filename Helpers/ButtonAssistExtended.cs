@@ -6,14 +6,14 @@ namespace EMA.MaterialDesignInXAMLExtender
     /// <summary>
     /// Extends <see cref="MaterialDesignThemes.Wpf.ButtonAssist"/> by adding new features.
     /// </summary>
-    public static class ButtonAssist
+    public static class ButtonAssistExtended
     {
         /// <summary>
         /// Sets the corner radius of a button or border base element with a scalar (double) value, which helps to 
         /// define animations when the corner radius is uniformly changed.
         /// </summary>
         public static readonly DependencyProperty UniformCornerRadiusProperty 
-            = DependencyProperty.RegisterAttached("UniformCornerRadius", typeof(double), typeof(ButtonAssist), new PropertyMetadata(2.0, OnUniformCornerRadius));
+            = DependencyProperty.RegisterAttached("UniformCornerRadius", typeof(double), typeof(ButtonAssistExtended), new PropertyMetadata(2.0, OnUniformCornerRadius));
 
         /// <summary>
         /// Gets the value of the <see cref="UniformCornerRadiusProperty"/> dependency property.

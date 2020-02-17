@@ -6,7 +6,7 @@ namespace EMA.MaterialDesignInXAMLExtender
     /// <summary>
     /// Stores helpers <see cref="TextBox"/> elements.
     /// </summary>
-    public static class TextBoxAssist
+    public static class TextBoxAssistExtended
     {
         #region Override for Material Design textbox border padding (that is not customizable otherwise)
         /// <summary>
@@ -14,7 +14,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// not accessible in the current definition of the textbox style.
         /// </summary>
         public static readonly DependencyProperty OverrideBorderPaddingProperty 
-            = DependencyProperty.RegisterAttached("OverrideBorderPadding", typeof(Thickness), typeof(TextBoxAssist), new PropertyMetadata(new Thickness(-1), OnOverrideBorderPadding));
+            = DependencyProperty.RegisterAttached("OverrideBorderPadding", typeof(Thickness), typeof(TextBoxAssistExtended), new PropertyMetadata(new Thickness(-1), OnOverrideBorderPadding));
 
         /// <summary>
         /// Gets the value of the <see cref="OverrideBorderPaddingProperty"/> dependency property.
