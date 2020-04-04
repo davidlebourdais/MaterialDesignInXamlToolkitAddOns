@@ -4,6 +4,11 @@
                     xmlns:converters="clr-namespace:MaterialDesignThemes.Wpf.Converters;assembly=MaterialDesignThemes.Wpf"
                     xmlns:extender="clr-namespace:EMA.MaterialDesignInXAMLExtender">
 
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.Separator.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+    <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" TrueValue="Visible" FalseValue="Collapsed"/>
     <converters:BooleanToVisibilityConverter x:Key="InverseBoolToVisConverter" TrueValue="Collapsed" FalseValue="Visible"/>
     <extender:BindingProxy x:Key="MaterialDesignBodyColor" Data="{DynamicResource MaterialDesignBody}" />
 
@@ -53,16 +58,9 @@
                     <Border x:Name="BackgroundBorder" Background="{StaticResource TransparentBackground}" extender:ButtonAssistExtended.UniformCornerRadius="8" Margin="4" ToolTip="{TemplateBinding AsRGBText}">
                         <Button x:Name="SelectButton" Height="15" Width="15" Background="{TemplateBinding AsSolidColorBrush}" extender:ButtonAssistExtended.UniformCornerRadius="8" 
                                 Command="{Binding SelectColorCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:CustomColorPicker}}}"
-                                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type extender:BrushItem}}}">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
-                                    <Setter Property="BorderThickness" Value="0" />
-                                    <Setter Property="Margin" Value="0 0 0 0" />
-                                    <Setter Property="md:RippleAssist.IsDisabled" Value="True" />
-                                    <Setter Property="md:ShadowAssist.ShadowDepth" Value="Depth0" />
-                                    <Setter Property="Tag" Value="0" />
-                                </Style>
-                            </Button.Style>
+                                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type extender:BrushItem}}}" 
+                                Style="{DynamicResource MaterialDesignRaisedButton}" Margin="0" BorderThickness="0" md:RippleAssist.IsDisabled="True" md:ShadowAssist.ShadowDepth="Depth0"  Tag="0">
+                            
                         </Button>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -116,24 +114,6 @@
                             </Trigger.ExitActions>
                         </Trigger>
                     </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style x:Key="SeparatorStyle" TargetType="{x:Type Separator}">
-        <Setter Property="Background" Value="{DynamicResource MaterialDesignDarkSeparatorBackground}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDarkSeparatorBackground}"/>
-        <Setter Property="Background" Value="{DynamicResource MaterialDesignSelection}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignSelection}"/>
-        <Setter Property="MinHeight" Value="1"/>
-        <Setter Property="SnapsToDevicePixels" Value="true"/>
-        <Setter Property="Height" Value="16"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type Separator}">
-                    <Rectangle Height="1" Fill="{TemplateBinding Background}"
-                               HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -301,23 +281,23 @@
 
     <!-- Custom color picker 'in a popup' template - WARNING - copy-paste from raw template -->
     <ControlTemplate x:Key="MaterialDesignPopupCustomColorPickerTemplate" TargetType="{x:Type extender:CustomColorPicker}">
-            <md:PopupBox IsPopupOpen="{Binding IsOpen, RelativeSource={RelativeSource TemplatedParent},Mode=TwoWay}"
-                         md:RippleAssist.Feedback="{x:Null}" StaysOpen="True">
+        <md:PopupBox IsPopupOpen="{Binding IsOpen, RelativeSource={RelativeSource TemplatedParent},Mode=TwoWay}"
+                        md:RippleAssist.Feedback="{x:Null}" StaysOpen="True">
                 
-                <!-- Header shows a preview of the colors and act as button to open settings -->
-                <md:PopupBox.ToggleContent>
-                    <Button HorizontalAlignment="Right" Padding="8 0"
-                            Style="{StaticResource MaterialDesignFlatButton}"
-                            Command="{Binding OpenCommand, RelativeSource={RelativeSource TemplatedParent}}">
-                        <Button.Content>
-                            <StackPanel Orientation="Horizontal">
-                            <Border Background="{Binding SelectedBrushItem.AsSolidColorBrush, RelativeSource={RelativeSource TemplatedParent}}" 
-                                    CornerRadius="2" Margin="4" Width="16" Height="16" BorderThickness="1" BorderBrush="LightGray"/>
-                                <TextBlock Margin="5,0" Text="{Binding SelectedBrushItem.AsRGBText, RelativeSource={RelativeSource TemplatedParent}}" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button.Content>
-                    </Button>
-                </md:PopupBox.ToggleContent>
+            <!-- Header shows a preview of the colors and act as button to open settings -->
+            <md:PopupBox.ToggleContent>
+                <Button HorizontalAlignment="Right" Padding="8 0"
+                        Style="{DynamicResource MaterialDesignFlatButton}"
+                        Command="{Binding OpenCommand, RelativeSource={RelativeSource TemplatedParent}}">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                        <Border Background="{Binding SelectedBrushItem.AsSolidColorBrush, RelativeSource={RelativeSource TemplatedParent}}" 
+                                CornerRadius="2" Margin="4" Width="16" Height="16" BorderThickness="1" BorderBrush="LightGray"/>
+                            <TextBlock Margin="5,0" Text="{Binding SelectedBrushItem.AsRGBText, RelativeSource={RelativeSource TemplatedParent}}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
+            </md:PopupBox.ToggleContent>
 
             <!-- For the content, we have to recopy everything from the normal template as inheritance nor composition works for control templates -->
             <Border CornerRadius="5" Background="{DynamicResource MaterialDesignBackground}" MaxWidth="300"
@@ -341,10 +321,10 @@
                         <Separator Grid.Row="1" Margin="10,-7,10,-4" Height="12" VerticalAlignment="Bottom" Style="{StaticResource SeparatorStyle}"/>
 
                         <StackPanel Orientation="Horizontal" x:Name="PART_BrightnessSelector" Margin="10,0">
-                            <RadioButton Content="LIGHT" GroupName="GN" IsChecked="{Binding IsLightColorSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" Padding="0" MinWidth="55" Style="{StaticResource MaterialDesignTabRadioButton}"/>
-                            <RadioButton Content="MEDIUM" GroupName="GN" IsChecked="{Binding IsMediumColorSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"  Padding="0" MinWidth="70" Style="{StaticResource MaterialDesignTabRadioButton}"/>
-                            <RadioButton Content="DARK" GroupName="GN" IsChecked="{Binding IsDarkColorSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" Padding="0" MinWidth="55" Style="{StaticResource MaterialDesignTabRadioButton}"/>
-                            <RadioButton Content="GRAY" GroupName="GN" IsChecked="{Binding IsGrayColorSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" Padding="0" MinWidth="50" Style="{StaticResource MaterialDesignTabRadioButton}"/>
+                            <RadioButton Content="LIGHT" GroupName="GN" IsChecked="{Binding IsLightColorSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" Padding="0" MinWidth="55" Style="{DynamicResource MaterialDesignTabRadioButton}"/>
+                            <RadioButton Content="MEDIUM" GroupName="GN" IsChecked="{Binding IsMediumColorSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"  Padding="0" MinWidth="70" Style="{DynamicResource MaterialDesignTabRadioButton}"/>
+                            <RadioButton Content="DARK" GroupName="GN" IsChecked="{Binding IsDarkColorSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" Padding="0" MinWidth="55" Style="{DynamicResource MaterialDesignTabRadioButton}"/>
+                            <RadioButton Content="GRAY" GroupName="GN" IsChecked="{Binding IsGrayColorSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" Padding="0" MinWidth="50" Style="{DynamicResource MaterialDesignTabRadioButton}"/>
                         </StackPanel>
 
                         <ItemsControl Grid.Row="2" Width="230" HorizontalAlignment="Left" Margin="15,10,10,10"
