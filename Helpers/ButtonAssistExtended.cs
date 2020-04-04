@@ -1,13 +1,15 @@
+using MaterialDesignThemes.Wpf;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace EMA.MaterialDesignInXAMLExtender
 {   
     /// <summary>
-    /// Extends <see cref="MaterialDesignThemes.Wpf.ButtonAssist"/> by adding new features.
+    /// Extends <see cref="ButtonAssist"/> by adding new features.
     /// </summary>
     public static class ButtonAssistExtended
     {
+        #region UniformCornerRadius
         /// <summary>
         /// Sets the corner radius of a button or border base element with a scalar (double) value, which helps to 
         /// define animations when the corner radius is uniformly changed.
@@ -16,7 +18,7 @@ namespace EMA.MaterialDesignInXAMLExtender
             = DependencyProperty.RegisterAttached("UniformCornerRadius", typeof(double), typeof(ButtonAssistExtended), new PropertyMetadata(2.0, OnUniformCornerRadius));
 
         /// <summary>
-        /// Gets the value of the <see cref="UniformCornerRadiusProperty"/> dependency property.
+        /// Gets the value of the <see cref="UniformCornerRadiusProperty"/> attached property.
         /// </summary>
         /// <param name="obj">The object that the dependency property is attached to.</param>
         /// <returns>Returns true if scrollviewer must scroll to end automaticaly, false otherwise.</returns>
@@ -26,7 +28,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         }
 
         /// <summary>
-        /// Sets the value of the <see cref="UniformCornerRadiusProperty"/> dependency property.
+        /// Sets the value of the <see cref="UniformCornerRadiusProperty"/> attached property.
         /// </summary>
         /// <param name="obj">The object that the dependency property is attached to.</param>
         /// <param name="value">The new value to be set.</param>
@@ -47,5 +49,34 @@ namespace EMA.MaterialDesignInXAMLExtender
             else
                 MaterialDesignThemes.Wpf.ButtonAssist.SetCornerRadius(d, new CornerRadius((double)e.NewValue));
         }
+        #endregion
+
+        #region AttachedPackIconKind
+        /// <summary>
+        /// Sets a <see cref="PackIcon"/> kind property to a button.
+        /// </summary>
+        public static readonly DependencyProperty AttachedPackIconKindProperty
+            = DependencyProperty.RegisterAttached("AttachedPackIconKind", typeof(PackIconKind), typeof(ButtonAssistExtended), new PropertyMetadata(default(PackIconKind)));
+
+        /// <summary>
+        /// Gets the value of the <see cref="AttachedPackIconKindProperty"/> attached property.
+        /// </summary>
+        /// <param name="obj">The object that the dependency property is attached to.</param>
+        /// <returns>Returns true if scrollviewer must scroll to end automaticaly, false otherwise.</returns>
+        public static PackIconKind GetAttachedPackIconKind(DependencyObject obj)
+        {
+            return (PackIconKind)obj.GetValue(AttachedPackIconKindProperty);
+        }
+
+        /// <summary>
+        /// Sets the value of the <see cref="AttachedPackIconKindProperty"/> attached property.
+        /// </summary>
+        /// <param name="obj">The object that the dependency property is attached to.</param>
+        /// <param name="value">The new value to be set.</param>
+        public static void SetAttachedPackIconKind(DependencyObject obj, PackIconKind value)
+        {
+            obj.SetValue(AttachedPackIconKindProperty, value);
+        }
+        #endregion
     }
 }
