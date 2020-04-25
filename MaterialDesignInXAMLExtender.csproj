@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
-    <TargetFrameworks>net451;netcoreapp3.0</TargetFrameworks>
+    <TargetFrameworks>net471;netcoreapp3.1</TargetFrameworks>
     <PackageId>MaterialDesignInXAMLExtender</PackageId>
     <Title>Extender for MaterialDesignInXAML</Title>
     <PackageDescription>Offers new features and extra controls based on MaterialDesignInXAML.</PackageDescription>
     <PackageTags>WPF;Xaml;ColorPicker</PackageTags>
     <UseWPF>true</UseWPF>
-    <Version>0.0.6</Version>
+    <Version>0.0.7</Version>
     <Authors>David Le Bourdais</Authors>
     <Copyright>Copyright © 2020</Copyright>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -14,6 +14,6 @@
 
   <ItemGroup>
     <PackageReference Include="ExtendedWPFVisualTreeHelper" Version="1.0.4" />
-    <PackageReference Include="MaterialDesignThemes" Version="3.0.1" />
+    <PackageReference Include="MaterialDesignThemes" Version="3.1.0" />
   </ItemGroup>
 </Project>
