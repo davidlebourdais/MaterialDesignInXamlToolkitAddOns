@@ -8,10 +8,12 @@
         of the application, as most of our custom controls rely on it -->
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.CustomColorPicker.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.PressBorder.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.ExtendedDataGrid.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <!-- Default styles setup -->
     <Style TargetType="{x:Type extender:CustomColorPicker}" BasedOn="{StaticResource MaterialDesignCustomColorPicker}" />
     <Style TargetType="{x:Type extender:PressBorder}" BasedOn="{StaticResource MaterialDesignPressBorder}" />
     <Style TargetType="{x:Type extender:ExtendedCheckBox}" BasedOn="{StaticResource MaterialDesignCheckBox}" />
+    <Style TargetType="{x:Type extender:ExtendedDataGrid}" BasedOn="{StaticResource MaterialDesignExtendedDataGrid}"/>
 </ResourceDictionary>
