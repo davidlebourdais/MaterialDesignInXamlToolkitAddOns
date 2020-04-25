@@ -51,7 +51,7 @@ namespace EMA.MaterialDesignInXAMLExtender
                 // otherwise, process immediately:
                 if (textbox.IsLoaded)
                 {
-                    if (!overrideTemplateBorderPadding(textbox))
+                    if (!OverrideTemplateBorderPadding(textbox))
                     {
                         // If template not ready, report processing when size changes:
                         textbox.SizeChanged += Textbox_SizeChanged;
@@ -72,7 +72,7 @@ namespace EMA.MaterialDesignInXAMLExtender
             if (sender is TextBox textbox)
             {
                 textbox.Loaded -= Textbox_Loaded;
-                if (!overrideTemplateBorderPadding(textbox))
+                if (!OverrideTemplateBorderPadding(textbox))
                 {
                     // If template not ready, report processing when size changes:
                     textbox.SizeChanged += Textbox_SizeChanged;
@@ -90,7 +90,7 @@ namespace EMA.MaterialDesignInXAMLExtender
             if (sender is TextBox textbox)
             {
                 textbox.SizeChanged -= Textbox_SizeChanged;
-                overrideTemplateBorderPadding(textbox);
+                OverrideTemplateBorderPadding(textbox);
             }
         }
 
@@ -99,7 +99,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// </summary>
         /// <param name="textbox">The textbox that must see its inner border overriden.</param>
         /// <returns>True if was able to override the padding property of the inner border.</returns>
-        private static bool overrideTemplateBorderPadding(TextBox textbox)
+        private static bool OverrideTemplateBorderPadding(TextBox textbox)
         {
             if (textbox == null) return false;
 

@@ -63,22 +63,22 @@ namespace EMA.MaterialDesignInXAMLExtender
                     var weakSender = new WeakReference(scrollViewer);
 
                     // Build related event:
-                    NotifyCollectionChangedEventHandler oncollectionchanged = (s, e) =>
+                    void OnCollectionChanged(object s, NotifyCollectionChangedEventArgs e)
                     {
                         if (weakSender.IsAlive)
                         {
                             (weakSender.Target as ScrollViewer).ScrollToRightEnd();
                             (weakSender.Target as ScrollViewer).ScrollToBottom();
                         }
-                    };
+                    }
 
                     // Subscribe on current items:
                     if (itemscontrol.Items != null && itemscontrol.Items is INotifyCollectionChanged inotify1)
                     {
-                        inotify1.CollectionChanged += oncollectionchanged;
+                        inotify1.CollectionChanged += OnCollectionChanged;
 
                         // Invoke now for init:
-                        oncollectionchanged.Invoke(itemscontrol, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+                        OnCollectionChanged(itemscontrol, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
                     }
 
                     // And subscribe on future items:
@@ -86,7 +86,7 @@ namespace EMA.MaterialDesignInXAMLExtender
                         (s1, e1) =>
                         {
                             if (itemscontrol.Items != null && itemscontrol.Items is INotifyCollectionChanged inotify2)
-                                inotify2.CollectionChanged += oncollectionchanged;
+                                inotify2.CollectionChanged += OnCollectionChanged;
                         };
                 }
             }
