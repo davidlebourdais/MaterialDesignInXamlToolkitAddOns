@@ -11,7 +11,7 @@
     </ResourceDictionary.MergedDictionaries>
 
     <!-- Default styles setup -->
-    <Style TargetType="{x:Type extender:CustomColorPicker}" BasedOn="{StaticResource MaterialDesignCustomColorPicker}"/>
-    <Style TargetType="{x:Type extender:PressBorder}" BasedOn="{StaticResource MaterialDesignPressBorder}"/>
-    
+    <Style TargetType="{x:Type extender:CustomColorPicker}" BasedOn="{StaticResource MaterialDesignCustomColorPicker}" />
+    <Style TargetType="{x:Type extender:PressBorder}" BasedOn="{StaticResource MaterialDesignPressBorder}" />
+    <Style TargetType="{x:Type extender:ExtendedCheckBox}" BasedOn="{StaticResource MaterialDesignCheckBox}" />
 </ResourceDictionary>
