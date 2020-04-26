@@ -28,7 +28,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// <summary>
         /// Determines if paging system should be used instead of raw source.
         /// </summary>
-        private bool UsesPagingInternal => UsesPaging || ShowsCheckMarks || ShowsIDs || PagedTable.AreSourceItemsDynamic;
+        private bool UsesPagingInternal => UsesPaging || ShowsCheckMarks || ShowsIDs || ForceBackgroundLoading || PagedTable.AreSourceItemsDynamic;
         #endregion
 
         #region Constructors
@@ -41,6 +41,8 @@ namespace EMA.MaterialDesignInXAMLExtender
             PagedTable = new DataTablePagingManager();
             PagedTable.PageChanged += PagedTable_PageChanged;
             PagedTable.CheckMarkedRowsChanged += PagedTable_CheckMarkedRowsChanged;
+            PagedTable.PageLoading += (s, e) => IsPageLoading = true;
+            PagedTable.PageLoaded += (s, e) => IsPageLoading = false;
 
             // Build inner commands:
             GoToNextPageCommand = new SimpleCommand(() => PagedTable.GoNext(), () => PagedTable.HasNext());
@@ -417,6 +419,102 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// </summary>
         public static readonly DependencyProperty ShowGoToFirstAndLastPageControlsProperty
             = DependencyProperty.Register(nameof(ShowGoToFirstAndLastPageControls), typeof(bool), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(bool)));
+
+        /// <summary>
+        /// Gets or sets from how many rows found in the source background loading must be used, 
+        /// and how many rows should be loaded per background thread round.
+        /// </summary>
+        public int BackgoundLoadSizeInRows
+        {
+            get => (int)GetValue(BackgoundLoadSizeInRowsProperty);
+            set => SetCurrentValue(BackgoundLoadSizeInRowsProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="BackgoundLoadSizeInRows"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty BackgoundLoadSizeInRowsProperty
+            = DependencyProperty.Register(nameof(BackgoundLoadSizeInRows), typeof(int), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(DataTablePagingManager.DefaultItemLoadSize, CacheSizeInRowsChanged));
+
+        /// <summary>
+        /// Called whenever the <see cref="BackgoundLoadSizeInRows"/> property changes.
+        /// </summary>
+        /// <param name="sender">The object whose property changed.</param>
+        /// <param name="args">Information about the property change.</param>
+        public static void CacheSizeInRowsChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            if (sender is ExtendedDataGrid casted && args.NewValue is int new_value)
+                casted.PagedTable.SetLoadSize(new_value);
+        }
+
+        /// <summary>
+        /// Gets or sets a value that indicates if background loading shall be used even when 
+        /// not using paging, selection or ID features.
+        /// </summary>
+        public bool ForceBackgroundLoading
+        {
+            get => (bool)GetValue(ForceBackgroundLoadingProperty);
+            set => SetCurrentValue(ForceBackgroundLoadingProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="ForceBackgroundLoading"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty ForceBackgroundLoadingProperty
+            = DependencyProperty.Register(nameof(ForceBackgroundLoading), typeof(bool), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(bool), ForceBackgroundLoadingChanged));
+
+        /// <summary>
+        /// Called whenever the <see cref="ForceBackgroundLoading"/> property changes.
+        /// </summary>
+        /// <param name="sender">The object whose property changed.</param>
+        /// <param name="args">Information about the property change.</param>
+        public static void ForceBackgroundLoadingChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            if (sender is ExtendedDataGrid casted && args.NewValue is bool new_value)
+            {
+                // In case setting this property enabled paging 
+                // then force page to update:
+                if (new_value && !casted.UsesPaging && !casted.ShowsCheckMarks && !casted.ShowsIDs && !casted.PagedTable.AreSourceItemsDynamic)
+                {
+                    casted.CancelEdit();
+                    casted.PagedTable.UpdateCurrentPage();
+                }
+                // In case unsetting this property disabled paging,
+                // then force source update to original list:
+                else if (!new_value && !casted.UsesPagingInternal)
+                {
+                    casted.CancelEdit();
+                    casted.InvalidateProperty(ItemsSourceProperty);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating if page is loading in the background.
+        /// </summary>
+        public bool IsPageLoading
+        {
+            get => (bool)GetValue(IsPageLoadingProperty);
+            protected set => SetValue(IsPageLoadingPropertyKey, value);
+        }
+        private static readonly DependencyPropertyKey IsPageLoadingPropertyKey =
+            DependencyProperty.RegisterReadOnly(nameof(IsPageLoading), typeof(bool), typeof(ExtendedDataGrid), new PropertyMetadata(default(bool)));
+        /// <summary>
+        /// Registers <see cref="IsPageLoading"/> as a readonly dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IsPageLoadingProperty = IsPageLoadingPropertyKey.DependencyProperty;
+
+        /// <summary>
+        /// Gets or sets the text to be displayed when items are loading in the background.
+        /// </summary>
+        public string PageLoadingText
+        {
+            get => (string)GetValue(PageLoadingTextProperty);
+            set => SetCurrentValue(PageLoadingTextProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="PageLoadingText"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty PageLoadingTextProperty
+            = DependencyProperty.Register(nameof(PageLoadingText), typeof(string), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata("Background loading in progress"));
         #endregion
 
         #region Rows per page
@@ -1252,13 +1350,6 @@ namespace EMA.MaterialDesignInXAMLExtender
                             // Reproduce the behavior of the base datagrid here by putting last line into edit mode:
                             CurrentCell = new DataGridCellInfo(Items[Items.Count - 2], Columns[item_added_column_index]);
                             BeginEdit();
-
-                            // Other option is to go through another less-critical thread for this selection job:
-                            //Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, new Action(() =>
-                            //{
-                            //    CancelEdit();
-                            //    CurrentCell = new DataGridCellInfo(Items[Items.Count - 2], Columns[item_added_column_index]);
-                            //}));
                         }
                     }
                 }));

@@ -8,6 +8,7 @@ using System.Data;
 using System.Dynamic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace EMA.MaterialDesignInXAMLExtender.Utils
 {
@@ -16,6 +17,13 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
     /// </summary>
     public class DataTablePagingManager : IWeakEventListener
     {
+        #region Public static constants
+        /// <summary>
+        /// Indicates how many items are loaded per thread turn (also max size for background loading activation).
+        /// </summary>
+        public static int DefaultItemLoadSize { get; } = 1000;
+        #endregion 
+
         #region Private attributes
         private const string checkmark_column_name = "*Selectors";  // Global name of the selectors column (better start with special chars)
         private const string id_column_name = "*IDs";               // Global name of the IDs column (better start with special chars)
@@ -36,6 +44,60 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         private bool no_checkmarkedrows_update;                  // disables update notification of the checkmarked rows changes.
         IEnumerable<string> dynamicproperties;                   // stores dynamic properties that had been found on source (used for Expando objects).
         IEnumerable<PropertyDescriptor> properties;              // stores 'normal' properties that had been found on source.
+        private int load_size = DefaultItemLoadSize;             // stores how many items are loaded per thread turn (also max size for background loading activation).
+        private BackgroundWorker currentTableLoader;             // a worker that feeds table with rows in a background thread.
+        private int current_page_token;                          // stores an ID generated for the current page to be used by the background worker.
+        #endregion
+
+        #region Private struct
+        /// <summary>
+        /// A data set to be used by backgrond worker to load rows.
+        /// </summary>
+        private struct RowUpdateInformation
+        {
+            /// <summary>
+            /// Gets the token associated with the stored data.
+            /// </summary>
+            public int Token { get; }
+            /// <summary>
+            /// Gets or changes the current index on the partial source to work on.
+            /// </summary>
+            public int CurrentIndex { get; set; }
+            /// <summary>
+            /// Gets the offset of the current index regarding to global data source
+            /// (i.e. offset of the current page related to source).
+            /// </summary>
+            public int SourceIndexOffset { get; }
+            /// <summary>
+            /// The portion of the data source to be used for current page
+            /// population.
+            /// </summary>
+            public IEnumerable<object> PartialSource { get; }
+            /// <summary>
+            /// Size of the source portions.
+            /// </summary>
+            public int PartialSourceCount { get; }
+
+            /// <summary>
+            /// Initiates a new structure to pass information 
+            /// about for row updates.
+            /// </summary>
+            /// <param name="token">Unique token associated to this dataset.</param>
+            /// <param name="current_index">Current index on partial source.</param>
+            /// <param name="source_index_offset">Global source start index.</param>
+            /// <param name="partialSource">Portion of the global source that must be processed.</param>
+            /// <param name="partial_source_count">Optionnal size of this portion.</param>
+            public RowUpdateInformation(int token, int current_index, int source_index_offset, IEnumerable<object> partialSource, int partial_source_count = -1)
+            {
+                if (current_index < 0 || source_index_offset < 0)
+                    throw new IndexOutOfRangeException(nameof(current_index) + " or " + nameof(source_index_offset) + " are not valid to construct a " + nameof(RowUpdateInformation));
+                Token = token;
+                CurrentIndex = current_index;
+                SourceIndexOffset = source_index_offset;
+                PartialSource = partialSource ?? throw new ArgumentException("Cannot construct a " + nameof(RowUpdateInformation) + " with a null " + nameof(partialSource) + " reference", nameof(partialSource));
+                PartialSourceCount = partial_source_count < 0 ? partialSource.Count() : partial_source_count;
+            }
+        }
         #endregion
 
         #region Public properties
@@ -65,7 +127,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// <summary>
         /// Gets or sets the current page as datable.
         /// </summary>
-        public DataTable CurrentPage { get; private set; }
+        public DataTable CurrentPage { get; private set; } = new DataTable();
 
         /// <summary>
         /// Gets or sets the number of records per page.
@@ -262,8 +324,9 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// are selected and some are not.
         /// </summary>
         public bool? AllRowsCheckMarkState { get; private set; }
+        #endregion
 
-
+        #region Public events
         /// <summary>
         /// Occurs every time the current page is refreshed.
         /// </summary>
@@ -273,6 +336,16 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// Occurs when the selected row list is update.
         /// </summary>
         public event EventHandler CheckMarkedRowsChanged;
+
+        /// <summary>
+        /// Produced when the current page starts laoding in the background
+        /// </summary>
+        public event EventHandler PageLoading;
+
+        /// <summary>
+        /// Occurs when current page is completely loaded.
+        /// </summary>
+        public event EventHandler PageLoaded;
         #endregion
 
         #region CheckMarks processing
@@ -516,8 +589,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                         return true;
                     no_reentrancy_weak_event = true;
                     // Process through dispatcher in case we are invoked from another thread:
-                    Application.Current.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.DataBind,
-                    (Action)(() =>
+                    Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.DataBind, (Action)(() =>
                     {
                         if (source != sender)  // should never happen.
                         {
@@ -541,6 +613,21 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         }
         #endregion
 
+        #region Set background row load size
+        /// <summary>
+        /// Sets load size, i.e. how many items are loaded per 
+        /// loading method background invocation.
+        /// </summary>
+        /// <param name="new_load_size">A valid size in row counts.</param>
+        public void SetLoadSize(int new_load_size)
+        {
+            if (new_load_size < 1)
+                new_load_size = 1;
+
+            load_size = new_load_size;
+        }
+        #endregion
+
         #region Core methods
         /// <summary>
         /// Updates the currently available page.
@@ -554,7 +641,8 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
             no_reentrancy = true;
             if (source == null || !_paging_enabled)
             {
-                CurrentPage = GeneratePagedTable(source);
+                lock (CurrentPage)
+                    CurrentPage = GeneratePagedTable(source);
             }
             else
             {
@@ -568,8 +656,10 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                     _records_per_page > 0 ? 
                         ((page_records_count + _records_per_page) > SourceItemsCount ? SourceItemsCount : (page_records_count + _records_per_page)) 
                         : SourceItemsCount);
-                lock (source)
-                    CurrentPage = GeneratePagedTable(source.Skip(page_records_count).Take(_records_per_page > 0 ? _records_per_page : SourceItemsCount));
+
+                lock (CurrentPage)
+                    lock (source)
+                        CurrentPage = GeneratePagedTable(source.Skip(page_records_count).Take(_records_per_page > 0 ? _records_per_page : SourceItemsCount));
             }
             
             PageChanged?.Invoke(this, emptyEventArgs);
@@ -588,7 +678,8 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
             var toReturn = new DataTable();
 
             if (CurrentPage != null)
-                CurrentPage.ColumnChanged -= CurrentTable_ColumnChanged;
+                lock (CurrentPage)
+                    CurrentPage.ColumnChanged -= CurrentTable_ColumnChanged;
 
             if (partialSource != null)
             {
@@ -611,14 +702,8 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                         var indexColumn = (DataColumn)null;
                         if (HasIndexes)
                         {
-                            indexColumn = new DataColumn(id_column_name, typeof(int))
-                            {
-                                ReadOnly = true,
-                                Unique = true
-                            };
+                            indexColumn = new DataColumn(id_column_name, typeof(int));
                             toReturn.Columns.Add(indexColumn);
-                            //toReturn.Columns[0].AutoIncrement = true;
-                            //toReturn.Columns[1].AutoIncrementSeed = (int)CurrentPageIndex * records_per_page;
                         }
 
                         // Prepare properties from source definition based on first object:
@@ -653,61 +738,82 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                             }
                         }
 
-                        // Reorder special column orders:
+                        // Reorder special columns:
                         if (HasCheckmarks && CheckMarksColumnPosition > 0)
                             toReturn.Columns[SelectorsColumn.ColumnName].SetOrdinal(CheckMarksColumnPosition);
 
                         if (HasIndexes && IndexesColumnPosition > 0)
                             toReturn.Columns[indexColumn.ColumnName].SetOrdinal(IndexesColumnPosition);
 
-                        // Prepare pirmary keys (useful?):
-                        //int primary_keys_count = 0 + (HasSelectors ? 1 : 0) + (HasIndexes ? 1 : 0);
-                        //if (primary_keys_count > 0)
-                        //{
-                        //    var PrimaryKeyColumns = new DataColumn[primary_keys_count];
-                        //    if (HasSelectors)
-                        //        PrimaryKeyColumns[0] = SelectorsColumn;
-                        //    if (HasIndexes)
-                        //        PrimaryKeyColumns[HasSelectors ? 1 : 0] = indexColumn;
-                        //    toReturn.PrimaryKey = PrimaryKeyColumns;
-                        //}
+                        // Prepare key data:
+                        int page_row_count = partialSource.Count();
+                        int global_start_index = PagingEnabledInternal ? (int)CurrentPageIndex * _records_per_page : 0;
 
-                        // Fill rows:
-                        int i = IndexesStartAtZero ? 0 : 1;
-                        int j = 0;  // j is used as non-shifted index.
-                        Indexes = new int[partialSource.Count()];
-                        foreach (object item in partialSource)
+                        // Indexes are quick to build so let's build them now if needed:
+                        if (HasIndexes)
                         {
-                            var row = toReturn.NewRow();
+                            Indexes = new int[SourceItemsCount];
+                            var offset = IndexesStartAtZero ? 0 : 1;
+                            offset += global_start_index;
+                            for (int i = 0; i < page_row_count; i++)
+                                Indexes[i] = offset + i;
+                        }
+                        else if (Indexes.Length != 0)
+                            Indexes = new int[0];
+
+                        // Build all rows based on a 'model' row without filling user properties:
+                        var row = toReturn.NewRow();  // our model row
+                        toReturn.Rows.Add(row);  // mandatory to add it in table otherwise importing copies won't work
+
+                        for (int i = 0; i < page_row_count; i++)
+                        {
+                            // Fill checkmark if has any:
                             if (HasCheckmarks)
                             {
-                                var jindex = !PagingEnabledInternal ? j : ((int)CurrentPageIndex * _records_per_page + j);
-                                if (RowCheckMarks != null && RowCheckMarks.Count > jindex)
-                                    row[SelectorsColumn.ColumnName] = RowCheckMarks[jindex];
+                                var index = !PagingEnabledInternal ? i + global_start_index : ((int)CurrentPageIndex * _records_per_page + i + global_start_index);
+                                if (RowCheckMarks != null && RowCheckMarks.Count > index)
+                                    row[checkmark_column_name] = RowCheckMarks[index];
                                 else // should never happen as we sync selector count with items source count changes.
-                                    row[SelectorsColumn.ColumnName] = new CheckMark();
+                                    row[checkmark_column_name] = new CheckMark();
                             }
 
+                            // Fill ID if has any:
                             if (HasIndexes)
-                                row[indexColumn.ColumnName] = Indexes[j] = !PagingEnabledInternal ? i : ((int)CurrentPageIndex * _records_per_page + i);
-                            i++; j++;
-                            foreach (var property in properties)
+                                row[id_column_name] = Indexes[i];
+
+                            // Import empty row which if much 
+                            // faster than adding a new one:
+                            toReturn.ImportRow(row);
+                        }
+
+                        toReturn.Rows.RemoveAt(0);  // remove 'model' item.
+
+                        // Udpate token for previous background threads syncing:
+                        current_page_token++;
+
+                        // Update as much rows as the load_size parameter allows:
+                        var actual_load_size = Math.Min(page_row_count, load_size);
+                        InitializeRows(toReturn, 0, partialSource.Take(actual_load_size));
+
+                        // Fill rows in background if there are too many of them:
+                        if (page_row_count > load_size)
+                        {
+                            //For that: create background worker if not existing:
+                            if (currentTableLoader == null || currentTableLoader.IsBusy)
                             {
-                                row[property.Name] = property.GetValue(item);
+                                currentTableLoader = new BackgroundWorker();
+                                currentTableLoader.DoWork += InitializePageTableInBackground;
+                                currentTableLoader.RunWorkerCompleted += EndInitializePageTableInBackground;
                             }
-                            if (dynamicproperties != null)
-                            {
-                                foreach (var property_name in dynamicproperties)
-                                {
-                                    if (item is ExpandoObject expandoItem)
-                                    {
-                                        var asDict = (IDictionary<string, object>)expandoItem;
-                                        if (asDict.ContainsKey(property_name))
-                                            row[property_name] = asDict[property_name];
-                                    }
-                                }
-                            }
-                            toReturn.Rows.Add(row);
+
+                            // Note: start from load size as we already processed load_size items:
+                            var rowsToProcess = new RowUpdateInformation(current_page_token, load_size, global_start_index, partialSource, page_row_count);
+                            currentTableLoader.RunWorkerAsync(rowsToProcess);
+                            PageLoading?.Invoke(this, emptyEventArgs);
+                        }
+                        else // indicates that page is ready without triggering page loading event:
+                        {
+                            PageLoaded?.Invoke(this, emptyEventArgs);
                         }
                     }
                 }
@@ -715,7 +821,124 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
   
            toReturn.ColumnChanged += CurrentTable_ColumnChanged;
 
-            return toReturn;
+           return toReturn;
+        }
+
+        /// <summary>
+        /// Updates already created rows with their initial values.
+        /// Does not process ID or checkmarks 
+        /// (should be processed prior to calling this method).
+        /// </summary>
+        /// <param name="table">The table to work on.</param>
+        /// <param name="start_index">Starting index on the passed partial source.</param>
+        /// <param name="partialSource">The source of items where to get values from.</param>
+        /// <param name="validychecker">An optional function to check if we should quit or not this method during processing.</param>
+        private void InitializeRows(DataTable table, int start_index, IEnumerable<object> partialSource, Func<bool> validychecker = null)
+        {
+            if (table != null && partialSource != null)
+            {
+                // Disable table updates notifications:
+                table.ColumnChanged -= CurrentTable_ColumnChanged;
+
+                // Fill rows:
+                int i = start_index;
+                foreach (object item in partialSource)
+                {
+                    // Quit without notification if context is not valid anymore:
+                    if (validychecker?.Invoke() == false)
+                        return;
+
+                    // Get row to update:
+                    var row = table.Rows[i];
+
+                    // (Disable table updates again as sometimes they are reactivated by other running threads:)
+                    table.ColumnChanged -= CurrentTable_ColumnChanged;
+
+                    // Process normal properties:
+                    foreach (var property in properties)
+                        row[property.Name] = property.GetValue(item);
+
+                    // Process dynamic properties:
+                    if (dynamicproperties != null)
+                        foreach (var property_name in dynamicproperties)
+                            if (item is IDictionary<string, object> asDict && asDict.ContainsKey(property_name))  // (as expando object)
+                                row[property_name] = asDict[property_name];
+
+                    // Increment indexes:
+                    i++;
+                }
+
+                // Set table update notification back:
+                table.ColumnChanged += CurrentTable_ColumnChanged;
+            }
+        }
+
+        /// <summary>
+        /// Initializes the current page in a background worker.
+        /// </summary>
+        /// <param name="sender">Unused.</param>
+        /// <param name="e">Contains data information to start background processing.</param>
+        private void InitializePageTableInBackground(object sender, DoWorkEventArgs e)
+        {
+            // Cancel if passed source data are not valid anymore:
+            if (!(e.Argument is RowUpdateInformation data)
+                || data.PartialSourceCount <= 0
+                || data.CurrentIndex >= data.PartialSourceCount)
+            {
+                e.Result = true;
+                return;
+            }
+
+            var interlocked = true;
+
+            // Stop if current table is no more valid or if succeded to load every rows of partial source:
+            while (current_page_token == data.Token && data.CurrentIndex < data.PartialSourceCount)
+            {
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.DataBind, new Action(() =>
+                {
+                    // Calculate load size:
+                    var actual_load_size = Math.Min(data.PartialSourceCount - data.CurrentIndex, load_size);
+
+                    // Update rows:
+                    if (current_page_token == data.Token)
+                    {
+                        lock (CurrentPage)
+                            InitializeRows(CurrentPage, data.CurrentIndex, data.PartialSource.Skip(data.CurrentIndex).Take(actual_load_size), () => current_page_token == data.Token);
+                    }
+
+                    // If not sync anymore with current table (might have been reupdated) then return without finishing:
+                    if (current_page_token != data.Token)
+                        e.Cancel = true;
+
+                    // Or increment index if every alright:
+                    else
+                        data.CurrentIndex += actual_load_size;
+
+                    // Unlock next call:
+                    interlocked = false;
+
+                }));
+
+                // Wait for next call:
+                while (interlocked)
+                    System.Threading.Thread.Sleep(2);
+
+                interlocked = true;
+            }
+
+            e.Result = data;
+        }
+
+        /// <summary>
+        /// Called when a background loader is done.
+        /// </summary>
+        /// <param name="sender">The background loaded.</param>
+        /// <param name="e">Background loader info.</param>
+        private void EndInitializePageTableInBackground(object sender, RunWorkerCompletedEventArgs e)
+        {
+            // Invoke end-of-loading if stopped naturally:
+            if (!e.Cancelled)
+                PageLoaded?.Invoke(this, emptyEventArgs);
         }
         #endregion
 

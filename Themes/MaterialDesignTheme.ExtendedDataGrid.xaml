@@ -225,6 +225,19 @@
                                 <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
                             </ScrollViewer>
 
+                            <wpf:Card VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10" UniformCornerRadius="16"
+                                      Visibility="{Binding IsPageLoading, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <StackPanel Orientation="Horizontal" Margin="3,3,3,3">
+                                    <TextBlock Text="{TemplateBinding PageLoadingText}" VerticalAlignment="Center" Margin="8,0"/>
+                                    <wpf:Card UniformCornerRadius="14">
+                                        <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" 
+                                     Margin="3,3,4,3"
+                                     Value="0"                   
+                                     IsIndeterminate="True" />
+                                    </wpf:Card>
+                                </StackPanel>
+                            </wpf:Card>
+
                             <ContentControl Grid.Row="1" x:Name="PageNavigationControl" IsTabStop="False" Content="{Binding}" ContentTemplate="{TemplateBinding PagingOptionsTemplate}"/>
 
                             <Grid Grid.Row="2" Margin="0,0,0,2" MinHeight="{Binding ActualHeight, ElementName=PageNavigationControl}" Visibility="{TemplateBinding AdditionalOptionsVisibility}">
