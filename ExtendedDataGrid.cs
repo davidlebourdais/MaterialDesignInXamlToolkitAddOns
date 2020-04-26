@@ -18,17 +18,17 @@ namespace EMA.MaterialDesignInXAMLExtender
     public class ExtendedDataGrid : DataGrid
     {
         #region Private attributes and properties
-        private bool items_source_inner_change;               // disables reentrancy when ItemsSource changes.
-        private bool can_add_rows_inner_change;               // disables reentrancy when CanUserAddRows changes.
+        private bool items_source_inner_change;               // disables reentrancy when ItemsSource changes
+        private bool can_add_rows_inner_change;               // disables reentrancy when CanUserAddRows changes
         private readonly DataTablePagingManager PagedTable;   // paging manager that will be used to split raw source into pages when required
-        private IList<bool> CheckMarksValuesBackup;      // stores a backup of selectors value for control initialization.
-        private bool can_user_add_row_cache;                  // stores a backup of the CanUserAddRows property.
-        private bool source_is_readonly;                      // stores a value indicating if source is readonly.
+        private IList<bool> CheckMarksValuesBackup;           // stores a backup of selectors value for control initialization.
+        private bool can_user_add_row_cache;                  // stores a backup of the CanUserAddRows property
+        private bool source_is_readonly;                      // stores a value indicating if source is readonly
 
         /// <summary>
         /// Determines if paging system should be used instead of raw source.
         /// </summary>
-        private bool UsesPagingInternal => UsesPaging || ShowsCheckMarks || ShowsIDs;
+        private bool UsesPagingInternal => UsesPaging || ShowsCheckMarks || ShowsIDs || PagedTable.AreSourceItemsDynamic;
         #endregion
 
         #region Constructors

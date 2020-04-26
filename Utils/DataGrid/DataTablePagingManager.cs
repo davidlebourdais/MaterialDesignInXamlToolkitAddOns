@@ -123,6 +123,11 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         public bool HasMoreThanAPage => GetMaxCurrentPageIndex() > 1;
 
         /// <summary>
+        /// Indicates if source items are dynamic (Expando, etc.)
+        /// </summary>
+        public bool AreSourceItemsDynamic { get; private set; }
+        
+        /// <summary>
         /// Gets or sets a value indicating if a selection column
         /// (also called checkmarks) must be included in returned pages. 
         /// </summary>
@@ -439,18 +444,21 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 {
                     this.source = source;
                     SourceItemsCount = source.Count();
+                    AreSourceItemsDynamic = source.GetGenericType() == typeof(ExpandoObject);
                 }
             }
             else
             {
                 this.source = source;
                 SourceItemsCount = source.Count();
+                AreSourceItemsDynamic = source.GetGenericType() == typeof(ExpandoObject);
             }
 
             if (source == null)
             {
                 SourceItemsCount = 0;
                 RowCheckMarks?.Clear();
+                AreSourceItemsDynamic = false;
             }
 
             // If source is notifiable, subscribe to change for paging adaption:
