@@ -62,7 +62,7 @@
         <StackPanel Margin="1,0" Orientation="Horizontal">
             <TextBlock Text="{Binding CurrentVisibleItemRangeText, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}" Margin="0,0,5,0" VerticalAlignment="Center" />
             <Button Style="{StaticResource MaterialDesignIconForegroundButton}"
-                    Visibility="{Binding ShowGoToFirstAndLastPageControls, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    Visibility="{Binding ShowsGoToFirstAndLastPageControls, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}, Converter={StaticResource BooleanToVisibilityConverter}}"
                     Command="{Binding GoToFirstPageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}"
                     ToolTip="Go to first page"
                     Height="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"
@@ -93,7 +93,7 @@
                 <wpf:PackIcon Kind="ChevronRight" />
             </Button>
             <Button Style="{StaticResource MaterialDesignIconForegroundButton}"
-                    Visibility="{Binding ShowGoToFirstAndLastPageControls, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    Visibility="{Binding ShowsGoToFirstAndLastPageControls, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}, Converter={StaticResource BooleanToVisibilityConverter}}"
                     Command="{Binding GoToLastPageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}"
                     ToolTip="Go to last page"
                     Height="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"

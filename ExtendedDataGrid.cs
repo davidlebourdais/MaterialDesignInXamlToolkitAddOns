@@ -409,16 +409,16 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// Gets or sets a value indicating if controls allowing to go to first or last page should be shown.
         /// </summary>
         /// <remarks>No special behavior on this property, just an helper for templating.</remarks>
-        public bool ShowGoToFirstAndLastPageControls
+        public bool ShowsGoToFirstAndLastPageControls
         {
-            get => (bool)GetValue(ShowGoToFirstAndLastPageControlsProperty);
-            set => SetCurrentValue(ShowGoToFirstAndLastPageControlsProperty, value);
+            get => (bool)GetValue(ShowsGoToFirstAndLastPageControlsProperty);
+            set => SetCurrentValue(ShowsGoToFirstAndLastPageControlsProperty, value);
         }
         /// <summary>
-        /// Registers <see cref="ShowGoToFirstAndLastPageControls"/> as a dependency property.
+        /// Registers <see cref="ShowsGoToFirstAndLastPageControls"/> as a dependency property.
         /// </summary>
-        public static readonly DependencyProperty ShowGoToFirstAndLastPageControlsProperty
-            = DependencyProperty.Register(nameof(ShowGoToFirstAndLastPageControls), typeof(bool), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(bool)));
+        public static readonly DependencyProperty ShowsGoToFirstAndLastPageControlsProperty
+            = DependencyProperty.Register(nameof(ShowsGoToFirstAndLastPageControls), typeof(bool), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(bool)));
 
         /// <summary>
         /// Gets or sets from how many rows found in the source background loading must be used, 
