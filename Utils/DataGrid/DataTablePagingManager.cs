@@ -516,8 +516,11 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 lock (this.source)
                 {
                     this.source = source;
-                    SourceItemsCount = source.Count();
-                    AreSourceItemsDynamic = source.GetGenericType() == typeof(ExpandoObject);
+                    if (source != null)
+                    { 
+                        SourceItemsCount = source.Count();
+                        AreSourceItemsDynamic = source.GetGenericType() == typeof(ExpandoObject);
+                    }
                 }
             }
             else
