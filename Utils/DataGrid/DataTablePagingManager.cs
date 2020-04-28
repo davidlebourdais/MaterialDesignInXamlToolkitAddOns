@@ -713,15 +713,19 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                         var first = partialSource.First();
 
                         var props = TypeDescriptor.GetProperties(first.GetType());
+                        if (properties != null)
+                            lock (properties)
+                                properties = null;
                         properties = props == null ? new List<PropertyDescriptor>() : props.OfType<PropertyDescriptor>();
 
-                        foreach (var property in properties)
-                        {
-                            var type = (property.PropertyType.IsGenericType
-                                && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>) ?
-                                    Nullable.GetUnderlyingType(property.PropertyType) : property.PropertyType);
-                            toReturn.Columns.Add(property.Name, type);
-                        }
+                        lock (properties)
+                            foreach (var property in properties)
+                            {
+                                var type = (property.PropertyType.IsGenericType
+                                    && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>) ?
+                                        Nullable.GetUnderlyingType(property.PropertyType) : property.PropertyType);
+                                toReturn.Columns.Add(property.Name, type);
+                            }
 
                         // Dynamic types, still based on first item:
                         dynamicproperties = null;
@@ -733,13 +737,10 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                         }
 
                         if (dynamicproperties != null)
-                        {
-                            foreach (var property in dynamicproperties)
-                            {
-                                if (asExpandoObject != null)
-                                    toReturn.Columns.Add(property, asExpandoObject[property].GetType());
-                            }
-                        }
+                            lock (dynamicproperties)
+                                foreach (var property in dynamicproperties)
+                                    if (asExpandoObject != null)
+                                        toReturn.Columns.Add(property, asExpandoObject[property].GetType());
 
                         // Reorder special columns:
                         if (HasCheckmarks && CheckMarksColumnPosition > 0)
@@ -858,14 +859,17 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                     table.ColumnChanged -= CurrentTable_ColumnChanged;
 
                     // Process normal properties:
-                    foreach (var property in properties)
-                        row[property.Name] = property.GetValue(item);
+                    if (properties != null)
+                        lock (properties)
+                            foreach (var property in properties)
+                                row[property.Name] = property.GetValue(item);
 
                     // Process dynamic properties:
                     if (dynamicproperties != null)
-                        foreach (var property_name in dynamicproperties)
-                            if (item is IDictionary<string, object> asDict && asDict.ContainsKey(property_name))  // (as expando object)
-                                row[property_name] = asDict[property_name];
+                        lock (dynamicproperties)
+                            foreach (var property_name in dynamicproperties)
+                                if (item is IDictionary<string, object> asDict && asDict.ContainsKey(property_name))  // (as expando object)
+                                    row[property_name] = asDict[property_name];
 
                     // Increment indexes:
                     i++;
