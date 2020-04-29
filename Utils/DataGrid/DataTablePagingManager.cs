@@ -31,6 +31,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         private static readonly EventArgs emptyEventArgs = new EventArgs();  // empty args created once but used multiple times.
 
         private IEnumerable<object> source;                      // reference to source data.
+        private IList sourceAsList;                      // cast (99% cases) or copy of the source object as a list.
         private bool _paging_enabled = true;                     // indicates if pages should be created, enabled by default.
         private int _records_per_page = -1;                      // stores the number of records each page should keep, undefined by default.
         private bool _has_indexes;                               // stores HasIndexes state.
@@ -40,7 +41,8 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         private bool _indexes_start_at_zero;                     // tells if indexes should start at zero or one.
         private ObservableCollection<CheckMark> _rowCheckMarks;  // stores line checkmarks.
         private bool no_reentrancy;                              // disables reentrancy for some methods.
-        private bool no_reentrancy_weak_event;                   // disables reentrancy in collection weak event handling.
+        private bool no_reentrancy_prop_changed_weak_event;      // disables reentrancy in property changed weak event handling.
+        private bool no_reentrancy_collection_weak_event;        // disables reentrancy in collection weak event handling.
         private bool no_checkmarkedrows_update;                  // disables update notification of the checkmarked rows changes.
         IEnumerable<string> dynamicproperties;                   // stores dynamic properties that had been found on source (used for Expando objects).
         IEnumerable<PropertyDescriptor> properties;              // stores 'normal' properties that had been found on source.
@@ -188,7 +190,12 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// Indicates if source items are dynamic (Expando, etc.)
         /// </summary>
         public bool AreSourceItemsDynamic { get; private set; }
-        
+
+        /// <summary>
+        /// Indicates if source items implements <see cref="INotifyPropertyChanged"/>.
+        /// </summary>
+        public bool AreSourceItemsINotifyPropertyChanged { get; private set; }
+
         /// <summary>
         /// Gets or sets a value indicating if a selection column
         /// (also called checkmarks) must be included in returned pages. 
@@ -442,13 +449,11 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
             // Gross initialization of checked marked rows if needed:
             if (force || CheckMarkedRows.Count() != RowCheckMarks.Count(x => x.IsChecked))
             {
-                if (source != null)
+                if (sourceAsList != null)
                 {
                     var checkMarkedRows = new List<object>();
-                    var sourceAsList = (List<object>)null;
-                    lock (source)
+                    lock (sourceAsList)
                     {
-                        sourceAsList = source.ToList();
                         int i = 0;
                         foreach (var check in RowCheckMarks)
                         {
@@ -515,26 +520,40 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
             {
                 lock (this.source)
                 {
+                    // First process 1% case where list would be a copy of source:
+                    if (sourceAsList != this.source)
+                    {
+                        lock (sourceAsList)
+                            sourceAsList = source?.ToList();
+                    }
+                    else sourceAsList = source != null ? source as IList : null;
+
                     this.source = source;
+
                     if (source != null)
                     { 
                         SourceItemsCount = source.Count();
                         AreSourceItemsDynamic = source.GetGenericType() == typeof(ExpandoObject);
+                        AreSourceItemsINotifyPropertyChanged = source.AreItemsINotifyPropertyChanged();
                     }
                 }
             }
             else
             {
                 this.source = source;
+                sourceAsList = source != null ? (source is IList ? source as IList : source.ToList()) : null;
                 SourceItemsCount = source.Count();
                 AreSourceItemsDynamic = source.GetGenericType() == typeof(ExpandoObject);
+                AreSourceItemsINotifyPropertyChanged = source.AreItemsINotifyPropertyChanged();
             }
 
             if (source == null)
             {
+                sourceAsList = null;
                 SourceItemsCount = 0;
                 RowCheckMarks?.Clear();
                 AreSourceItemsDynamic = false;
+                AreSourceItemsINotifyPropertyChanged = false;
             }
 
             // If source is notifiable, subscribe to change for paging adaption:
@@ -554,7 +573,15 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
             {
                 lock (source)
                 {
-                    var new_count = source.Count();
+                    // First process 1% case where list would be a copy of source:
+                    if (sourceAsList != source)
+                    {
+                        lock (sourceAsList)
+                            sourceAsList = source is IList ? source as IList : source.ToList();
+                    }
+                    else sourceAsList = source is IList ? source as IList : source.ToList(); // or just cast current source.
+
+                    var new_count = sourceAsList.Count;
                     if (SourceItemsCount != new_count)
                     {
                         SourceItemsCount = new_count;
@@ -566,6 +593,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
 
             if (source == null)
             {
+                sourceAsList = null;
                 SourceItemsCount = 0;
                 RowCheckMarks?.Clear();
             }
@@ -575,22 +603,30 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         }
 
         /// <summary>
-        /// Called if source is notifiable and its collection changed.
+        /// Called if source is notifiable and its collection or a property changed.
         /// </summary>
         /// <param name="managerType">Type of the manager we subscribed to.</param>
-        /// <param name="sender">The collection that sent the event.</param>
+        /// <param name="sender">The object that sent the event.</param>
         /// <param name="e">Information about the event.</param>
         /// <returns>True if was able to perform the required operation.</returns>
         /// <remarks><see cref="IWeakEventListener"/> implementation.</remarks>
         public bool ReceiveWeakEvent(Type managerType, object sender, EventArgs e)
         {
-            if (source != null)
+            var handled = false;
+
+            /* Case where a INotifyPropertyChanged object (normaly a cell) called */
+            if (managerType == typeof(PropertyChangedEventManager))
             {
-                if (managerType == typeof(CollectionChangedEventManager))
+                if (source != null)
+                    ReceiveWeakINotifyPropertyChangedEvent(sender as INotifyPropertyChanged, e as PropertyChangedEventArgs);
+                handled = true;
+            }
+            /* Case where the source a notifiable collection called: */
+            else if (managerType == typeof(CollectionChangedEventManager))
+            {
+                if (source != null && !no_reentrancy_collection_weak_event)
                 {
-                    if (no_reentrancy_weak_event)
-                        return true;
-                    no_reentrancy_weak_event = true;
+                    no_reentrancy_collection_weak_event = true;
                     // Process through dispatcher in case we are invoked from another thread:
                     Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.DataBind, (Action)(() =>
                     {
@@ -602,17 +638,17 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                             return;
                         }
 
-                        UpdateSource();
-                        no_reentrancy_weak_event = false;
+                        UpdateSource(true);
+                        no_reentrancy_collection_weak_event = false;
                     }));
-                    return true;
                 }
+                else if (source == null && sender is INotifyCollectionChanged collection)
+                    CollectionChangedEventManager.RemoveListener(collection, this);  // our binding expression is not used anymore, we can shut listening down.
+
+                handled = true;
             }
-            else if (sender is INotifyCollectionChanged collection)
-            {
-                CollectionChangedEventManager.RemoveListener(collection, this);  // our binding expression is not used anymore, we can shut listening down.
-            }
-            return false;
+
+            return handled;  // must be true otherwise will generate an exception.
         }
         #endregion
 
@@ -824,7 +860,6 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
             }
   
            toReturn.ColumnChanged += CurrentTable_ColumnChanged;
-
            return toReturn;
         }
 
@@ -846,6 +881,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
 
                 // Fill rows:
                 int i = start_index;
+                bool has_i_notify = AreSourceItemsINotifyPropertyChanged;
                 foreach (object item in partialSource)
                 {
                     // Quit without notification if context is not valid anymore:
@@ -862,14 +898,28 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                     if (properties != null)
                         lock (properties)
                             foreach (var property in properties)
+                            {
+                                // Set value:
                                 row[property.Name] = property.GetValue(item);
+
+                                // Subscribe to any further changes if possible:
+                                if (has_i_notify)
+                                    PropertyChangedEventManager.AddListener(item as INotifyPropertyChanged, this, property.Name);
+                            }
 
                     // Process dynamic properties:
                     if (dynamicproperties != null)
                         lock (dynamicproperties)
                             foreach (var property_name in dynamicproperties)
                                 if (item is IDictionary<string, object> asDict && asDict.ContainsKey(property_name))  // (as expando object)
+                                {
+                                    // Set value:
                                     row[property_name] = asDict[property_name];
+
+                                    // Subscribe to any further changes if possible:
+                                    if (has_i_notify)
+                                        PropertyChangedEventManager.AddListener(item as INotifyPropertyChanged, this, property_name);
+                                }
 
                     // Increment indexes:
                     i++;
@@ -951,7 +1001,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
 
         #region Modify cell, add or delete row methods
         /// <summary>
-        /// Called whenever a value in the column changed.
+        /// Called whenever a value in the column changed (through user input).
         /// </summary>
         /// <param name="sender">Unused.</param>
         /// <param name="e">Unused.</param>
@@ -967,11 +1017,25 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
             if (index >= 0)
             {
                 var propertyname = e.Column.ColumnName;
+
+                // For class definition properties:
+                var propertydesc = properties?.FirstOrDefault(x => x.Name == propertyname);
+                if (propertydesc != null)
+                {
+                    lock (source)
+                    {
+                        var item = SourceItemsCount > index ? sourceAsList[index] : null;
+                        if (item != null)
+                            propertydesc.SetValue(item, e.Row[propertyname]);
+                    }
+                }
+
+                // For dynamic properties:
                 if (dynamicproperties != null && dynamicproperties.Contains(propertyname))
                 {
                     lock (source)
                     {
-                        var item = source.Count() > index ? source.ToList()[index] : null;
+                        var item = SourceItemsCount > index ? sourceAsList[index] : null;
                         if (item is ExpandoObject expandoItem)
                         {
                             var asDict = (IDictionary<string, object>)expandoItem;
@@ -981,15 +1045,64 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                         }
                     }
                 }
-                var propertydesc = properties?.FirstOrDefault(x => x.Name == propertyname);
-                if (propertydesc != null)
+            }
+        }
+
+        /// <summary>
+        /// Called if a cell as <see cref="INotifyPropertyChanged"/> notifies a property change.
+        /// </summary>
+        /// <param name="sender">The <see cref="INotifyPropertyChanged"/> that sent the event.</param>
+        /// <param name="e">Information about the event.</param>
+        private void ReceiveWeakINotifyPropertyChangedEvent(INotifyPropertyChanged sender, PropertyChangedEventArgs e)
+        {
+            // Block reentrants:
+            if (no_reentrancy_prop_changed_weak_event)
+                return;
+            
+            // Block invalids:
+            if (sender == null || e == null) return;
+
+            // Find index in source:
+            var index = -1;
+            lock (sourceAsList)  // should lock source as well if same reference.
+                index = sourceAsList.IndexOf(sender);  // index related to source.
+
+            // If item is not found, ensure 
+            if (index < 0)
+                return;
+
+            // Change property values on current page only:
+            lock (CurrentPage)
+            {
+                var current_page_index_offset = PagingEnabledInternal ? (int)CurrentPageIndex * _records_per_page : 0;
+                if (index >= current_page_index_offset && index < CurrentPage.Rows.Count + current_page_index_offset)
                 {
-                    lock (source)
-                    {
-                        var item = source.Count() > index ? source.ToList()[index] : null;
-                        if (item != null)
-                            propertydesc.SetValue(item, e.Row[propertyname]);
-                    }
+                    // For type properties:
+                    if (properties != null)
+                        lock (properties)
+                        {
+                            var property = properties.FirstOrDefault(x => x.Name == e.PropertyName);
+                            if (property != null)
+                            {
+                                CurrentPage.ColumnChanged -= CurrentTable_ColumnChanged;
+                                no_reentrancy_prop_changed_weak_event = true;
+                                CurrentPage.Rows[index][property.Name] = property.GetValue(sender);
+                                CurrentPage.ColumnChanged += CurrentTable_ColumnChanged;
+                                no_reentrancy_prop_changed_weak_event = false;
+                            }
+                        }
+
+                    // For dynamic object properties:
+                    if (dynamicproperties != null)
+                        lock (dynamicproperties)  // lock even if not using this list to avoid writing cell at same time as other threads.
+                            if (sender is IDictionary<string, object> asDict && asDict.ContainsKey(e.PropertyName))  // (as expando object)
+                            {
+                                CurrentPage.ColumnChanged -= CurrentTable_ColumnChanged;
+                                no_reentrancy_prop_changed_weak_event = true;
+                                CurrentPage.Rows[index][e.PropertyName] = asDict[e.PropertyName];
+                                CurrentPage.ColumnChanged += CurrentTable_ColumnChanged;
+                                no_reentrancy_prop_changed_weak_event = false;
+                            }
                 }
             }
         }
@@ -1017,19 +1130,19 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                             try  // we do not want the whole app to collapse because of generic UI item creation.
                             {
                                 var createdObject = constructor.Invoke(parameters);
-                                no_reentrancy_weak_event = true;  // do not update through observables notifications
+                                no_reentrancy_collection_weak_event = true;  // do not update through observables notifications
                                 if (list.Add(createdObject) >= 0)
                                 {
                                     UpdateSource();
-                                    no_reentrancy_weak_event = false;
+                                    no_reentrancy_collection_weak_event = false;
                                     return true;
                                 }
                             }
                             catch
                             { }
                             finally
-                            { 
-                                no_reentrancy_weak_event = false;
+                            {
+                                no_reentrancy_collection_weak_event = false;
                             }
                         }
                     }
@@ -1055,10 +1168,10 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 {
                     if (source is IList list && !list.IsReadOnly && list.Count > index)
                     {
-                        no_reentrancy_weak_event = true;  // for observable collections, do not update...
+                        no_reentrancy_collection_weak_event = true;  // for observable collections, do not update...
                         list.RemoveAt(index);
                         UpdateSource();  // ...and let us update the list manualy.
-                        no_reentrancy_weak_event = false;
+                        no_reentrancy_collection_weak_event = false;
                     }
                 }
             }
