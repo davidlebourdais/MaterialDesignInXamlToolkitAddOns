@@ -167,6 +167,7 @@
         <Setter Property="PagingOptionsTemplate" Value="{StaticResource PagingOptionsTemplate}" />
         <Setter Property="CanShowAdditionalOptions" Value="True" />
         <Setter Property="AdditionalOptionsTemplate" Value="{StaticResource AdditionalOptionsTemplate}" />
+        <Setter Property="CellStyle" Value="{StaticResource MaterialDesignDataGridCell}" />
         <Setter Property="CheckMarksColumnHeaderStyle" Value="{StaticResource IDAndCheckMarksColumnHeaderTemplateStyle}" />
         <Setter Property="CheckMarksColumnHeaderTemplate" Value="{StaticResource CheckMarksColumnHeaderTemplate}" />
         <Setter Property="CheckMarkCellStyle" Value="{StaticResource MaterialDesignDataGridCell}" />

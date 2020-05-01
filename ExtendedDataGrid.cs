@@ -160,52 +160,71 @@ namespace EMA.MaterialDesignInXAMLExtender
             var is_select = ShowsCheckMarks && index == CheckMarksColumnIndex;
             var is_id = ShowsIDs && index == IDsColumnIndex;
 
-            // Cancel only when necessary:
-            if (is_select || is_id
-                || ColumnHeaderStyle != null || ColumnHeaderTemplate != null || ColumnHeaderTemplateSelector != null
-               || CellStyle != null || CellTemplate != null || CellTemplateSelector != null
-               || CellEditingTemplate != null || CellEditingTemplateSelector != null)
-            {
+            // Cancel only when necessary, i.e. when a checkmark, id, or template column:
+            if (is_select || is_id || (e.Column is DataGridTemplateColumn))
+            {               
                 e.Column = new ExtendedDataGridTemplateColumn(e.PropertyName, is_id, is_select)
                 {
                     Header = e.Column.Header,
+                    HeaderStringFormat = e.Column.HeaderStringFormat,
+                    //DisplayIndex = e.Column.DisplayIndex,
                     SortMemberPath = e.PropertyName,
                     HeaderStyle =
                         is_select ? CheckMarksColumnHeaderStyle :
                         is_id ? IDsColumnHeaderStyle :
-                        ColumnHeaderStyle,
+                        e.Column.HeaderStyle ?? ColumnHeaderStyle,
                     HeaderTemplate =
                         is_select ? CheckMarksColumnHeaderTemplate :
                         is_id ? IDsColumnHeaderTemplate :
-                        ColumnHeaderTemplate,
+                        e.Column.HeaderTemplate ?? ColumnHeaderTemplate,
                     HeaderTemplateSelector =
                         is_select ? CheckMarksColumnHeaderTemplateSelector :
                         is_id ? IDsColumnHeaderTemplateSelector :
-                        ColumnHeaderTemplateSelector,
+                        e.Column.HeaderTemplateSelector ?? ColumnHeaderTemplateSelector,
                     CellStyle =
                         is_select ? CheckMarkCellStyle :
                         is_id ? IDCellStyle :
-                        CellStyle,
+                        e.Column.CellStyle ?? CellStyle,
                     CellTemplate =
                         is_select ? CheckMarkCellTemplate :
                         is_id ? IDCellTemplate :
-                        CellTemplate,
+                        (e.Column as DataGridTemplateColumn)?.CellTemplate ?? CellTemplate,
                     CellTemplateSelector =
                         is_select ? CheckMarkCellTemplateSelector :
                         is_id ? IDCellTemplateSelector :
-                        CellTemplateSelector,
+                        (e.Column as DataGridTemplateColumn)?.CellTemplateSelector ?? CellTemplateSelector,
                     CellEditingTemplate =
                         is_select ? CheckMarkCellEditingTemplate :
-                        CellEditingTemplate,
+                        (e.Column as DataGridTemplateColumn)?.CellEditingTemplate ?? CellEditingTemplate,
                     CellEditingTemplateSelector =
                         is_select ? CheckMarkCellEditingTemplateSelector :
-                        CellEditingTemplateSelector,
+                        (e.Column as DataGridTemplateColumn)?.CellEditingTemplateSelector ?? CellEditingTemplateSelector,
                     IsReadOnly = is_id,
-                    CanUserSort = CanUserSortColumns,
-                    CanUserReorder = CanUserReorderIDsAndCheckMarksColumns || (!is_id && !is_select && CanUserReorderColumns)
+                    CanUserSort = e.Column.CanUserSort && CanUserSortColumns,
+                    CanUserResize = e.Column.CanUserResize && CanUserResizeColumns,
+                    CanUserReorder = CanUserReorderIDsAndCheckMarksColumns || (!is_id && !is_select && e.Column.CanUserReorder && CanUserReorderColumns),
+                    Width = e.Column.Width,
+                    MinWidth = e.Column.MinWidth,
+                    MaxWidth = e.Column.MaxWidth,
+                    ClipboardContentBinding = e.Column.ClipboardContentBinding,
+                    DragIndicatorStyle = e.Column.DragIndicatorStyle,                    
+                    Visibility = e.Column.Visibility
                 };
             }
-            else base.OnAutoGeneratingColumn(e);
+            else // just correct some properties and perform sorting before we let base do the job:
+            {
+                if (e.Column.HeaderStyle == null)
+                    e.Column.HeaderStyle = ColumnHeaderStyle;
+                if (e.Column.HeaderTemplate == null)
+                    e.Column.HeaderTemplate = ColumnHeaderTemplate;
+                if (e.Column.HeaderTemplateSelector == null)
+                    e.Column.HeaderTemplateSelector = ColumnHeaderTemplateSelector;
+                if (e.Column.CellStyle == null)
+                    e.Column.CellStyle = CellStyle;
+            }
+
+            base.OnAutoGeneratingColumn(e);
+        }
         }
         #endregion
 
