@@ -246,9 +246,10 @@ namespace EMA.MaterialDesignInXAMLExtender
         private void ProcessCanUserAddRows()
         {
             // Can add items only if at last page:
-            if (!CanUserAddRows && can_user_add_row_cache && PagedTable.CurrentPageIsLastPage && !source_is_readonly)
+            if (!CanUserAddRows && can_user_add_row_cache && !source_is_readonly
+                && PagedTable.CurrentPageIsLastPage && PagedTable.SourceItemsCount > 0)
                 CanUserAddRows = true;
-            else if (CanUserAddRows && (!PagedTable.CurrentPageIsLastPage || source_is_readonly))
+            else if (CanUserAddRows && (!PagedTable.CurrentPageIsLastPage || source_is_readonly || PagedTable.SourceItemsCount == 0))
             {
                 can_add_rows_inner_change = true;
                 CanUserAddRows = false;
