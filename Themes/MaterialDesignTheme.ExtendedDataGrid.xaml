@@ -8,8 +8,43 @@
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.DataGrid.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.Separator.xaml"/>
     </ResourceDictionary.MergedDictionaries>
-
+    
     <extenderutils:DataGridCellToDataContextConverter x:Key="DataGridCellToDataContextConverter" />
+    <wpf:NullableToVisibilityConverter x:Key="NullableToVisibilityConverter" />
+
+    <!-- Same as in MaterialDesign Toolkit header style but without arrow animations -->
+    <Style x:Key="MaterialDesignExtendedDataGridColumnHeader" TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type DataGridColumnHeader}">
+                    <Grid>
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <Grid Background="Transparent">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <wpf:ListSortDirectionIndicator Grid.Column="0" Width="12" Height="12"
+                                                                x:Name="SortDirectionIndicator"
+                                                                ListSortDirection="{TemplateBinding SortDirection}" 
+                                                                Visibility="{Binding SortDirection, RelativeSource={RelativeSource Mode=TemplatedParent}, Converter={StaticResource NullableToVisibilityConverter}}"
+                                                                />
+                                <ContentPresenter Grid.Column="1" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                  Margin="{TemplateBinding Padding}"/>
+                            </Grid>
+                        </Border>
+                        <Thumb x:Name="PART_LeftHeaderGripper" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignGridColumnHeaderGripper}"/>
+                        <Thumb x:Name="PART_RightHeaderGripper" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignGridColumnHeaderGripper}"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
     <DataTemplate x:Key="CheckMarksColumnHeaderTemplate">
         <extender:ExtendedCheckBox HorizontalAlignment="Center" VerticalAlignment="Center" 
@@ -33,7 +68,7 @@
                    Text="{Binding StringFormat={}{0}.}" FontWeight="Bold" VerticalAlignment="Center" TextAlignment="Right" HorizontalAlignment="Center"/>
     </DataTemplate>
 
-    <Style x:Key="IDAndCheckMarksColumnHeaderTemplateStyle" TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+    <Style x:Key="IDAndCheckMarksColumnHeaderTemplateStyle" TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MaterialDesignExtendedDataGridColumnHeader}">
         <Setter Property="OverridesDefaultStyle" Value="False" />
         <Setter Property="FontStyle" Value="Italic" />
         <Setter Property="HorizontalAlignment" Value="Center" />
@@ -168,6 +203,7 @@
         <Setter Property="CanShowAdditionalOptions" Value="True" />
         <Setter Property="AdditionalOptionsTemplate" Value="{StaticResource AdditionalOptionsTemplate}" />
         <Setter Property="CellStyle" Value="{StaticResource MaterialDesignDataGridCell}" />
+        <Setter Property="ColumnHeaderStyle" Value="{StaticResource MaterialDesignExtendedDataGridColumnHeader}" />
         <Setter Property="CheckMarksColumnHeaderStyle" Value="{StaticResource IDAndCheckMarksColumnHeaderTemplateStyle}" />
         <Setter Property="CheckMarksColumnHeaderTemplate" Value="{StaticResource CheckMarksColumnHeaderTemplate}" />
         <Setter Property="CheckMarkCellStyle" Value="{StaticResource MaterialDesignDataGridCell}" />

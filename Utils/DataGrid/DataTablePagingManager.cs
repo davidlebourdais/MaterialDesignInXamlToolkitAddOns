@@ -31,7 +31,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         private static readonly EventArgs emptyEventArgs = new EventArgs();  // empty args created once but used multiple times.
 
         private IEnumerable<object> source;                      // reference to source data.
-        private IList sourceAsList;                      // cast (99% cases) or copy of the source object as a list.
+        private IList sourceAsList;                              // cast (99% cases) or copy of the source object as a list.
         private bool _paging_enabled = true;                     // indicates if pages should be created, enabled by default.
         private int _records_per_page = -1;                      // stores the number of records each page should keep, undefined by default.
         private bool _has_indexes;                               // stores HasIndexes state.
@@ -39,7 +39,6 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         private int _indexes_column_position;                    // stores index for IDs column.
         private int _checkmarks_column_position;                 // stores index for selectors column.
         private bool _indexes_start_at_zero;                     // tells if indexes should start at zero or one.
-        private ObservableCollection<CheckMark> _rowCheckMarks;  // stores line checkmarks.
         private bool no_reentrancy;                              // disables reentrancy for some methods.
         private bool no_reentrancy_prop_changed_weak_event;      // disables reentrancy in property changed weak event handling.
         private bool no_reentrancy_collection_weak_event;        // disables reentrancy in collection weak event handling.
@@ -49,6 +48,9 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         private int load_size = DefaultItemLoadSize;             // stores how many items are loaded per thread turn (also max size for background loading activation).
         private BackgroundWorker currentTableLoader;             // a worker that feeds table with rows in a background thread.
         private int current_page_token;                          // stores an ID generated for the current page to be used by the background worker.
+        private bool _is_sorting_persistent;                     // stores sorting persistency property.
+        private bool sorting_sync_lost;                          // when sorting persistency is off, indicates if source had been updated in a way sorting if not valid anymore.
+        private bool source_count_was_zero;                      // indicates if at some point after a source update, the source count was zero and then became > 0.
         #endregion
 
         #region Private struct
@@ -88,7 +90,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
             /// <param name="current_index">Current index on partial source.</param>
             /// <param name="source_index_offset">Global source start index.</param>
             /// <param name="partialSource">Portion of the global source that must be processed.</param>
-            /// <param name="partial_source_count">Optionnal size of this portion.</param>
+            /// <param name="partial_source_count">Optional size of this portion.</param>
             public RowUpdateInformation(int token, int current_index, int source_index_offset, IEnumerable<object> partialSource, int partial_source_count = -1)
             {
                 if (current_index < 0 || source_index_offset < 0)
@@ -209,11 +211,27 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 {
                     _has_checkmarks = value;
 
+                    if (value)
+                    {
+                        SyncRowCheckMarksCount();
+                        if (IsSorting)
+                            UpdateSortedCheckMarks();
+                    }
                     // Update ID column index regarding to selector column apparance/disapearance:
                     if (value && IndexesColumnPosition >= CheckMarksColumnPosition)
                         IndexesColumnPosition++;
                     else if (!value && IndexesColumnPosition >= CheckMarksColumnPosition)
                         IndexesColumnPosition--;
+
+                    if (IsSorting)
+                    {
+                        if (!value && CheckMarksColumnPosition == SortingColumnIndex)
+                            StopSorting();
+                        else if (!value && CheckMarksColumnPosition < SortingColumnIndex)
+                            SortingColumnIndex--;
+                        else if (value && CheckMarksColumnPosition <= SortingColumnIndex)
+                            SortingColumnIndex++;
+                    }
 
                     UpdateCurrentPage();
                 }
@@ -254,6 +272,30 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                     else if (!value && IndexesColumnPosition <= CheckMarksColumnPosition)
                         CheckMarksColumnPosition--;
 
+                    if (value)
+                    {
+                        if (!IsSorting)
+                            Indexes = Enumerable.Range(IndexesStartAtZero ? 0 : 1, SourceItemsCount).ToList();
+                        else
+                        {
+                            UpdateSortedIndexes();
+                            if (IndexesColumnPosition <= SortingColumnIndex)
+                                SortingColumnIndex++;
+                        }
+                    }
+                    else
+                    {
+                        if (IsSorting)
+                        {
+                            if (IndexesColumnPosition == SortingColumnIndex)
+                                StopSorting();
+                            else if (IndexesColumnPosition < SortingColumnIndex)
+                                SortingColumnIndex--;
+                        }
+
+                        Indexes = new List<int>();
+                    }
+
                     UpdateCurrentPage();
                 }
             }
@@ -278,7 +320,12 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// <summary>
         /// Gets or sets the currently displayed indexes.
         /// </summary>
-        public int[] Indexes { get; private set; } = new int[0];
+        public int[] DisplayedIndexes { get; private set; } = new int[0];
+
+        /// <summary>
+        /// Gets the list of all indexes.
+        /// </summary>
+        public List<int> Indexes { get; private set; } = new List<int>();
 
         /// <summary>
         /// Gets or sets a value indicating if indexes should 
@@ -300,25 +347,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// <summary>
         /// Gets or sets the current list of row checkmarks.
         /// </summary>
-        public ObservableCollection<CheckMark> RowCheckMarks
-        {
-            get => _rowCheckMarks;
-            set
-            {
-                if (value != _rowCheckMarks)
-                {
-                    if (_rowCheckMarks != null)
-                        _rowCheckMarks.CollectionChanged -= RowCheckMarks_CollectionChanged;
-                    _rowCheckMarks = value;
-                    if (_rowCheckMarks != null)
-                    {
-                        _rowCheckMarks.CollectionChanged += RowCheckMarks_CollectionChanged;
-                        if (_rowCheckMarks.Count > 0)
-                            UpdateCurrentPage();  // update only if fully valid.
-                    }
-                }
-            }
-        }
+        public ObservableCollection<CheckMark> CheckMarks { get; private set; }
 
         /// <summary>
         /// Gets or sets the current list of checked items in source list (checked rows).
@@ -331,6 +360,55 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// are selected and some are not.
         /// </summary>
         public bool? AllRowsCheckMarkState { get; private set; }
+
+        /// <summary>
+        /// Gets a sorted version of the source.
+        /// </summary>
+        public IList<object> SortedSource { get; private set; }
+
+        /// <summary>
+        /// Gets a sorted version of the internaly used checkmarks.
+        /// </summary>
+        private List<CheckMark> SortedCheckMarks { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating is sorting is occuring on the table.
+        /// </summary>
+        public bool IsSorting { get; private set; }
+
+        /// <summary>
+        /// Gets the index of the column that is used for sorting.
+        /// </summary>
+        public int SortingColumnIndex { get; private set; }
+
+        /// <summary>
+        /// Gets the name of the column that drives sorting.
+        /// </summary>
+        public string SortingColumnName { get; private set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating is persistency must be 
+        /// </summary>
+        public bool IsSortingPersistent
+        {
+            get => _is_sorting_persistent;
+            set
+            {
+                if (value != _is_sorting_persistent)
+                {
+                    _is_sorting_persistent = value;
+                    if (IsSorting && sorting_sync_lost && value)
+                    {
+                        // Force an update as we do not know 
+                        // if persistency was lost before setting this 
+                        // value:
+                        UpdateSortedLists();
+                        UpdateCurrentPage();
+                        sorting_sync_lost = false;
+                    }
+                }
+            }
+        }
         #endregion
 
         #region Public events
@@ -366,20 +444,21 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
             int newValuesCount;
             if (newValues != null && (newValuesCount = newValues.Count) > 0)
             { 
-                lock (_rowCheckMarks)
+                lock (CheckMarks)
                 {
-                    while (_rowCheckMarks.Count < newValuesCount)
-                        _rowCheckMarks.Add(new CheckMark());
+                    var diff = newValuesCount - CheckMarks.Count;
+                    while (diff-- > 0)
+                        CheckMarks.Add(new CheckMark());
 
-                    if (_rowCheckMarks.Count > 0)
+                    if (CheckMarks.Any())
                     {
                         no_checkmarkedrows_update = true;  // lock list notification for better performance.
-                        int max = Math.Min(newValuesCount, _rowCheckMarks.Count);
+                        int max = Math.Min(newValuesCount, CheckMarks.Count);
                         for (int i = 0; i < max; i++)
                         {
-                            if (_rowCheckMarks[i].IsChecked != newValues[i])
+                            if (CheckMarks[i].IsChecked != newValues[i])
                             {
-                                _rowCheckMarks[i].IsChecked = newValues[i];
+                                CheckMarks[i].IsChecked = newValues[i];
                                 had_been_updated |= true;
                             }
                         }
@@ -410,14 +489,14 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         private void CheckOrUncheckMarksAllRow(bool check = false)
         {
             var had_been_updated = SyncRowCheckMarksCount();
-            lock (_rowCheckMarks)
+            lock (CheckMarks)
             {
-                had_been_updated |= _rowCheckMarks.Any(x => x.IsChecked != check);  // check if need to be updated.
+                had_been_updated |= CheckMarks.Any(x => x.IsChecked != check);  // check if need to be updated.
                 if (had_been_updated)
                 {
                     no_checkmarkedrows_update = true;
-                    for (int i = 0; i < _rowCheckMarks.Count; i++)
-                        _rowCheckMarks[i].IsChecked = check;
+                    for (int i = 0; i < CheckMarks.Count; i++)
+                        CheckMarks[i].IsChecked = check;
                     no_checkmarkedrows_update = false;
                     AllRowsCheckMarkState = check;
                 }
@@ -436,18 +515,32 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// <returns>True if lists where correctly synchronized.</returns>
         private bool SyncRowCheckMarksCount(bool force = false)
         {
-            if (!force && !(RowCheckMarks == null || RowCheckMarks.Count != SourceItemsCount))
+            var checkmarks_count = CheckMarks != null ? CheckMarks.Count : 0;
+            if (!force && !(CheckMarks == null || checkmarks_count != SourceItemsCount))
                 return false;  // no updates needed.
 
-            if (RowCheckMarks == null)
-                RowCheckMarks = new ObservableCollection<CheckMark>();
-            while (RowCheckMarks.Count > SourceItemsCount)
-                RowCheckMarks.RemoveAt(RowCheckMarks.Count - 1);
-            while (RowCheckMarks.Count < SourceItemsCount)
-                RowCheckMarks.Add(new CheckMark());
+            // Init if needed:
+            if (CheckMarks == null)
+            {
+                CheckMarks = new ObservableCollection<CheckMark>();
+                CheckMarks.CollectionChanged += RowCheckMarks_CollectionChanged;
+                SortedCheckMarks = new List<CheckMark>();
+            }
+
+            // Adjust count:
+            var diff = SourceItemsCount - checkmarks_count;
+            if (diff != 0)
+            {
+                while (diff < 0)
+                    CheckMarks.RemoveAt(checkmarks_count + diff++);
+                while (diff-- > 0)
+                    CheckMarks.Add(new CheckMark());
+                if (!IsSorting)
+                    SortedCheckMarks = new List<CheckMark>(CheckMarks);
+            }
 
             // Gross initialization of checked marked rows if needed:
-            if (force || CheckMarkedRows.Count() != RowCheckMarks.Count(x => x.IsChecked))
+            if (force || CheckMarkedRows.Count() != CheckMarks.Count(x => x.IsChecked))
             {
                 if (sourceAsList != null)
                 {
@@ -455,16 +548,16 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                     lock (sourceAsList)
                     {
                         int i = 0;
-                        foreach (var check in RowCheckMarks)
+                        foreach (var check in CheckMarks)
                         {
                             if (check.IsChecked)
                                 checkMarkedRows.Add(sourceAsList[i]);
                             i++;
                         }
                     }
-                    AllRowsCheckMarkState = RowCheckMarks.Any(x => x.IsChecked) ? (bool?)null : false;
+                    AllRowsCheckMarkState = CheckMarks.Any(x => x.IsChecked) ? (bool?)null : false;
                     if (AllRowsCheckMarkState == null)
-                        AllRowsCheckMarkState = RowCheckMarks.Any(x => !x.IsChecked) ? (bool?)null : true;
+                        AllRowsCheckMarkState = CheckMarks.Any(x => !x.IsChecked) ? (bool?)null : true;
                     CheckMarkedRows = checkMarkedRows;
 
                     // Update collection here:
@@ -482,7 +575,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// <param name="e">Collection changed info.</param>
         private void RowCheckMarks_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (sender != RowCheckMarks) return;
+            if (sender != CheckMarks) return;
 
             if (e.NewItems != null)
                 foreach (CheckMark item in e.NewItems)
@@ -551,10 +644,43 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
             {
                 sourceAsList = null;
                 SourceItemsCount = 0;
-                RowCheckMarks?.Clear();
+                CheckMarks?.Clear();
                 AreSourceItemsDynamic = false;
                 AreSourceItemsINotifyPropertyChanged = false;
+                Indexes = new List<int>();
+                SortedCheckMarks = new List<CheckMark>();
             }
+
+            if (source != null)
+            {
+                // Get source underlying class public properties:
+                var props = TypeDescriptor.GetProperties(source.GetGenericType());
+                if (properties != null)
+                    lock (properties)
+                        properties = null;
+                properties = props == null ? new List<PropertyDescriptor>() : props.OfType<PropertyDescriptor>();
+
+                // Reset dynamic object properties (will be regenerated at first current update with items within):
+                if (dynamicproperties != null)
+                    lock (dynamicproperties)
+                        dynamicproperties = null;
+            }
+
+            // Set was zero:
+            source_count_was_zero = SourceItemsCount == 0;
+
+            // Reset sorting when a new source is set:
+            IsSorting = false;
+            SortedSource = source?.ToList();
+
+            // Set checkmarks:
+            SyncRowCheckMarksCount(true);
+            if (source != null && HasCheckmarks)
+                SortedCheckMarks = CheckMarks.ToList();
+
+            // Set indexes:
+            if (source != null && HasIndexes)
+                Indexes = Enumerable.Range(IndexesStartAtZero ? 0 : 1, SourceItemsCount).ToList();
 
             // If source is notifiable, subscribe to change for paging adaption:
             if (this.source is INotifyCollectionChanged asObservable2)
@@ -585,8 +711,31 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                     if (SourceItemsCount != new_count)
                     {
                         SourceItemsCount = new_count;
-                        SyncRowCheckMarksCount();
+                       
+                        SyncRowCheckMarksCount(); 
                         CorrectCurrentPageIndex();
+
+                        if (IsSorting)
+                        {
+                            UpdateSortedLists();
+                        }
+                        else
+                        {
+                            SortedSource = source.ToList();
+
+                            // Set indexes:
+                            if (HasIndexes)
+                                Indexes = Enumerable.Range(IndexesStartAtZero ? 0 : 1, SourceItemsCount).ToList();
+                        }
+
+                        // Reset dynamic object properties if we are added new first items
+                        // to be processed:
+                        if (source_count_was_zero && SourceItemsCount > 0)
+                        {                      
+                            if (dynamicproperties != null)
+                                lock (dynamicproperties)
+                                    dynamicproperties = null;
+                        }
                     }
                 }
             }
@@ -594,9 +743,15 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
             if (source == null)
             {
                 sourceAsList = null;
+                SortedSource = null;
                 SourceItemsCount = 0;
-                RowCheckMarks?.Clear();
+                CheckMarks?.Clear();
+                SortedCheckMarks = new List<CheckMark>();
+                Indexes = new List<int>();
             }
+
+            // Set was zero:
+            source_count_was_zero = SourceItemsCount == 0;
 
             if (update_current_page)
                 UpdateCurrentPage();
@@ -681,7 +836,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
             if (source == null || !_paging_enabled)
             {
                 lock (CurrentPage)
-                    CurrentPage = GeneratePagedTable(source);
+                    CurrentPage = GeneratePagedTable(SortedSource);
             }
             else
             {
@@ -698,7 +853,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
 
                 lock (CurrentPage)
                     lock (source)
-                        CurrentPage = GeneratePagedTable(source.Skip(page_records_count).Take(_records_per_page > 0 ? _records_per_page : SourceItemsCount));
+                        CurrentPage = GeneratePagedTable(SortedSource.Skip(page_records_count).Take(_records_per_page > 0 ? _records_per_page : SourceItemsCount));
             }
             
             PageChanged?.Invoke(this, emptyEventArgs);
@@ -724,36 +879,25 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
             {
                 lock (partialSource)
                 {
-                    if (partialSource.Count() > 0)
+                    // Prepare special columns:
+                    var SelectorsColumn = (DataColumn)null;
+                    if (HasCheckmarks)
                     {
-                        // Prepare special columns:
-                        var SelectorsColumn = (DataColumn)null;
-                        if (HasCheckmarks)
-                        {
-                            // Note: wildcard character in name because 'normal' autogenerated column headers, 
-                            // based on C# property definitions, does not support them so not likely to encounter such user-defined name. 
-                            SelectorsColumn = new DataColumn(checkmark_column_name, typeof(CheckMark), "", MappingType.Hidden);
-                            toReturn.Columns.Add(SelectorsColumn);
-                        }
+                        // Note: wildcard character in name because 'normal' autogenerated column headers, 
+                        // based on C# property definitions, does not support them so not likely to encounter such user-defined name. 
+                        SelectorsColumn = new DataColumn(checkmark_column_name, typeof(CheckMark), "", MappingType.Hidden);
+                        toReturn.Columns.Add(SelectorsColumn);
+                    }
 
-                        SyncRowCheckMarksCount(force:true);
-
-                        var indexColumn = (DataColumn)null;
-                        if (HasIndexes)
-                        {
-                            indexColumn = new DataColumn(id_column_name, typeof(int));
-                            toReturn.Columns.Add(indexColumn);
-                        }
-
-                        // Prepare properties from source definition based on first object:
-                        var first = partialSource.First();
-
-                        var props = TypeDescriptor.GetProperties(first.GetType());
-                        if (properties != null)
-                            lock (properties)
-                                properties = null;
-                        properties = props == null ? new List<PropertyDescriptor>() : props.OfType<PropertyDescriptor>();
-
+                    var indexColumn = (DataColumn)null;
+                    if (HasIndexes)
+                    {
+                        indexColumn = new DataColumn(id_column_name, typeof(int));
+                        toReturn.Columns.Add(indexColumn);
+                    }
+                       
+                    // Set column names based on underlying generic source type property names:
+                    if (properties != null)
                         lock (properties)
                             foreach (var property in properties)
                             {
@@ -763,59 +907,41 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                                 toReturn.Columns.Add(property.Name, type);
                             }
 
-                        // Dynamic types, still based on first item:
-                        dynamicproperties = null;
-                        var asExpandoObject = (IDictionary<string, object>)null;
-                        if (first is ExpandoObject)
-                        {
-                            asExpandoObject = (IDictionary<string, object>)first;
-                            dynamicproperties = ((IDictionary<string, object>)first).Keys;
-                        }
+                    // Dynamic types, based on first item:
+                    var asExpandoObject = (IDictionary<string, object>)null;
+                    if (partialSource.Any() && partialSource.First() is ExpandoObject firstItem)
+                    {
+                        asExpandoObject = (IDictionary<string, object>)firstItem;
+                        if (dynamicproperties == null)
+                            dynamicproperties = asExpandoObject.Keys.ToList();
 
-                        if (dynamicproperties != null)
-                            lock (dynamicproperties)
-                                foreach (var property in dynamicproperties)
-                                    if (asExpandoObject != null)
-                                        toReturn.Columns.Add(property, asExpandoObject[property].GetType());
+                        lock (dynamicproperties)
+                            foreach (var property in dynamicproperties)
+                                toReturn.Columns.Add(property, asExpandoObject[property].GetType());
+                    }
 
-                        // Reorder special columns:
-                        if (HasCheckmarks && CheckMarksColumnPosition > 0)
-                            toReturn.Columns[SelectorsColumn.ColumnName].SetOrdinal(CheckMarksColumnPosition);
+                    // Reorder special columns:
+                    if (HasCheckmarks && CheckMarksColumnPosition > 0)
+                        toReturn.Columns[SelectorsColumn.ColumnName].SetOrdinal(CheckMarksColumnPosition);
 
-                        if (HasIndexes && IndexesColumnPosition > 0)
-                            toReturn.Columns[indexColumn.ColumnName].SetOrdinal(IndexesColumnPosition);
+                    if (HasIndexes && IndexesColumnPosition > 0)
+                        toReturn.Columns[indexColumn.ColumnName].SetOrdinal(IndexesColumnPosition);
 
-                        // Prepare key data:
-                        int page_row_count = partialSource.Count();
+                    // Load rows only if source is not empty:
+                    int page_row_count = partialSource.Count();
+                    if (page_row_count > 0)
+                    { 
                         int global_start_index = PagingEnabledInternal ? (int)CurrentPageIndex * _records_per_page : 0;
-
-                        // Indexes are quick to build so let's build them now if needed:
-                        if (HasIndexes)
-                        {
-                            Indexes = new int[SourceItemsCount];
-                            var offset = IndexesStartAtZero ? 0 : 1;
-                            offset += global_start_index;
-                            for (int i = 0; i < page_row_count; i++)
-                                Indexes[i] = offset + i;
-                        }
-                        else if (Indexes.Length != 0)
-                            Indexes = new int[0];
 
                         // Build all rows based on a 'model' row without filling user properties:
                         var row = toReturn.NewRow();  // our model row
                         toReturn.Rows.Add(row);  // mandatory to add it in table otherwise importing copies won't work
 
-                        for (int i = 0; i < page_row_count; i++)
+                        for (int i = global_start_index; i < page_row_count + global_start_index; i++)
                         {
                             // Fill checkmark if has any:
                             if (HasCheckmarks)
-                            {
-                                var index = !PagingEnabledInternal ? i + global_start_index : ((int)CurrentPageIndex * _records_per_page + i + global_start_index);
-                                if (RowCheckMarks != null && RowCheckMarks.Count > index)
-                                    row[checkmark_column_name] = RowCheckMarks[index];
-                                else // should never happen as we sync selector count with items source count changes.
-                                    row[checkmark_column_name] = new CheckMark();
-                            }
+                                row[checkmark_column_name] = SortedCheckMarks[i];
 
                             // Fill ID if has any:
                             if (HasIndexes)
@@ -828,7 +954,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
 
                         toReturn.Rows.RemoveAt(0);  // remove 'model' item.
 
-                        // Udpate token for previous background threads syncing:
+                        // Update token for previous background threads syncing:
                         current_page_token++;
 
                         // Update as much rows as the load_size parameter allows:
@@ -1019,29 +1145,41 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 var propertyname = e.Column.ColumnName;
 
                 // For class definition properties:
-                var propertydesc = properties?.FirstOrDefault(x => x.Name == propertyname);
-                if (propertydesc != null)
+                if (properties != null)
                 {
-                    lock (source)
+                    lock (properties)
                     {
-                        var item = SourceItemsCount > index ? sourceAsList[index] : null;
-                        if (item != null)
-                            propertydesc.SetValue(item, e.Row[propertyname]);
+                        var propertydesc = properties?.FirstOrDefault(x => x.Name == propertyname);
+                        if (propertydesc != null)
+                        {
+                            lock (source)
+                            {
+                                var item = SourceItemsCount > index ? SortedSource[index] : null;
+                                if (item != null)
+                                    propertydesc.SetValue(item, e.Row[propertyname]);
+                            }
+                        }
                     }
                 }
 
                 // For dynamic properties:
-                if (dynamicproperties != null && dynamicproperties.Contains(propertyname))
+                if (dynamicproperties != null)
                 {
-                    lock (source)
+                    lock (dynamicproperties)
                     {
-                        var item = SourceItemsCount > index ? sourceAsList[index] : null;
-                        if (item is ExpandoObject expandoItem)
+                        if (dynamicproperties.Contains(propertyname))
                         {
-                            var asDict = (IDictionary<string, object>)expandoItem;
-                            if (asDict.Keys.Contains(propertyname))
-                                asDict[propertyname] = e.Row[propertyname];
-                            return;
+                            lock (source)
+                            {
+                                var item = SourceItemsCount > index ? SortedSource[index] : null;
+                                if (item is ExpandoObject expandoItem)
+                                {
+                                    var asDict = (IDictionary<string, object>)expandoItem;
+                                    if (asDict.Keys.Contains(propertyname))
+                                        asDict[propertyname] = e.Row[propertyname];
+                                    return;
+                                }
+                            }
                         }
                     }
                 }
@@ -1064,8 +1202,8 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
 
             // Find index in source:
             var index = -1;
-            lock (sourceAsList)  // should lock source as well if same reference.
-                index = sourceAsList.IndexOf(sender);  // index related to source.
+            lock (SortedSource)  // should lock source as well if same reference.
+                index = SortedSource.IndexOf(sender);  // index related to source.
 
             // If item is not found, ensure 
             if (index < 0)
@@ -1077,6 +1215,8 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 var current_page_index_offset = PagingEnabledInternal ? (int)CurrentPageIndex * _records_per_page : 0;
                 if (index >= current_page_index_offset && index < CurrentPage.Rows.Count + current_page_index_offset)
                 {
+                    index -= current_page_index_offset;
+
                     // For type properties:
                     if (properties != null)
                         lock (properties)
@@ -1103,6 +1243,26 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                                 CurrentPage.ColumnChanged += CurrentTable_ColumnChanged;
                                 no_reentrancy_prop_changed_weak_event = false;
                             }
+                }
+
+                // If value had changed on a column that is sorted, then update sorted lists:
+                if (IsSorting && SortingColumnName == e.PropertyName)
+                {
+                    // Update only if persistency is set:
+                    if (IsSortingPersistent)
+                    {
+                        no_reentrancy_prop_changed_weak_event = true;
+                        UpdateSortedLists();
+
+                        // Do this in UI thread queue to not lock it in case of too quick updates:
+                        Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.DataBind, (Action)(() =>
+                        {
+                            UpdateCurrentPage();
+                            no_reentrancy_prop_changed_weak_event = false;
+                        }));
+                    }
+                    else
+                        sorting_sync_lost = true;
                 }
             }
         }
@@ -1178,6 +1338,276 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         }
         #endregion
 
+        #region Sorting
+        /// <summary>
+        /// Base function to enumerate all sortable lists at once (saves processing time).
+        /// </summary>
+        /// <param name="ienum">The source list that will be processed.</param>
+        /// <returns>A collection of ordered tupples with ID, checkmark item and source item.</returns>
+        private IEnumerable<(int, CheckMark, object)> SortSourceBase(IEnumerable<object> ienum) 
+            => ienum.Select((x, i) => (idx: i + (IndexesStartAtZero ? 0 : 1), check: CheckMarks[i], val: x));
+
+        /// <summary>
+        /// Customizable extension of <see cref="SortSourceBase(IEnumerable{object})"/> that provides the effective 
+        /// sorting method to be applied on it. 
+        /// </summary>
+        private Func<IEnumerable<object>, IEnumerable<(int, CheckMark, object)>> sortinternal;
+
+        /// <summary>
+        /// Gets the property value of a passed item.
+        /// </summary>
+        /// <param name="property">A valid property descriptor of the property to be read.</param>
+        /// <param name="item">The item on which the property must be read.</param>
+        /// <param name="sort_member_path">Optional property to be read on the read main property value.</param>
+        /// <returns>A <see cref="IComparable"/> value to be used for sorting.</returns>
+        private IComparable GetIComparablePropertyValue(PropertyDescriptor property, object item, string sort_member_path = null)
+        {
+            if (property != null && item != null)
+            {
+                var result = property.GetValue(item);
+
+                // If provided, find memberpath value:
+                if (!string.IsNullOrEmpty(sort_member_path))
+                {
+                    var subresult = GetIComparablePropertyRecursively(result, sort_member_path);
+                    if (subresult != null)
+                        return subresult as IComparable ?? subresult.ToString();
+                }
+
+                return result as IComparable ?? result.ToString();  // else return self.
+            }
+            else return null;
+        }
+
+        /// <summary>
+        /// Gets the dynamic property value of a passed dynamic item.
+        /// </summary>
+        /// <param name="property">The name of the property to be read.</param>
+        /// <param name="item">The item on which the property must be read.</param>
+        /// <param name="sort_member_path">Optional property to be read on the read main property value.</param>
+        /// <returns>A <see cref="IComparable"/> value to be used for sorting.</returns>
+        private IComparable GetIComparableDynamicPropertyValue(string property, IDictionary<string, object> item, string sort_member_path = null)
+        {
+            if (item != null && item.TryGetValue(property, out object result))
+            {
+                // If provided, find memberpath value:
+                if (!string.IsNullOrEmpty(sort_member_path))
+                {
+                    var subresult = GetIComparablePropertyRecursively(result, sort_member_path);
+                    if (subresult != null)
+                        return subresult as IComparable ?? subresult.ToString();
+                }
+
+                return result as IComparable ?? result.ToString();
+            }
+            else return null;
+        }
+
+        /// <summary>
+        /// Finds property value based on a member path and source object in a recursive manner.
+        /// </summary>
+        /// <param name="item">The item on which to follow the sort member path.</param>
+        /// <param name="sort_member_path">A property path of indefinite length that leads to the value to be
+        /// used for sorting.</param>
+        /// <returns>The value pointed out by the sort member path on the passed original item, null if object or path are not valid.</returns>
+        private IComparable GetIComparablePropertyRecursively(object item, string sort_member_path)
+        {
+            // If provided, find memberpath value:
+            if (item != null && !string.IsNullOrEmpty(sort_member_path))
+            {
+                var splitted = sort_member_path.Split('.');
+                var property_name = splitted[0];
+
+                // In classical properties:
+                var matching = TypeDescriptor.GetProperties(item.GetType())?.OfType<PropertyDescriptor>().FirstOrDefault(x => x.Name == property_name);
+                if (matching != null)
+                {
+                    var result = matching.GetValue(item);
+                    if (splitted.Length > 1)
+                        return GetIComparablePropertyRecursively(result, sort_member_path.Remove(0, property_name.Length + 1));  // path no over, go further.
+                    else return result as IComparable ?? result.ToString();  // en of path, return result.
+                }
+
+                // In dynamic object properties:
+                if (item is ExpandoObject && item is IDictionary<string, object> expando)
+                {
+                    if (expando.ContainsKey(property_name))
+                    {
+                        var result = expando[property_name];
+                        if (splitted.Length > 1)
+                            return GetIComparablePropertyRecursively(result, sort_member_path.Remove(0, property_name.Length + 1));
+                        else return result as IComparable ?? result.ToString();
+                    }
+                }
+            }
+            
+            return null;
+        }
+
+        /// <summary>
+        /// Sorts items based on a column list of values and order.
+        /// </summary>
+        /// <param name="column_index">The index of the column to sort.</param>
+        /// <param name="ascending_order">Determines if ordering should be ascending or descending on values.</param>
+        /// <param name="sort_member_path">Optional property to be read on the read main property value.</param>
+        public void SortItems(int column_index, bool ascending_order = true, string sort_member_path = null)
+        {
+            if (source == null) return;
+
+            // Get column name out of index:
+            var column_name = string.Empty;
+            lock (CurrentPage)
+            {
+                if (column_index >= 0 && CurrentPage.Columns.Count > column_index)
+                    column_name = CurrentPage.Columns[column_index].ColumnName;
+                else if (IsSorting)  // wrong passed index is a motive to stop sorting.
+                    StopSorting();
+            }
+
+            var had_been_updated = false;
+
+            // Order by checker:
+            if (HasCheckmarks && column_name == checkmark_column_name)
+            {
+                if (ascending_order)
+                    sortinternal = (ienum) => SortSourceBase(ienum).OrderBy(x => x.Item2);
+                else sortinternal = (ienum) => SortSourceBase(ienum).OrderByDescending(x => x.Item2);
+                had_been_updated = true;
+            }
+
+            // Order by id:
+            else if (HasIndexes && column_name == id_column_name)
+            {
+                if (ascending_order)
+                {
+                    // Special case here, we go back 
+                    // to default and stop sorting for 
+                    // better performances:
+                    StopSorting();
+                    UpdateCurrentPage();
+                    return;
+                }
+                else
+                {
+                    sortinternal = (ienum) => SortSourceBase(ienum).Reverse();
+                    had_been_updated = true;
+                }
+            }
+            else
+            {
+                if (properties != null)
+                {
+                    lock (properties)
+                    {
+                        var property = properties.FirstOrDefault(x => x.Name == column_name);
+                        if (property != null)
+                        {
+                            // If ascending required:
+                            if (ascending_order)
+                                sortinternal = (ienum) => SortSourceBase(ienum).OrderBy(x => GetIComparablePropertyValue(property, x.Item3, sort_member_path));
+                            else // else order descending:
+                                sortinternal = (ienum) => SortSourceBase(ienum).OrderByDescending(x => GetIComparablePropertyValue(property, x.Item3, sort_member_path));
+                            had_been_updated = true;
+                        }
+                    }
+
+                    if (dynamicproperties != null)
+                    {
+                        lock (dynamicproperties)
+                        {
+                            lock (source)
+                            {
+                                if (source.Any() && source.First() is IDictionary<string, object> asDict && asDict.ContainsKey(column_name))  // as expando object
+                                {
+                                    // If ascending required:
+                                    if (ascending_order)
+                                        sortinternal = (ienum) => SortSourceBase(ienum).OrderBy(
+                                            x => GetIComparableDynamicPropertyValue(column_name, x.Item3 as IDictionary<string, object>, sort_member_path));
+                                    else // else order descending:
+                                        sortinternal = (ienum) => SortSourceBase(ienum).OrderByDescending(
+                                            x => GetIComparableDynamicPropertyValue(column_name, x.Item3 as IDictionary<string, object>, sort_member_path));
+                                    had_been_updated = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (had_been_updated)
+            {
+                IsSorting = true;
+                SortingColumnName = column_name;
+                SortingColumnIndex = column_index;
+                UpdateSortedLists();
+                UpdateCurrentPage();
+            }
+        }
+
+        /// <summary>
+        /// Sorts all sortable lists (source, checkmarks, IDs).
+        /// </summary>
+        private void UpdateSortedLists()
+        {
+            if (source != null)
+                lock (source)
+                {
+                    var fullValues = sortinternal(source).ToList();
+                    if (HasCheckmarks)
+                        SortedCheckMarks = fullValues.Select(x => x.Item2).ToList();
+                    if (HasIndexes)
+                        Indexes = fullValues.Select(x => x.Item1).ToList();
+                    SortedSource = fullValues.Select(x => x.Item3).ToList();
+                }
+        }
+
+        /// <summary>
+        /// Sorts checker list only.
+        /// </summary>
+        private void UpdateSortedCheckMarks()
+        {
+            if (source != null)
+                lock (source)
+                {
+                    var fullValues = sortinternal(source);
+                    lock (SortedCheckMarks)
+                        SortedCheckMarks = fullValues.Select(x => x.Item2).ToList();
+                }
+        }
+
+        /// <summary>
+        /// Sorts ID list only.
+        /// </summary>
+        private void UpdateSortedIndexes()
+        {
+            if (source != null)
+                lock (source)
+                {
+                    var fullValues = sortinternal(source);
+                    Indexes = fullValues.Select(x => x.Item1).ToList();
+                }
+        }
+
+        /// <summary>
+        /// Stops sorting of the whole source data.
+        /// </summary>
+        public void StopSorting()
+        {
+            IsSorting = false;
+            sorting_sync_lost = false;
+            if (source != null)
+                lock (source)
+                {
+                    if (HasCheckmarks)
+                        SortedCheckMarks = CheckMarks.ToList();
+                    if (HasIndexes)
+                        Indexes = Enumerable.Range(IndexesStartAtZero ? 0 : 1, SourceItemsCount).ToList(); 
+                    else Indexes = new List<int>();
+                    SortedSource = source.ToList();
+                }
+        }
+        #endregion
+
         #region Navigation methods
         /// <summary>
         /// Indicates if a next page exists.
@@ -1193,7 +1623,6 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         {
             if (source == null || !PagingEnabledInternal) 
                 return GeneratePagedTable(source);
-
             CurrentPageIndex++;
             CorrectCurrentPageIndex();
             return UpdateCurrentPage();
@@ -1268,7 +1697,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// </summary>
         /// <returns>The maximum index of the page.</returns>
         private uint GetMaxCurrentPageIndex()
-            => (uint)((SourceItemsCount / _records_per_page) - ((SourceItemsCount % _records_per_page) == 0 ? 1 : 0));
+            => SourceItemsCount > 0 ? (uint)((SourceItemsCount / _records_per_page) - ((SourceItemsCount % _records_per_page) == 0 ? 1 : 0)) : 0;
         #endregion
     }
 }

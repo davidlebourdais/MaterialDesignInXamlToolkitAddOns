@@ -49,7 +49,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         public override string ToString() => IsChecked.ToString();
 
         /// <summary>
-        /// Compares this object with another one, returnin -1 if current is less than
+        /// Compares this object with another one, returning -1 if current is less than
         /// comparison object, +1 is more and 0 is equal.
         /// Comparison rule is: IsChecked = true > false or null.
         /// </summary>
