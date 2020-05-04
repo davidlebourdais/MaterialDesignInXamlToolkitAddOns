@@ -9,6 +9,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
+using Dynamitey;
 
 namespace EMA.MaterialDesignInXAMLExtender.Utils
 {
@@ -34,28 +35,28 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
 
         private static readonly EventArgs emptyEventArgs = new EventArgs();  // empty args created once but used multiple times.
 
-        private IEnumerable<object> source;                      // reference to source data.
-        private IList sourceAsList;                              // cast (99% cases) or copy of the source object as a list.
-        private bool _paging_enabled = true;                     // indicates if pages should be created, enabled by default.
-        private int _records_per_page = -1;                      // stores the number of records each page should keep, undefined by default.
-        private bool _has_indexes;                               // stores HasIndexes state.
-        private bool _has_checkmarks;                            // stores HasSelectors state.
-        private int _indexes_column_position;                    // stores index for IDs column.
-        private int _checkmarks_column_position;                 // stores index for selectors column.
-        private bool _indexes_start_at_zero;                     // tells if indexes should start at zero or one.
-        private bool no_reentrancy;                              // disables reentrancy for some methods.
-        private bool no_reentrancy_prop_changed_weak_event;      // disables reentrancy in property changed weak event handling.
-        private bool no_reentrancy_collection_weak_event;        // disables reentrancy in collection weak event handling.
-        private bool no_checkmarkedrows_update;                  // disables update notification of the checkmarked rows changes.
-        IEnumerable<string> dynamicproperties;                   // stores dynamic properties that had been found on source (used for Expando objects).
-        IEnumerable<PropertyDescriptor> properties;              // stores 'normal' properties that had been found on source.
-        private int load_threshold = DefaultThresholdBGLoadSize; // stores from how many items background loading should occur.
-        private int load_size = DefaultItemBGLoadSize;           // stores how many items are loaded per thread turn (also max size for background loading activation).
-        private BackgroundWorker currentTableLoader;             // a worker that feeds table with rows in a background thread.
-        private int current_page_token;                          // stores an ID generated for the current page to be used by the background worker.
-        private bool _is_sorting_persistent;                     // stores sorting persistency property.
-        private bool sorting_sync_lost;                          // when sorting persistency is off, indicates if source had been updated in a way sorting if not valid anymore.
-        private bool source_count_was_zero;                      // indicates if at some point after a source update, the source count was zero and then became > 0.
+        private IEnumerable<object> source;                        // reference to source data.
+        private IList sourceAsList;                                // cast (99% cases) or copy of the source object as a list.
+        private bool _paging_enabled = true;                       // indicates if pages should be created, enabled by default.
+        private int _records_per_page = -1;                        // stores the number of records each page should keep, undefined by default.
+        private bool _has_indexes;                                 // stores HasIndexes state.
+        private bool _has_checkmarks;                              // stores HasSelectors state.
+        private int _indexes_column_position;                      // stores index for IDs column.
+        private int _checkmarks_column_position;                   // stores index for selectors column.
+        private bool _indexes_start_at_zero;                       // tells if indexes should start at zero or one.
+        private bool no_reentrancy;                                // disables reentrancy for some methods.
+        private bool no_reentrancy_prop_changed_weak_event;        // disables reentrancy in property changed weak event handling.
+        private bool no_reentrancy_collection_weak_event;          // disables reentrancy in collection weak event handling.
+        private bool no_checkmarkedrows_update;                    // disables update notification of the checkmarked rows changes.
+        Dictionary<string, CacheableInvocation> dynamicproperties; // stores dynamic object properties and their invocators.
+        IEnumerable<PropertyDescriptor> properties;                // stores 'normal' properties that had been found on source.
+        private int load_threshold = DefaultThresholdBGLoadSize;   // stores from how many items background loading should occur.
+        private int load_size = DefaultItemBGLoadSize;             // stores how many items are loaded per thread turn (also max size for background loading activation).
+        private BackgroundWorker currentTableLoader;               // a worker that feeds table with rows in a background thread.
+        private int current_page_token;                            // stores an ID generated for the current page to be used by the background worker.
+        private bool _is_sorting_persistent;                       // stores sorting persistency property.
+        private bool sorting_sync_lost;                            // when sorting persistency is off, indicates if source had been updated in a way sorting if not valid anymore.
+        private bool source_count_was_zero;                        // indicates if at some point after a source update, the source count was zero and then became > 0.
         #endregion
 
         #region Private struct
@@ -194,7 +195,8 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         public bool HasMoreThanAPage => GetMaxCurrentPageIndex() > 1;
 
         /// <summary>
-        /// Indicates if source items are dynamic (Expando, etc.)
+        /// Indicates if source items are dynamic 
+        /// (i.e. implements IDynamicMetaObjectProvider, like ExpandoObject).
         /// </summary>
         public bool AreSourceItemsDynamic { get; private set; }
 
@@ -631,7 +633,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                     if (source != null)
                     { 
                         SourceItemsCount = source.Count();
-                        AreSourceItemsDynamic = source.GetGenericType() == typeof(ExpandoObject);
+                        AreSourceItemsDynamic = source.GetGenericType() == typeof(IDynamicMetaObjectProvider);
                         AreSourceItemsINotifyPropertyChanged = source.AreItemsINotifyPropertyChanged();
                     }
                 }
@@ -641,7 +643,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 this.source = source;
                 sourceAsList = source != null ? (source is IList ? source as IList : source.ToList()) : null;
                 SourceItemsCount = source.Count();
-                AreSourceItemsDynamic = source.GetGenericType() == typeof(ExpandoObject);
+                AreSourceItemsDynamic = source.GetGenericType() == typeof(IDynamicMetaObjectProvider);
                 AreSourceItemsINotifyPropertyChanged = source.AreItemsINotifyPropertyChanged();
             }
 
@@ -668,7 +670,11 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 // Reset dynamic object properties (will be regenerated at first current update with items within):
                 if (dynamicproperties != null)
                     lock (dynamicproperties)
+                    {
+                        if (dynamicproperties.Keys.Any())
+                            Dynamic.ClearCaches();
                         dynamicproperties = null;
+                    }
             }
 
             // Set was zero:
@@ -739,7 +745,11 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                         {                      
                             if (dynamicproperties != null)
                                 lock (dynamicproperties)
+                                {
+                                    if (dynamicproperties.Keys.Any())
+                                        Dynamic.ClearCaches();
                                     dynamicproperties = null;
+                                }
                         }
                     }
                 }
@@ -913,7 +923,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                         indexColumn = new DataColumn(id_column_name, typeof(int));
                         toReturn.Columns.Add(indexColumn);
                     }
-                       
+
                     // Set column names based on underlying generic source type property names:
                     if (properties != null)
                         lock (properties)
@@ -926,16 +936,36 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                             }
 
                     // Dynamic types, based on first item:
-                    var asExpandoObject = (IDictionary<string, object>)null;
-                    if (partialSource.Any() && partialSource.First() is ExpandoObject firstItem)
+                    if (partialSource.Any() && partialSource.First() is IDynamicMetaObjectProvider)
                     {
-                        asExpandoObject = (IDictionary<string, object>)firstItem;
                         if (dynamicproperties == null)
-                            dynamicproperties = asExpandoObject.Keys.ToList();
+                        {
+                            dynamicproperties = new Dictionary<string, CacheableInvocation>();
+                            var dyn_props = Dynamic.GetMemberNames(partialSource.First(), dynamicOnly: true);  // do not pull out class members that we already have.
+                            foreach (var property in dyn_props)
+                                dynamicproperties[property] = new CacheableInvocation(InvocationKind.Get, property);
+                        }
 
-                        lock (dynamicproperties)
-                            foreach (var property in dynamicproperties)
-                                toReturn.Columns.Add(property, asExpandoObject[property].GetType());
+                        if (dynamicproperties != null)
+                        {
+                            var dynamicToRemove = new List<string>();
+                            lock (dynamicproperties)
+                            {
+                                foreach (var getter in dynamicproperties)
+                                {
+                                    try
+                                    {
+                                        var propertyValue = Dynamic.InvokeGet(partialSource.First(), getter.Key);
+                                        toReturn.Columns.Add(getter.Key, ((object)propertyValue).GetType());
+                                    }
+                                    catch
+                                    {
+                                        dynamicToRemove.Add(getter.Key); // remove properties for which getterfail for any reason.
+                                    }
+                                }
+                                dynamicToRemove.ForEach(x => dynamicproperties.Remove(x));
+                            }
+                        }
                     }
 
                     // Reorder special columns:
@@ -1054,16 +1084,15 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                     // Process dynamic properties:
                     if (dynamicproperties != null)
                         lock (dynamicproperties)
-                            foreach (var property_name in dynamicproperties)
-                                if (item is IDictionary<string, object> asDict && asDict.ContainsKey(property_name))  // (as expando object)
-                                {
-                                    // Set value:
-                                    row[property_name] = asDict[property_name];
+                            foreach (var getter in dynamicproperties)
+                            {
+                                // Set value:
+                                row[getter.Key] = getter.Value.Invoke(item);
 
-                                    // Subscribe to any further changes if possible:
-                                    if (has_i_notify)
-                                        PropertyChangedEventManager.AddListener(item as INotifyPropertyChanged, this, property_name);
-                                }
+                                // Subscribe to any further changes if possible:
+                                if (has_i_notify)
+                                    PropertyChangedEventManager.AddListener(item as INotifyPropertyChanged, this, getter.Key);
+                            }
 
                     // Increment indexes:
                     i++;
@@ -1185,18 +1214,13 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 {
                     lock (dynamicproperties)
                     {
-                        if (dynamicproperties.Contains(propertyname))
+                        if (dynamicproperties.Keys.Contains(propertyname))
                         {
                             lock (source)
                             {
                                 var item = SourceItemsCount > index ? SortedSource[index] : null;
-                                if (item is ExpandoObject expandoItem)
-                                {
-                                    var asDict = (IDictionary<string, object>)expandoItem;
-                                    if (asDict.Keys.Contains(propertyname))
-                                        asDict[propertyname] = e.Row[propertyname];
-                                    return;
-                                }
+                                if (item != null)
+                                    Dynamic.InvokeSet(item, propertyname, e.Row[propertyname]);
                             }
                         }
                     }
@@ -1253,11 +1277,11 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                     // For dynamic object properties:
                     if (dynamicproperties != null)
                         lock (dynamicproperties)  // lock even if not using this list to avoid writing cell at same time as other threads.
-                            if (sender is IDictionary<string, object> asDict && asDict.ContainsKey(e.PropertyName))  // (as expando object)
+                            if (sender is IDynamicMetaObjectProvider)
                             {
                                 CurrentPage.ColumnChanged -= CurrentTable_ColumnChanged;
                                 no_reentrancy_prop_changed_weak_event = true;
-                                CurrentPage.Rows[index][e.PropertyName] = asDict[e.PropertyName];
+                                CurrentPage.Rows[index][e.PropertyName] = dynamicproperties[e.PropertyName].Invoke(sender);
                                 CurrentPage.ColumnChanged += CurrentTable_ColumnChanged;
                                 no_reentrancy_prop_changed_weak_event = false;
                             }
@@ -1400,23 +1424,29 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// <summary>
         /// Gets the dynamic property value of a passed dynamic item.
         /// </summary>
-        /// <param name="property">The name of the property to be read.</param>
+        /// <param name="getter">Cached getter function to be used for property value retrieval.</param>
         /// <param name="item">The item on which the property must be read.</param>
         /// <param name="sort_member_path">Optional property to be read on the read main property value.</param>
         /// <returns>A <see cref="IComparable"/> value to be used for sorting.</returns>
-        private IComparable GetIComparableDynamicPropertyValue(string property, IDictionary<string, object> item, string sort_member_path = null)
+        private IComparable GetIComparableDynamicPropertyValue(CacheableInvocation getter, IDynamicMetaObjectProvider item, string sort_member_path = null)
         {
-            if (item != null && item.TryGetValue(property, out object result))
+            if (item != null && getter != null)
             {
-                // If provided, find memberpath value:
-                if (!string.IsNullOrEmpty(sort_member_path))
+                try
                 {
-                    var subresult = GetIComparablePropertyRecursively(result, sort_member_path);
-                    if (subresult != null)
-                        return subresult as IComparable ?? subresult.ToString();
-                }
+                    var result = getter.Invoke(item);
 
-                return result as IComparable ?? result.ToString();
+                    // If provided, find memberpath value:
+                    if (!string.IsNullOrEmpty(sort_member_path))
+                    {
+                        var subresult = GetIComparablePropertyRecursively(result, sort_member_path);
+                        if (subresult != null)
+                            return subresult as IComparable ?? subresult.ToString();
+                    }
+
+                    return result as IComparable ?? result.ToString();
+                }
+                catch { return null; }
             }
             else return null;
         }
@@ -1447,11 +1477,12 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 }
 
                 // In dynamic object properties:
-                if (item is ExpandoObject && item is IDictionary<string, object> expando)
+                if (item is IDynamicMetaObjectProvider asDynamic)
                 {
-                    if (expando.ContainsKey(property_name))
+                    var names = Dynamic.GetMemberNames(asDynamic, dynamicOnly:true);
+                    if (names.Contains(property_name))
                     {
-                        var result = expando[property_name];
+                        var result = Dynamic.InvokeGet(asDynamic, property_name);
                         if (splitted.Length > 1)
                             return GetIComparablePropertyRecursively(result, sort_member_path.Remove(0, property_name.Length + 1));
                         else return result as IComparable ?? result.ToString();
@@ -1535,15 +1566,15 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                         {
                             lock (source)
                             {
-                                if (source.Any() && source.First() is IDictionary<string, object> asDict && asDict.ContainsKey(column_name))  // as expando object
+                                if (dynamicproperties.TryGetValue(column_name, out CacheableInvocation getter))
                                 {
                                     // If ascending required:
                                     if (ascending_order)
                                         sortinternal = (ienum) => SortSourceBase(ienum).OrderBy(
-                                            x => GetIComparableDynamicPropertyValue(column_name, x.Item3 as IDictionary<string, object>, sort_member_path));
+                                            x => GetIComparableDynamicPropertyValue(getter, x.Item3 as IDynamicMetaObjectProvider, sort_member_path));
                                     else // else order descending:
                                         sortinternal = (ienum) => SortSourceBase(ienum).OrderByDescending(
-                                            x => GetIComparableDynamicPropertyValue(column_name, x.Item3 as IDictionary<string, object>, sort_member_path));
+                                            x => GetIComparableDynamicPropertyValue(getter, x.Item3 as IDynamicMetaObjectProvider, sort_member_path));
                                     had_been_updated = true;
                                 }
                             }
