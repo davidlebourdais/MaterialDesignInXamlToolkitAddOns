@@ -163,9 +163,8 @@ namespace EMA.MaterialDesignInXAMLExtender
             if (UsesPagingInternal)
             {
                 items_source_inner_change = true;
-                CancelEdit();
+                CancelEditWithCare();
                 columns_inner_change = true;
-                Columns.Clear();
                 this.SetCurrentValue(ItemsSourceProperty, PagedTable.CurrentPage.DefaultView);
                 columns_inner_change = false;
                 items_source_inner_change = false;
@@ -596,7 +595,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         {
             if (sender is ExtendedDataGrid casted && args.NewValue is bool new_value)
             {
-                casted.CancelEdit();
+                casted.CancelEditWithCare();
 
                 if (!new_value)
                 {
@@ -612,7 +611,7 @@ namespace EMA.MaterialDesignInXAMLExtender
                 try
                 {
                     casted.columns_inner_change = true;
-                    casted.Columns.Clear();
+                    //casted.Columns.Clear();
                     casted.InvalidateProperty(ItemsSourceProperty);  // will force property to reevaluate and tie to source without going through pages.
                 }
                 finally
@@ -744,14 +743,14 @@ namespace EMA.MaterialDesignInXAMLExtender
                 // then force page to update:
                 if (new_value && !casted.UsesPaging && !casted.ShowsCheckMarks && !casted.ShowsIDs && !casted.PagedTable.AreSourceItemsDynamic)
                 {
-                    casted.CancelEdit();
+                    casted.CancelEditWithCare();
                     casted.PagedTable.UpdateCurrentPage();
                 }
                 // In case unsetting this property disabled paging,
                 // then force source update to original list:
                 else if (!new_value && !casted.UsesPagingInternal)
                 {
-                    casted.CancelEdit();
+                    casted.CancelEditWithCare();
 
                     try
                     {
@@ -879,7 +878,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         {
             if (sender is ExtendedDataGrid casted && args.NewValue is int new_value)
             {
-                casted.CancelEdit();
+                casted.CancelEditWithCare();
                 casted.PagedTable.RecordsPerPage = new_value;
             }        
         }
@@ -1169,7 +1168,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         {
             if (sender is ExtendedDataGrid casted)
             {
-                casted.CancelEdit();
+                casted.CancelEditWithCare();
                 casted.PagedTable.UpdateCurrentPage();  // force update to force column autogeneration
             }
         }
@@ -1226,7 +1225,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         {
             if (sender is ExtendedDataGrid casted && args.NewValue is bool new_value)
             {
-                casted.CancelEdit();
+                casted.CancelEditWithCare();
                 if (new_value)
                     casted.PagedTable.CheckMarkAllRows();
                 else
@@ -1274,7 +1273,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         {
             if (sender is ExtendedDataGrid casted && args.NewValue is bool new_value)
             {
-                casted.CancelEdit();
+                casted.CancelEditWithCare();
                 casted.PagedTable.HasCheckmarks = new_value;
 
                 // In case this property disabled paging,
@@ -1322,7 +1321,7 @@ namespace EMA.MaterialDesignInXAMLExtender
                     casted.CheckMarksValuesBackup = new List<bool>(newValue);  // keep a backup to restore at loading.
                 else if (!casted.checkmarks_inner_change)
                 {
-                    casted.CancelEdit();
+                    casted.CancelEditWithCare();
                     casted.PagedTable.SetRowCheckMarksValues(newValue);  // else set selector values normally.
                 }
             }
@@ -1351,7 +1350,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         {
             if (sender is ExtendedDataGrid casted && args.NewValue is int new_value)
             {
-                casted.CancelEdit();
+                casted.CancelEditWithCare();
                 casted.PagedTable.CheckMarksColumnPosition = new_value;
             }
         }
@@ -1493,7 +1492,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         {
             if (sender is ExtendedDataGrid casted && args.NewValue is bool new_value)
             {
-                casted.CancelEdit();
+                casted.CancelEditWithCare();
                 casted.PagedTable.HasIndexes = new_value;
 
                 // In case this property disabled paging,
@@ -1780,8 +1779,12 @@ namespace EMA.MaterialDesignInXAMLExtender
                             else PagedTable.UpdateCurrentPage();
 
                             // Reproduce the behavior of the base datagrid here by putting last line into edit mode:
-                            CurrentCell = new DataGridCellInfo(Items[Items.Count - 2], Columns[item_added_column_index]);
-                            BeginEdit();
+                            var items_count = Items.Count;
+                            if (items_count > 1 && item_added_column_index < Columns.Count)
+                            {
+                                CurrentCell = new DataGridCellInfo(Items[Items.Count - 2], Columns[item_added_column_index]);
+                                BeginEdit();
+                            }
                         }
                     }
                 }));
@@ -1803,6 +1806,22 @@ namespace EMA.MaterialDesignInXAMLExtender
             try
             {
                 base.OnExecutedCommitEdit(e);
+            }
+            catch (Exception except) //TODO: since bug is persistent even after page changes, find a way to reset datagrid.
+            {
+                if (!(except is ArgumentNullException argnullexcept) || argnullexcept.ParamName != "element")  // very specific error appearing for desynchronism.
+                    throw except;
+            }
+        }
+
+        /// <summary>
+        /// Cancels edition while handling any source desync that might occur.
+        /// </summary>
+        private void CancelEditWithCare()
+        {
+            try
+            {
+                CancelEdit();
             }
             catch (Exception except)
             {
