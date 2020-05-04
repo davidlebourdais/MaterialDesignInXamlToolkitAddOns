@@ -55,7 +55,8 @@ namespace EMA.MaterialDesignInXAMLExtender
 
             // Build paging manager to be used:
             PagedTable = new DataTablePagingManager();
-            PagedTable.PageChanged += PagedTable_PageChanged;
+            PagedTable.TableInformationUpdated += PagedTable_TableInformationUpdated;
+            PagedTable.CurrentPageChanged += PagedTable_CurrentPageChanged;
             PagedTable.CheckMarkedRowsChanged += PagedTable_CheckMarkedRowsChanged;
             PagedTable.PageLoading += (s, e) => IsPageLoading = true;
             PagedTable.PageLoaded += (s, e) => IsPageLoading = false;
@@ -127,13 +128,13 @@ namespace EMA.MaterialDesignInXAMLExtender
         }
 
         /// <summary>
-        /// Occurs whenever paged table page changes.
+        /// Occurs whenever table information changes.
         /// Allows to internally update every related properties.
         /// </summary>
         /// <param name="sender">Unused.</param>
         /// <param name="e">Unused.</param>
         /// <remarks>Core method, syncs with page manager.</remarks>
-        private void PagedTable_PageChanged(object sender, EventArgs e)
+        private void PagedTable_TableInformationUpdated(object sender, EventArgs e)
         {
             // Update properties:
             (GoToNextPageCommand as SimpleCommand).RaiseCanExecuteChanged();
@@ -149,7 +150,7 @@ namespace EMA.MaterialDesignInXAMLExtender
 
             // Reset sorting if disabled in paged table (except if currently set as ascending 
             // on the ID column, which is the default 'unsorted' case):
-            if (IsLoaded && !PagedTable.IsSorting && SortedColumnIndex >= 0 
+            if (IsLoaded && !PagedTable.IsSorting && SortedColumnIndex >= 0
                 && (!ShowsIDs || SortedColumnIndex != IDsColumnIndex || IsSortingDescending))
                 SortedColumnIndex = -1;
             else if (PagedTable.IsSorting && PagedTable.SortingColumnIndex != SortedColumnIndex)
@@ -158,7 +159,17 @@ namespace EMA.MaterialDesignInXAMLExtender
                 SortedColumnIndex = PagedTable.SortingColumnIndex;
                 sorting_inner_change = false;
             }
+        }
 
+        /// <summary>
+        /// Occurs whenever paged table page changes.
+        /// Allows to internally update every related properties.
+        /// </summary>
+        /// <param name="sender">Unused.</param>
+        /// <param name="e">Unused.</param>
+        /// <remarks>Core method, syncs with page manager.</remarks>
+        private void PagedTable_CurrentPageChanged(object sender, EventArgs e)
+        {
             // Update datagrid source items if required:
             if (UsesPagingInternal)
             {

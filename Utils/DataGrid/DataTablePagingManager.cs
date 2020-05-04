@@ -152,7 +152,8 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 if (value != _records_per_page)
                 {
                     _records_per_page = value;
-                    UpdateCurrentPage();
+                    if (PagingEnabledInternal)
+                        UpdateCurrentPage();
                 }
             }
         }
@@ -346,7 +347,8 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 if (value != _indexes_start_at_zero)
                 {
                     _indexes_start_at_zero = value;
-                    UpdateCurrentPage();
+                    if (HasIndexes)
+                        UpdateCurrentPage();
                 }
             }
         }
@@ -420,9 +422,14 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
 
         #region Public events
         /// <summary>
-        /// Occurs every time the current page is refreshed.
+        /// Occurs every time the current page (its content) is changed.
         /// </summary>
-        public event EventHandler PageChanged;
+        public event EventHandler CurrentPageChanged;
+
+        /// <summary>
+        /// Occurs every time information about the main table change.
+        /// </summary>
+        public event EventHandler TableInformationUpdated;
 
         /// <summary>
         /// Occurs when the selected row list is update.
@@ -707,6 +714,9 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// <param name="update_current_page">Set to true to update current table page.</param>
         private void UpdateSource(bool update_current_page = false)
         {
+            bool full_page_update_required = false;
+            bool was_current_page_full = CurrentPageIsFull;
+
             if (source != null)
             {
                 lock (source)
@@ -730,6 +740,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                         if (IsSorting)
                         {
                             UpdateSortedLists();
+                            full_page_update_required = true;
                         }
                         else
                         {
@@ -738,12 +749,16 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                             // Set indexes:
                             if (HasIndexes)
                                 Indexes = Enumerable.Range(IndexesStartAtZero ? 0 : 1, SourceItemsCount).ToList();
+
+                            // Full update if our page count changed is not full:
+                            if (!was_current_page_full || was_current_page_full && !CurrentPageIsFull) 
+                                full_page_update_required = true;
                         }
 
                         // Reset dynamic object properties if we are added new first items
                         // to be processed:
                         if (source_count_was_zero && SourceItemsCount > 0)
-                        {                      
+                        {
                             if (dynamicproperties != null)
                                 lock (dynamicproperties)
                                 {
@@ -751,6 +766,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                                         Dynamic.ClearCaches();
                                     dynamicproperties = null;
                                 }
+                            full_page_update_required = true;
                         }
                     }
                 }
@@ -764,13 +780,19 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 CheckMarks?.Clear();
                 SortedCheckMarks = new List<CheckMark>();
                 Indexes = new List<int>();
+                full_page_update_required = true;
             }
 
             // Set was zero:
             source_count_was_zero = SourceItemsCount == 0;
 
             if (update_current_page)
-                UpdateCurrentPage();
+            {
+                if (full_page_update_required)
+                    UpdateCurrentPage();  // Update current page that will trigger the paged changed event.
+                else TableInformationUpdated?.Invoke(this, emptyEventArgs);  // Indicate table main info only had updated.
+            }
+                
         }
 
         /// <summary>
@@ -884,8 +906,9 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                     lock (source)
                         CurrentPage = GeneratePagedTable(SortedSource.Skip(page_records_count).Take(_records_per_page > 0 ? _records_per_page : SourceItemsCount));
             }
-            
-            PageChanged?.Invoke(this, emptyEventArgs);
+
+            TableInformationUpdated?.Invoke(this, emptyEventArgs);
+            CurrentPageChanged?.Invoke(this, emptyEventArgs);
             no_reentrancy = false;
             return CurrentPage;
         }
