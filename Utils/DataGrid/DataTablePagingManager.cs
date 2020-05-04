@@ -19,9 +19,13 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
     {
         #region Public static constants
         /// <summary>
+        /// Indicates how item pool size for background loading.
+        /// </summary>
+        public static int DefaultThresholdBGLoadSize { get; } = 10000;
+        /// <summary>
         /// Indicates how many items are loaded per thread turn (also max size for background loading activation).
         /// </summary>
-        public static int DefaultItemLoadSize { get; } = 1000;
+        public static int DefaultItemBGLoadSize { get; } = 1000;
         #endregion 
 
         #region Private attributes
@@ -45,7 +49,8 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         private bool no_checkmarkedrows_update;                  // disables update notification of the checkmarked rows changes.
         IEnumerable<string> dynamicproperties;                   // stores dynamic properties that had been found on source (used for Expando objects).
         IEnumerable<PropertyDescriptor> properties;              // stores 'normal' properties that had been found on source.
-        private int load_size = DefaultItemLoadSize;             // stores how many items are loaded per thread turn (also max size for background loading activation).
+        private int load_threshold = DefaultThresholdBGLoadSize; // stores from how many items background loading should occur.
+        private int load_size = DefaultItemBGLoadSize;           // stores how many items are loaded per thread turn (also max size for background loading activation).
         private BackgroundWorker currentTableLoader;             // a worker that feeds table with rows in a background thread.
         private int current_page_token;                          // stores an ID generated for the current page to be used by the background worker.
         private bool _is_sorting_persistent;                     // stores sorting persistency property.
@@ -809,16 +814,29 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
 
         #region Set background row load size
         /// <summary>
+        /// Sets load size threshold, i.e. how many items there should be
+        /// in a page to trigger background loading.
+        /// </summary>
+        /// <param name="new_value">A valid size in row counts.</param>
+        public void SetLoadSizeThreshold(int new_value)
+        {
+            if (new_value < 1)
+                new_value = 1;
+
+            load_threshold = new_value;
+        }
+
+        /// <summary>
         /// Sets load size, i.e. how many items are loaded per 
         /// loading method background invocation.
         /// </summary>
-        /// <param name="new_load_size">A valid size in row counts.</param>
-        public void SetLoadSize(int new_load_size)
+        /// <param name="new_value">A valid size in row counts.</param>
+        public void SetLoadSize(int new_value)
         {
-            if (new_load_size < 1)
-                new_load_size = 1;
+            if (new_value < 1)
+                new_value = 1;
 
-            load_size = new_load_size;
+            load_size = new_value;
         }
         #endregion
 
@@ -958,11 +976,11 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                         current_page_token++;
 
                         // Update as much rows as the load_size parameter allows:
-                        var actual_load_size = Math.Min(page_row_count, load_size);
+                        var actual_load_size = Math.Min(page_row_count, load_threshold);
                         InitializeRows(toReturn, 0, partialSource.Take(actual_load_size));
 
                         // Fill rows in background if there are too many of them:
-                        if (page_row_count > load_size)
+                        if (page_row_count > load_threshold)
                         {
                             //For that: create background worker if not existing:
                             if (currentTableLoader == null || currentTableLoader.IsBusy)
@@ -972,8 +990,8 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                                 currentTableLoader.RunWorkerCompleted += EndInitializePageTableInBackground;
                             }
 
-                            // Note: start from load size as we already processed load_size items:
-                            var rowsToProcess = new RowUpdateInformation(current_page_token, load_size, global_start_index, partialSource, page_row_count);
+                            // Note: start from load size as we already processed actual_load_size items:
+                            var rowsToProcess = new RowUpdateInformation(current_page_token, actual_load_size, global_start_index, partialSource, page_row_count);
                             currentTableLoader.RunWorkerAsync(rowsToProcess);
                             PageLoading?.Invoke(this, emptyEventArgs);
                         }

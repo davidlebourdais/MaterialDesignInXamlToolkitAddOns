@@ -88,7 +88,7 @@ namespace EMA.MaterialDesignInXAMLExtender
 
             // Reevaluate sorting as source might have been null
             // when sorting properties were evaluated:
-            if (sorted_column_index_init != SortedColumnIndex)
+            if (SortedColumnIndex != sorted_column_index_init)
                 SortedColumnIndex = sorted_column_index_init;
         }
 
@@ -667,26 +667,50 @@ namespace EMA.MaterialDesignInXAMLExtender
             = DependencyProperty.Register(nameof(ShowsGoToFirstAndLastPageControls), typeof(bool), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(bool)));
 
         /// <summary>
-        /// Gets or sets from how many rows found in the source background loading must be used, 
-        /// and how many rows should be loaded per background thread round.
+        /// Gets or sets from how many rows found in the source background loading must be used.
         /// </summary>
-        public int BackgoundLoadSizeInRows
+        public int BackgoundLoadingThreshold
         {
-            get => (int)GetValue(BackgoundLoadSizeInRowsProperty);
-            set => SetCurrentValue(BackgoundLoadSizeInRowsProperty, value);
+            get => (int)GetValue(BackgoundLoadingThresholdProperty);
+            set => SetCurrentValue(BackgoundLoadingThresholdProperty, value);
         }
         /// <summary>
-        /// Registers <see cref="BackgoundLoadSizeInRows"/> as a dependency property.
+        /// Registers <see cref="BackgoundLoadingThreshold"/> as a dependency property.
         /// </summary>
-        public static readonly DependencyProperty BackgoundLoadSizeInRowsProperty
-            = DependencyProperty.Register(nameof(BackgoundLoadSizeInRows), typeof(int), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(DataTablePagingManager.DefaultItemLoadSize, CacheSizeInRowsChanged));
+        public static readonly DependencyProperty BackgoundLoadingThresholdProperty
+            = DependencyProperty.Register(nameof(BackgoundLoadingThreshold), typeof(int), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(DataTablePagingManager.DefaultThresholdBGLoadSize, BackgoundLoadingThresholdChanged));
 
         /// <summary>
-        /// Called whenever the <see cref="BackgoundLoadSizeInRows"/> property changes.
+        /// Called whenever the <see cref="BackgoundLoadingThreshold"/> property changes.
         /// </summary>
         /// <param name="sender">The object whose property changed.</param>
         /// <param name="args">Information about the property change.</param>
-        public static void CacheSizeInRowsChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        public static void BackgoundLoadingThresholdChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            if (sender is ExtendedDataGrid casted && args.NewValue is int new_value)
+                casted.PagedTable.SetLoadSizeThreshold(new_value);
+        }
+
+        /// <summary>
+        /// Gets or sets how many rows should be loaded per background thread turn.
+        /// </summary>
+        public int BackgoundLoadSize
+        {
+            get => (int)GetValue(BackgoundLoadSizeProperty);
+            set => SetCurrentValue(BackgoundLoadSizeProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="BackgoundLoadSize"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty BackgoundLoadSizeProperty
+            = DependencyProperty.Register(nameof(BackgoundLoadSize), typeof(int), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(DataTablePagingManager.DefaultItemBGLoadSize, BackgoundLoadSizeChanged));
+
+        /// <summary>
+        /// Called whenever the <see cref="BackgoundLoadSize"/> property changes.
+        /// </summary>
+        /// <param name="sender">The object whose property changed.</param>
+        /// <param name="args">Information about the property change.</param>
+        public static void BackgoundLoadSizeChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
             if (sender is ExtendedDataGrid casted && args.NewValue is int new_value)
                 casted.PagedTable.SetLoadSize(new_value);
