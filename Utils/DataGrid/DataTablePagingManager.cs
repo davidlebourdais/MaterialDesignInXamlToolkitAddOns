@@ -538,8 +538,9 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
             var diff = SourceItemsCount - checkmarks_count;
             if (diff != 0)
             {
-                while (diff < 0)
-                    CheckMarks.RemoveAt(checkmarks_count + diff++);
+                int i = 0;
+                while (i-- > diff)
+                    CheckMarks.RemoveAt(checkmarks_count + diff);
                 while (diff-- > 0)
                     CheckMarks.Add(new CheckMark());
                 if (!IsSorting)
