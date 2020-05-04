@@ -27,7 +27,21 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// Indicates how many items are loaded per thread turn (also max size for background loading activation).
         /// </summary>
         public static int DefaultItemBGLoadSize { get; } = 1000;
-        #endregion 
+
+        // .NET framework badly handles dynamic objects as it regularly sends RuntimeBinderException that slow down 
+        // execution. .NET Core is OK and we can get a bit of better performances using Dynamitey instead of manual handling.
+        #if NETFRAMEWORK 
+        /// <summary>
+        /// Handle <see cref="ExpandoObject"/> objects in this code.
+        /// </summary>
+        private const bool handle_expandos = true;
+        #else
+        /// <summary>
+        /// Let Dynamitey library handle <see cref="ExpandoObject"/> objects.
+        /// </summary>
+        private const bool handle_expandos = false;
+        #endif
+        #endregion
 
         #region Private attributes
         private const string checkmark_column_name = "*Selectors";  // Global name of the selectors column (better start with special chars)
@@ -49,6 +63,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         private bool no_reentrancy_collection_weak_event;          // disables reentrancy in collection weak event handling.
         private bool no_checkmarkedrows_update;                    // disables update notification of the checkmarked rows changes.
         Dictionary<string, CacheableInvocation> dynamicproperties; // stores dynamic object properties and their invocators.
+        List<string> expandoproperties;                            // stores expando object properties.
         IEnumerable<PropertyDescriptor> properties;                // stores 'normal' properties that had been found on source.
         private int load_threshold = DefaultThresholdBGLoadSize;   // stores from how many items background loading should occur.
         private int load_size = DefaultItemBGLoadSize;             // stores how many items are loaded per thread turn (also max size for background loading activation).
@@ -641,7 +656,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                     if (source != null)
                     { 
                         SourceItemsCount = source.Count();
-                        AreSourceItemsDynamic = source.GetGenericType() == typeof(IDynamicMetaObjectProvider);
+                        AreSourceItemsDynamic = source.GetGenericType().GetInterfaces().Contains(typeof(IDynamicMetaObjectProvider));
                         AreSourceItemsINotifyPropertyChanged = source.AreItemsINotifyPropertyChanged();
                     }
                 }
@@ -651,7 +666,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 this.source = source;
                 sourceAsList = source != null ? (source is IList ? source as IList : source.ToList()) : null;
                 SourceItemsCount = source.Count();
-                AreSourceItemsDynamic = source.GetGenericType() == typeof(IDynamicMetaObjectProvider);
+                AreSourceItemsDynamic = source.GetGenericType().GetInterfaces().Contains(typeof(IDynamicMetaObjectProvider));
                 AreSourceItemsINotifyPropertyChanged = source.AreItemsINotifyPropertyChanged();
             }
 
@@ -676,6 +691,10 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 properties = props == null ? new List<PropertyDescriptor>() : props.OfType<PropertyDescriptor>();
 
                 // Reset dynamic object properties (will be regenerated at first current update with items within):
+                if (expandoproperties != null)
+                    lock (expandoproperties)
+                        expandoproperties = null;
+
                 if (dynamicproperties != null)
                     lock (dynamicproperties)
                     {
@@ -683,6 +702,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                             Dynamic.ClearCaches();
                         dynamicproperties = null;
                     }
+
             }
 
             // Set was zero:
@@ -759,6 +779,10 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                         // to be processed:
                         if (source_count_was_zero && SourceItemsCount > 0)
                         {
+                            if (expandoproperties != null)
+                                lock (expandoproperties)
+                                    expandoproperties = null;
+
                             if (dynamicproperties != null)
                                 lock (dynamicproperties)
                                 {
@@ -962,32 +986,58 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                     // Dynamic types, based on first item:
                     if (partialSource.Any() && partialSource.First() is IDynamicMetaObjectProvider)
                     {
-                        if (dynamicproperties == null)
+                        // If expando:
+                        if (handle_expandos && partialSource.First() is ExpandoObject asExpando)
                         {
-                            dynamicproperties = new Dictionary<string, CacheableInvocation>();
-                            var dyn_props = Dynamic.GetMemberNames(partialSource.First(), dynamicOnly: true);  // do not pull out class members that we already have.
-                            foreach (var property in dyn_props)
-                                dynamicproperties[property] = new CacheableInvocation(InvocationKind.Get, property);
-                        }
+                            var asExpandoDict = (IDictionary<string, object>)asExpando;
+                            if (expandoproperties == null)
+                                expandoproperties = asExpandoDict.Keys.ToList();
 
-                        if (dynamicproperties != null)
-                        {
-                            var dynamicToRemove = new List<string>();
-                            lock (dynamicproperties)
+                            if (expandoproperties != null)
                             {
-                                foreach (var getter in dynamicproperties)
+                                var expandoToRemove = new List<string>();
+                                foreach (var property in expandoproperties)
                                 {
-                                    try
-                                    {
-                                        var propertyValue = Dynamic.InvokeGet(partialSource.First(), getter.Key);
-                                        toReturn.Columns.Add(getter.Key, ((object)propertyValue).GetType());
-                                    }
-                                    catch
-                                    {
-                                        dynamicToRemove.Add(getter.Key); // remove properties for which getterfail for any reason.
-                                    }
+                                    var value = asExpandoDict[property];
+                                    if (value != null)
+                                        toReturn.Columns.Add(property, asExpandoDict[property].GetType());
+                                    else expandoToRemove.Add(property);
                                 }
-                                dynamicToRemove.ForEach(x => dynamicproperties.Remove(x));
+                                expandoToRemove.ForEach(x => expandoproperties.Remove(x));
+                            }
+                        }
+                        // if any other dynamic object:
+                        else
+                        {
+                            if (dynamicproperties == null)
+                            {
+                                dynamicproperties = new Dictionary<string, CacheableInvocation>();
+                                var dyn_props = Dynamic.GetMemberNames(partialSource.First(), dynamicOnly: true);  // do not pull out class members that we already have.
+                                foreach (var property in dyn_props)
+                                    dynamicproperties[property] = new CacheableInvocation(InvocationKind.Get, property);
+                            }
+
+                            if (dynamicproperties != null)
+                            {
+                                var dynamicToRemove = new List<string>();
+                                lock (dynamicproperties)
+                                {
+                                    foreach (var getter in dynamicproperties)
+                                    {
+                                        try
+                                        {
+                                            var propertyValue = Dynamic.InvokeGet(partialSource.First(), getter.Key);
+                                            if (propertyValue != null)
+                                                toReturn.Columns.Add(getter.Key, ((object)propertyValue).GetType());
+                                            else dynamicToRemove.Add(getter.Key);
+                                        }
+                                        catch
+                                        {
+                                            dynamicToRemove.Add(getter.Key); // remove properties for which getterfail for any reason.
+                                        }
+                                    }
+                                    dynamicToRemove.ForEach(x => dynamicproperties.Remove(x));
+                                }
                             }
                         }
                     }
@@ -1106,6 +1156,21 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                             }
 
                     // Process dynamic properties:
+                    if (handle_expandos && expandoproperties != null && item is ExpandoObject asExpando)
+                        lock (expandoproperties)
+                        {
+                            var asDict = (IDictionary<string, object>)asExpando;
+                            foreach (var property in expandoproperties)
+                            {
+                                // Set value:
+                                row[property] = asDict[property];
+
+                                // Subscribe to any further changes if possible:
+                                if (has_i_notify)
+                                    PropertyChangedEventManager.AddListener(item as INotifyPropertyChanged, this, property);
+                            }
+                        }
+
                     if (dynamicproperties != null)
                         lock (dynamicproperties)
                             foreach (var getter in dynamicproperties)
@@ -1234,21 +1299,25 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 }
 
                 // For dynamic properties:
+                if (handle_expandos && expandoproperties != null)
+                    lock (expandoproperties)
+                        if (expandoproperties.Contains(propertyname))
+                            lock (source)
+                            {
+                                var item = SourceItemsCount > index ? SortedSource[index] as IDictionary<string, object> : null;
+                                if (item != null)
+                                    item[propertyname] = e.Row[propertyname];
+                            }
+
                 if (dynamicproperties != null)
-                {
                     lock (dynamicproperties)
-                    {
                         if (dynamicproperties.Keys.Contains(propertyname))
-                        {
                             lock (source)
                             {
                                 var item = SourceItemsCount > index ? SortedSource[index] : null;
                                 if (item != null)
                                     Dynamic.InvokeSet(item, propertyname, e.Row[propertyname]);
                             }
-                        }
-                    }
-                }
             }
         }
 
@@ -1299,6 +1368,17 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                         }
 
                     // For dynamic object properties:
+                    if (handle_expandos && expandoproperties != null)
+                        lock (expandoproperties)  // lock even if not using this list to avoid writing cell at same time as other threads.
+                            if (sender is IDictionary<string, object> asDict)
+                            {
+                                CurrentPage.ColumnChanged -= CurrentTable_ColumnChanged;
+                                no_reentrancy_prop_changed_weak_event = true;
+                                CurrentPage.Rows[index][e.PropertyName] = asDict[e.PropertyName];
+                                CurrentPage.ColumnChanged += CurrentTable_ColumnChanged;
+                                no_reentrancy_prop_changed_weak_event = false;
+                            }
+
                     if (dynamicproperties != null)
                         lock (dynamicproperties)  // lock even if not using this list to avoid writing cell at same time as other threads.
                             if (sender is IDynamicMetaObjectProvider)
@@ -1357,6 +1437,35 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                             {
                                 var createdObject = constructor.Invoke(parameters);
                                 no_reentrancy_collection_weak_event = true;  // do not update through observables notifications
+
+                                // For dynamic objects, try to set dynamic properties on the new object using first object
+                                // definition (properties used to pattern new object and default values provided by reflection):
+                                if (AreSourceItemsDynamic)
+                                {
+                                    if (handle_expandos && expandoproperties != null 
+                                        && source.Any() && source.First() is IDictionary<string, object> firstAsDict 
+                                        && createdObject is IDictionary<string, object> createdAsDict)
+                                    {
+                                        foreach (var property in expandoproperties)
+                                        {
+                                            var value = firstAsDict[property];
+                                            if (value != null)
+                                                createdAsDict[property] = value.GetType().GetDefault();
+                                        }
+                                    }
+                                    else if(dynamicproperties != null
+                                        && source.Any() && source.First() is IDynamicMetaObjectProvider firstItem
+                                        && createdObject is IDynamicMetaObjectProvider createdItem)
+                                    {
+                                        foreach (var property in dynamicproperties)
+                                        {
+                                            var value = property.Value.Invoke(firstItem);
+                                            if (value != null)
+                                                Dynamic.InvokeSet(createdObject, property.Key, value.GetType().GetDefault());
+                                        }
+                                    }
+                                }
+
                                 if (list.Add(createdObject) >= 0)
                                 {
                                     UpdateSource();
@@ -1446,6 +1555,32 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         }
 
         /// <summary>
+        /// Gets the dynamic property value of a passed expando item.
+        /// </summary>
+        /// <param name="property_name">The name of the property to retrieve.</param>
+        /// <param name="item">The item on which the property must be read.</param>
+        /// <param name="sort_member_path">Optional property to be read on the read main property value.</param>
+        /// <returns>A <see cref="IComparable"/> value to be used for sorting.</returns>
+        private IComparable GetIComparableExpandoPropertyValue(string property_name, ExpandoObject item, string sort_member_path = null)
+        {
+            if (!string.IsNullOrEmpty(property_name) 
+                && item is IDictionary<string, object> asDict 
+                && asDict.TryGetValue(property_name, out object result))
+            {
+                // If provided, find memberpath value:
+                if (!string.IsNullOrEmpty(sort_member_path))
+                {
+                    var subresult = GetIComparablePropertyRecursively(result, sort_member_path);
+                    if (subresult != null)
+                        return subresult as IComparable ?? subresult.ToString();
+                }
+
+                return result as IComparable ?? result.ToString();
+            }
+            else return null;
+        }
+
+        /// <summary>
         /// Gets the dynamic property value of a passed dynamic item.
         /// </summary>
         /// <param name="getter">Cached getter function to be used for property value retrieval.</param>
@@ -1500,8 +1635,21 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                     else return result as IComparable ?? result.ToString();  // en of path, return result.
                 }
 
+                // As Expando object:
+                if (handle_expandos && item is ExpandoObject asExpando)
+                {
+                    var asDict = (IDictionary<string, object>)asExpando;
+                    if (asDict.ContainsKey(property_name))
+                    {
+                        var result = asDict[property_name];
+                        if (splitted.Length > 1)
+                            return GetIComparablePropertyRecursively(result, sort_member_path.Remove(0, property_name.Length + 1));
+                        else return result as IComparable ?? result.ToString();
+                    }
+                }
+
                 // In dynamic object properties:
-                if (item is IDynamicMetaObjectProvider asDynamic)
+                else if (item is IDynamicMetaObjectProvider asDynamic)
                 {
                     var names = Dynamic.GetMemberNames(asDynamic, dynamicOnly:true);
                     if (names.Contains(property_name))
@@ -1581,6 +1729,27 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                             else // else order descending:
                                 sortinternal = (ienum) => SortSourceBase(ienum).OrderByDescending(x => GetIComparablePropertyValue(property, x.Item3, sort_member_path));
                             had_been_updated = true;
+                        }
+                    }
+
+                    if (expandoproperties != null)
+                    {
+                        lock (expandoproperties)
+                        {
+                            lock (source)
+                            {
+                                if (expandoproperties.Contains(column_name))
+                                {
+                                    // If ascending required:
+                                    if (ascending_order)
+                                        sortinternal = (ienum) => SortSourceBase(ienum).OrderBy(
+                                            x => GetIComparableExpandoPropertyValue(column_name, x.Item3 as ExpandoObject, sort_member_path));
+                                    else // else order descending:
+                                        sortinternal = (ienum) => SortSourceBase(ienum).OrderByDescending(
+                                            x => GetIComparableExpandoPropertyValue(column_name, x.Item3 as ExpandoObject, sort_member_path));
+                                    had_been_updated = true;
+                                }
+                            }
                         }
                     }
 
