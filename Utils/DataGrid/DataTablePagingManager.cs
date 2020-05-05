@@ -242,9 +242,9 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                     }
                     // Update ID column index regarding to selector column apparance/disapearance:
                     if (value && IndexesColumnPosition >= CheckMarksColumnPosition)
-                        IndexesColumnPosition++;
+                        _indexes_column_position++;
                     else if (!value && IndexesColumnPosition >= CheckMarksColumnPosition)
-                        IndexesColumnPosition--;
+                        _indexes_column_position--;
 
                     if (IsSorting)
                     {
@@ -290,11 +290,6 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 {
                     _has_indexes = value;
 
-                    if (value && IndexesColumnPosition <= CheckMarksColumnPosition)
-                        CheckMarksColumnPosition++;
-                    else if (!value && IndexesColumnPosition <= CheckMarksColumnPosition)
-                        CheckMarksColumnPosition--;
-
                     if (value)
                     {
                         if (!IsSorting)
@@ -305,6 +300,9 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                             if (IndexesColumnPosition <= SortingColumnIndex)
                                 SortingColumnIndex++;
                         }
+
+                        if (IndexesColumnPosition <= CheckMarksColumnPosition)
+                            _checkmarks_column_position++;
                     }
                     else
                     {
@@ -317,6 +315,9 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                         }
 
                         Indexes = new List<int>();
+
+                        if (IndexesColumnPosition <= CheckMarksColumnPosition)
+                            _checkmarks_column_position--;
                     }
 
                     UpdateCurrentPage();
@@ -995,14 +996,15 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
 
                             if (expandoproperties != null)
                             {
-                                var expandoToRemove = new List<string>();
-                                foreach (var property in expandoproperties)
-                                {
-                                    var value = asExpandoDict[property];
-                                    if (value != null)
-                                        toReturn.Columns.Add(property, asExpandoDict[property].GetType());
-                                    else expandoToRemove.Add(property);
-                                }
+                                var expandoToRemove = expandoproperties.Except(asExpandoDict.Keys).ToList();
+                                foreach (var property in expandoproperties.Intersect(asExpandoDict.Keys))
+                                    if (asExpandoDict.ContainsKey(property))
+                                    {
+                                        var value = asExpandoDict[property];
+                                        if (value != null)
+                                            toReturn.Columns.Add(property, asExpandoDict[property].GetType());
+                                        else expandoToRemove.Add(property);
+                                    }
                                 expandoToRemove.ForEach(x => expandoproperties.Remove(x));
                             }
                         }
@@ -1160,7 +1162,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                         lock (expandoproperties)
                         {
                             var asDict = (IDictionary<string, object>)asExpando;
-                            foreach (var property in expandoproperties)
+                            foreach (var property in expandoproperties.Intersect(asDict.Keys))
                             {
                                 // Set value:
                                 row[property] = asDict[property];
@@ -1371,13 +1373,14 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                     if (handle_expandos && expandoproperties != null)
                         lock (expandoproperties)  // lock even if not using this list to avoid writing cell at same time as other threads.
                             if (sender is IDictionary<string, object> asDict)
-                            {
-                                CurrentPage.ColumnChanged -= CurrentTable_ColumnChanged;
-                                no_reentrancy_prop_changed_weak_event = true;
-                                CurrentPage.Rows[index][e.PropertyName] = asDict[e.PropertyName];
-                                CurrentPage.ColumnChanged += CurrentTable_ColumnChanged;
-                                no_reentrancy_prop_changed_weak_event = false;
-                            }
+                                if (asDict.ContainsKey(e.PropertyName))
+                                {
+                                    CurrentPage.ColumnChanged -= CurrentTable_ColumnChanged;
+                                    no_reentrancy_prop_changed_weak_event = true;
+                                    CurrentPage.Rows[index][e.PropertyName] = asDict[e.PropertyName];
+                                    CurrentPage.ColumnChanged += CurrentTable_ColumnChanged;
+                                    no_reentrancy_prop_changed_weak_event = false;
+                                }
 
                     if (dynamicproperties != null)
                         lock (dynamicproperties)  // lock even if not using this list to avoid writing cell at same time as other threads.
@@ -1446,7 +1449,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                                         && source.Any() && source.First() is IDictionary<string, object> firstAsDict 
                                         && createdObject is IDictionary<string, object> createdAsDict)
                                     {
-                                        foreach (var property in expandoproperties)
+                                        foreach (var property in expandoproperties.Intersect(firstAsDict.Keys))
                                         {
                                             var value = firstAsDict[property];
                                             if (value != null)
