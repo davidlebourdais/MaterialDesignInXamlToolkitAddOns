@@ -639,6 +639,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
             // If source had previously subscribed to collection changed, unsubscribe:
             if (this.source is INotifyCollectionChanged asObservable1)
                 CollectionChangedEventManager.RemoveListener(asObservable1, this);
+            no_reentrancy_collection_weak_event = false;
 
             if (this.source != null)
             {
@@ -754,9 +755,10 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                     if (SourceItemsCount != new_count)
                     {
                         SourceItemsCount = new_count;
-                       
+                        
                         SyncRowCheckMarksCount(); 
                         CorrectCurrentPageIndex();
+                        UpdateCurrentPageRange();
 
                         if (IsSorting)
                         {
@@ -848,16 +850,17 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                     // Process through dispatcher in case we are invoked from another thread:
                     Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.DataBind, (Action)(() =>
                     {
-                        if (source != sender)  // should never happen.
+                        try
                         {
-                            if (source != null && source is INotifyCollectionChanged notifycollection)
-                                CollectionChangedEventManager.RemoveListener(notifycollection, this);
-                            SetSource(sender as IEnumerable<object>);
-                            return;
-                        }
+                            if (source != sender)  // cancel if source changed between callback setup and execution.
+                                return;
 
-                        UpdateSource(true);
-                        no_reentrancy_collection_weak_event = false;
+                            UpdateSource(true);
+                        }
+                        finally
+                        {
+                            no_reentrancy_collection_weak_event = false;
+                        }
                     }));
                 }
                 else if (source == null && sender is INotifyCollectionChanged collection)
@@ -919,14 +922,11 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                 // Correct page index:
                 CorrectCurrentPageIndex();
 
-                // Check that current page count is ok regarding to list size, rearrange otherwise:
-                var page_records_count = _records_per_page > 0 ? (int)CurrentPageIndex * _records_per_page : 0;
-                CurrentPageRange =
-                    (page_records_count + (SourceItemsCount <= 0 ? 0 : 1),
-                    _records_per_page > 0 ? 
-                        ((page_records_count + _records_per_page) > SourceItemsCount ? SourceItemsCount : (page_records_count + _records_per_page)) 
-                        : SourceItemsCount);
+                // Update page range:
+                UpdateCurrentPageRange();
 
+                // Set current page:
+                var page_records_count = _records_per_page > 0 ? (int)CurrentPageIndex * _records_per_page : 0;
                 lock (CurrentPage)
                     lock (source)
                         CurrentPage = GeneratePagedTable(SortedSource.Skip(page_records_count).Take(_records_per_page > 0 ? _records_per_page : SourceItemsCount));
@@ -1943,6 +1943,20 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// <returns>The maximum index of the page.</returns>
         private uint GetMaxCurrentPageIndex()
             => SourceItemsCount > 0 ? (uint)((SourceItemsCount / _records_per_page) - ((SourceItemsCount % _records_per_page) == 0 ? 1 : 0)) : 0;
+
+        /// <summary>
+        /// Updates the current page range.
+        /// </summary>
+        private void UpdateCurrentPageRange()
+        {
+            // Check that current page count is ok regarding to list size, rearrange otherwise:
+            var page_records_count = _records_per_page > 0 ? (int)CurrentPageIndex * _records_per_page : 0;
+            CurrentPageRange =
+                (page_records_count + (SourceItemsCount <= 0 ? 0 : 1),
+                _records_per_page > 0 ?
+                    ((page_records_count + _records_per_page) > SourceItemsCount ? SourceItemsCount : (page_records_count + _records_per_page))
+                    : SourceItemsCount);
+        }
         #endregion
     }
 }
