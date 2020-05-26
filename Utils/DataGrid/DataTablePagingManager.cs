@@ -667,9 +667,9 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
             {
                 this.source = source;
                 sourceAsList = source != null ? (source is IList ? source as IList : source.ToList()) : null;
-                SourceItemsCount = source.Count();
-                AreSourceItemsDynamic = source.GetGenericType().GetInterfaces().Contains(typeof(IDynamicMetaObjectProvider));
-                AreSourceItemsINotifyPropertyChanged = source.AreItemsINotifyPropertyChanged();
+                SourceItemsCount = source != null ? source.Count() : 0;
+                AreSourceItemsDynamic = source?.GetGenericType().GetInterfaces().Contains(typeof(IDynamicMetaObjectProvider)) == true;
+                AreSourceItemsINotifyPropertyChanged = source?.AreItemsINotifyPropertyChanged() == true;
             }
 
             if (source == null)
@@ -1377,7 +1377,12 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                                 {
                                     CurrentPage.ColumnChanged -= CurrentTable_ColumnChanged;
                                     no_reentrancy_prop_changed_weak_event = true;
-                                    CurrentPage.Rows[index][e.PropertyName] = asDict[e.PropertyName];
+                                    var value = asDict[e.PropertyName];
+                                    var value_type = value.GetType();
+                                    var column_data_type = CurrentPage.Columns[e.PropertyName].DataType;
+                                    // Must check type as dynamic objects might have different ones from line to line:
+                                    if (value_type == column_data_type || value_type.IsSubclassOf(column_data_type)) 
+                                        CurrentPage.Rows[index][e.PropertyName] = value;
                                     CurrentPage.ColumnChanged += CurrentTable_ColumnChanged;
                                     no_reentrancy_prop_changed_weak_event = false;
                                 }
@@ -1388,7 +1393,12 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                             {
                                 CurrentPage.ColumnChanged -= CurrentTable_ColumnChanged;
                                 no_reentrancy_prop_changed_weak_event = true;
-                                CurrentPage.Rows[index][e.PropertyName] = dynamicproperties[e.PropertyName].Invoke(sender);
+                                var value = dynamicproperties[e.PropertyName].Invoke(sender);       
+                                var value_type = value.GetType();
+                                var column_data_type = CurrentPage.Columns[e.PropertyName].DataType;
+                                // Must check type as dynamic objects might have different ones from line to line:
+                                if (value_type == column_data_type || value_type.IsSubclassOf(column_data_type))
+                                    CurrentPage.Rows[index][e.PropertyName] = value;
                                 CurrentPage.ColumnChanged += CurrentTable_ColumnChanged;
                                 no_reentrancy_prop_changed_weak_event = false;
                             }
@@ -1616,7 +1626,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// <summary>
         /// Finds property value based on a member path and source object in a recursive manner.
         /// </summary>
-        /// <param name="item">The item on which to follow the sort member path.</param>
+        /// <param name="item">The item from which to follow the sort member path.</param>
         /// <param name="sort_member_path">A property path of indefinite length that leads to the value to be
         /// used for sorting.</param>
         /// <returns>The value pointed out by the sort member path on the passed original item, null if object or path are not valid.</returns>
