@@ -155,6 +155,11 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         public DataTable CurrentPage { get; private set; } = new DataTable();
 
         /// <summary>
+        /// Gets or sets the path to be used to reach value from item source.
+        /// </summary>
+        public string ValueMemberPath { get; set; }
+
+        /// <summary>
         /// Gets or sets a common base type for source item properties to be used 
         /// for table generation, so columns would all be of this peculiar type.
         /// </summary>
@@ -946,6 +951,89 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         }
 
         /// <summary>
+        /// Finds property value based on a member path and source object in a recursive manner.
+        /// </summary>
+        /// <param name="item">The item from which to follow the member path.</param>
+        /// <param name="member_path">A property path of indefinite length that leads to the value to be retrieved.</param>
+        /// <returns>The value pointed out by the sort member path on the passed original item, null if object or path are not valid.</returns>
+        private object GetPropertyValueRecursively(object item, string member_path)
+        {
+            // If provided, find memberpath value:
+            if (item != null && !string.IsNullOrEmpty(member_path))
+            {
+                var splitted = member_path.Split('.');
+                var property_name = splitted[0];
+
+                // In classical properties:
+                var matching = TypeDescriptor.GetProperties(item.GetType())?.OfType<PropertyDescriptor>().FirstOrDefault(x => x.Name == property_name);
+                if (matching != null)
+                {
+                    var result = matching.GetValue(item);
+                    if (splitted.Length > 1)
+                        return GetPropertyValueRecursively(result, member_path.Remove(0, property_name.Length + 1));  // path not over, go further.
+                    else return result;  // end of path, return result.
+                }
+
+                // As Expando object:
+                if (handle_expandos && item is ExpandoObject asExpando)
+                {
+                    var asDict = (IDictionary<string, object>)asExpando;
+                    if (asDict.ContainsKey(property_name))
+                    {
+                        var result = asDict[property_name];
+                        if (splitted.Length > 1)
+                            return GetPropertyValueRecursively(result, member_path.Remove(0, property_name.Length + 1));
+                        else return result;  // end of path, return result.
+                    }
+                }
+
+                // In dynamic object properties:
+                else if (item is IDynamicMetaObjectProvider asDynamic)
+                {
+                    var names = Dynamic.GetMemberNames(asDynamic, dynamicOnly: true);
+                    if (names.Contains(property_name))
+                    {
+                        var result = Dynamic.InvokeGet(asDynamic, property_name);
+                        if (splitted.Length > 1)
+                            return GetPropertyValueRecursively(result, member_path.Remove(0, property_name.Length + 1));
+                        else return result;  // end of path, return result.
+                    }
+                }
+            }
+
+            return item;
+        }
+
+        /// <summary>
+        /// Gets the type of a property that is decribed by a path
+        /// that lead to the target property from the passed source type.
+        /// </summary>
+        /// <param name="sourceType">Type to start looking from.</param>
+        /// <param name="member_path">Path to the destination property for which the type must be retrieved.</param>
+        /// <returns>The type of the property pointed by the path.</returns>
+        private Type GetPropertyTypeRecursively(Type sourceType, string member_path)
+        {
+            // If data is provided, find memberpath property:
+            if (sourceType != null && !string.IsNullOrEmpty(member_path))
+            {
+                var splitted = member_path.Split('.');
+                var property_name = splitted[0];
+
+                // In classical properties:
+                var matching = TypeDescriptor.GetProperties(sourceType)?.OfType<PropertyDescriptor>().FirstOrDefault(x => x.Name == property_name);
+                if (matching != null)
+                {
+                    var result = matching.PropertyType;
+                    if (splitted.Length > 1)
+                        return GetPropertyTypeRecursively(result, member_path.Remove(0, property_name.Length + 1));  // path not over, go further.
+                    else return result;  // end of path, return result.
+                }
+            }
+
+            return sourceType;
+        }
+
+        /// <summary>
         /// Generates the current page as a <see cref="DataTable"/>.
         /// </summary>
         /// <param name="partialSource">A portion of the source to be used for table generation
@@ -985,11 +1073,16 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                         lock (properties)
                             foreach (var property in properties)
                             {
+                                // Get the collection generic type:
                                 var type = (property.PropertyType.IsGenericType
                                     && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>) ?
                                         Nullable.GetUnderlyingType(property.PropertyType) : property.PropertyType);
+                                // Then get type pointed by the member path:
+                                type = string.IsNullOrEmpty(ValueMemberPath) ? type : GetPropertyTypeRecursively(type, ValueMemberPath);
+                                // The reduce to intermediate type is provided:
                                 if (IntermediatePropertyValueType != null && type.IsSubclassOf(IntermediatePropertyValueType))
                                     type = IntermediatePropertyValueType;
+
                                 toReturn.Columns.Add(property.Name, type);
                             }
 
@@ -1012,7 +1105,8 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                                         var value = asExpandoDict[property];
                                         if (value != null)
                                         {
-                                            var type = value.GetType();
+                                            var sub_value = !string.IsNullOrEmpty(ValueMemberPath) ? GetPropertyValueRecursively(value, ValueMemberPath) : value;
+                                            var type = sub_value.GetType();
                                             if (IntermediatePropertyValueType != null && type.IsSubclassOf(IntermediatePropertyValueType))
                                                 type = IntermediatePropertyValueType;
                                             toReturn.Columns.Add(property, type);
@@ -1043,9 +1137,10 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                                         try
                                         {
                                             var propertyValue = Dynamic.InvokeGet(partialSource.First(), getter.Key);
+                                            var sub_value = !string.IsNullOrEmpty(ValueMemberPath) ? GetPropertyValueRecursively(propertyValue, ValueMemberPath) : propertyValue;
                                             if (propertyValue != null)
                                             {
-                                                var type = ((object)propertyValue).GetType();
+                                                var type = ((object)sub_value).GetType();
                                                 if (IntermediatePropertyValueType != null && type.IsSubclassOf(IntermediatePropertyValueType))
                                                     type = IntermediatePropertyValueType;
                                                 toReturn.Columns.Add(getter.Key, type);
@@ -1651,50 +1746,8 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         /// <returns>The value pointed out by the sort member path on the passed original item, null if object or path are not valid.</returns>
         private IComparable GetIComparablePropertyRecursively(object item, string sort_member_path)
         {
-            // If provided, find memberpath value:
-            if (item != null && !string.IsNullOrEmpty(sort_member_path))
-            {
-                var splitted = sort_member_path.Split('.');
-                var property_name = splitted[0];
-
-                // In classical properties:
-                var matching = TypeDescriptor.GetProperties(item.GetType())?.OfType<PropertyDescriptor>().FirstOrDefault(x => x.Name == property_name);
-                if (matching != null)
-                {
-                    var result = matching.GetValue(item);
-                    if (splitted.Length > 1)
-                        return GetIComparablePropertyRecursively(result, sort_member_path.Remove(0, property_name.Length + 1));  // path no over, go further.
-                    else return result as IComparable ?? result.ToString();  // en of path, return result.
-                }
-
-                // As Expando object:
-                if (handle_expandos && item is ExpandoObject asExpando)
-                {
-                    var asDict = (IDictionary<string, object>)asExpando;
-                    if (asDict.ContainsKey(property_name))
-                    {
-                        var result = asDict[property_name];
-                        if (splitted.Length > 1)
-                            return GetIComparablePropertyRecursively(result, sort_member_path.Remove(0, property_name.Length + 1));
-                        else return result as IComparable ?? result.ToString();
-                    }
-                }
-
-                // In dynamic object properties:
-                else if (item is IDynamicMetaObjectProvider asDynamic)
-                {
-                    var names = Dynamic.GetMemberNames(asDynamic, dynamicOnly:true);
-                    if (names.Contains(property_name))
-                    {
-                        var result = Dynamic.InvokeGet(asDynamic, property_name);
-                        if (splitted.Length > 1)
-                            return GetIComparablePropertyRecursively(result, sort_member_path.Remove(0, property_name.Length + 1));
-                        else return result as IComparable ?? result.ToString();
-                    }
-                }
-            }
-            
-            return null;
+            var result = GetPropertyValueRecursively(item, sort_member_path);
+            return result as IComparable ?? result?.ToString();
         }
 
         /// <summary>

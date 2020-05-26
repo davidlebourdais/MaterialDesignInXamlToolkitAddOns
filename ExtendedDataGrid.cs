@@ -531,6 +531,31 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// <summary>
         /// Gets or sets the corner radius to be applied to the control.
         /// </summary>
+        public string ItemValuePath
+        {
+            get => (string)GetValue(ItemValuePathProperty);
+            set => SetCurrentValue(ItemValuePathProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="ItemValuePath"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty ItemValuePathProperty
+            = DependencyProperty.Register(nameof(ItemValuePath), typeof(string), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(string), ItemValuePathsChanged));
+
+        /// <summary>
+        /// Called whenever the <see cref="ItemValuePath"/> property changes.
+        /// </summary>
+        /// <param name="sender">The object whose property changed.</param>
+        /// <param name="args">Information about the property change.</param>
+        public static void ItemValuePathsChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            if (sender is ExtendedDataGrid casted && args.NewValue is string newValues)
+                casted.PagedTable.ValueMemberPath = newValues;
+        }
+
+        /// <summary>
+        /// Gets or sets the corner radius to be applied to the control.
+        /// </summary>
         public Type IntermediatePropertyValueType
         {
             get => (Type)GetValue(IntermediatePropertyValueTypeProperty);
