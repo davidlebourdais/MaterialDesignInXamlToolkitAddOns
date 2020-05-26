@@ -527,6 +527,37 @@ namespace EMA.MaterialDesignInXAMLExtender
         public ICommand GoToLastPageCommand { get; }
         #endregion
 
+        #region MemberPaths
+        /// <summary>
+        /// Gets or sets the corner radius to be applied to the control.
+        /// </summary>
+        public Type IntermediatePropertyValueType
+        {
+            get => (Type)GetValue(IntermediatePropertyValueTypeProperty);
+            set => SetCurrentValue(IntermediatePropertyValueTypeProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="IntermediatePropertyValueType"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IntermediatePropertyValueTypeProperty
+            = DependencyProperty.Register(nameof(IntermediatePropertyValueType), typeof(Type), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(Type), IntermediatePropertyValueTypeChanged));
+
+        /// <summary>
+        /// Called whenever the <see cref="IntermediatePropertyValueType"/> property changes.
+        /// </summary>
+        /// <param name="sender">The object whose property changed.</param>
+        /// <param name="args">Information about the property change.</param>
+        public static void IntermediatePropertyValueTypeChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            if (sender is ExtendedDataGrid casted)
+            {
+                casted.CancelEditWithCare();
+                casted.PagedTable.IntermediatePropertyValueType = args.NewValue as Type;
+                casted.PagedTable.UpdateCurrentPage();
+            }
+        }
+        #endregion
+
         #region General properties
         /// <summary>
         /// Gets or sets the corner radius to be applied to the control.

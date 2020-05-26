@@ -155,6 +155,13 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
         public DataTable CurrentPage { get; private set; } = new DataTable();
 
         /// <summary>
+        /// Gets or sets a common base type for source item properties to be used 
+        /// for table generation, so columns would all be of this peculiar type.
+        /// </summary>
+        /// <remarks>Example: set as typeof(object) and any columns would accepts any input data.</remarks>
+        public Type IntermediatePropertyValueType { get; set; }
+
+        /// <summary>
         /// Gets or sets the number of records per page.
         /// A zero or negative value let paging but will force
         /// display of all source items on one page.
@@ -981,6 +988,8 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                                 var type = (property.PropertyType.IsGenericType
                                     && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>) ?
                                         Nullable.GetUnderlyingType(property.PropertyType) : property.PropertyType);
+                                if (IntermediatePropertyValueType != null && type.IsSubclassOf(IntermediatePropertyValueType))
+                                    type = IntermediatePropertyValueType;
                                 toReturn.Columns.Add(property.Name, type);
                             }
 
@@ -1002,7 +1011,12 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                                     {
                                         var value = asExpandoDict[property];
                                         if (value != null)
-                                            toReturn.Columns.Add(property, asExpandoDict[property].GetType());
+                                        {
+                                            var type = value.GetType();
+                                            if (IntermediatePropertyValueType != null && type.IsSubclassOf(IntermediatePropertyValueType))
+                                                type = IntermediatePropertyValueType;
+                                            toReturn.Columns.Add(property, type);
+                                        }
                                         else expandoToRemove.Add(property);
                                     }
                                 expandoToRemove.ForEach(x => expandoproperties.Remove(x));
@@ -1030,7 +1044,12 @@ namespace EMA.MaterialDesignInXAMLExtender.Utils
                                         {
                                             var propertyValue = Dynamic.InvokeGet(partialSource.First(), getter.Key);
                                             if (propertyValue != null)
-                                                toReturn.Columns.Add(getter.Key, ((object)propertyValue).GetType());
+                                            {
+                                                var type = ((object)propertyValue).GetType();
+                                                if (IntermediatePropertyValueType != null && type.IsSubclassOf(IntermediatePropertyValueType))
+                                                    type = IntermediatePropertyValueType;
+                                                toReturn.Columns.Add(getter.Key, type);
+                                            }
                                             else dynamicToRemove.Add(getter.Key);
                                         }
                                         catch
