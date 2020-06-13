@@ -6,6 +6,7 @@
     <ResourceDictionary.MergedDictionaries>
         <!-- This Generic.xaml class must be called AFTER MaterialDesignInXAML for WPF MaterialDesignTheme.Defaults.xaml in the app.xaml file
         of the application, as most of our custom controls rely on it -->
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.Cursors.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.CustomColorPicker.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.PressBorder.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.ExtendedDataGrid.xaml" />

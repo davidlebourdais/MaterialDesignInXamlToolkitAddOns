@@ -6,11 +6,15 @@
     <PackageDescription>Offers new features and extra controls based on MaterialDesignInXAML.</PackageDescription>
     <PackageTags>WPF;Xaml;ColorPicker</PackageTags>
     <UseWPF>true</UseWPF>
-    <Version>0.0.9</Version>
+    <Version>0.0.92</Version>
     <Authors>David Le Bourdais</Authors>
     <Copyright>Copyright © 2020</Copyright>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Cursors\*.cur" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Dynamitey" Version="2.0.10.189" />
