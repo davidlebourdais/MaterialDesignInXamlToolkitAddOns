@@ -112,7 +112,7 @@ namespace EMA.MaterialDesignInXAMLExtender
             Brush = new SolidColorBrush(color);
             Color = color;
             BrushOpacity = opacity;
-            reevaluateSolidColorBrush();
+            ReevaluateSolidColorBrush();
         }
 
         /// <summary>
@@ -122,14 +122,12 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// <param name="name">An optionnal name to be given to the color.</param>
         public BrushItem(Brush brush, string name = "")
         {
-            if (brush == null)
-                throw new ArgumentNullException(nameof(brush));
             BrushName = name;
-            Brush = brush;
+            Brush = brush ?? throw new ArgumentNullException(nameof(brush));
             if (brush is SolidColorBrush solid)
                 Color = solid.Color;
             BrushOpacity = brush.Opacity;
-            reevaluateSolidColorBrush();
+            ReevaluateSolidColorBrush();
         }
 
         /// <summary>
@@ -137,11 +135,11 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// </summary>
         /// <param name="new_value">The new opacity value.</param>
         /// <returns>Returns true if opacity was succesfully changed.</returns>
-        public bool setBrushOpacity(double new_value)
+        public bool SetBrushOpacity(double new_value)
         {
             if (new_value < 0 || new_value > 1.0d || new_value == BrushOpacity) return false;
             BrushOpacity = new_value;
-            reevaluateSolidColorBrush();
+            ReevaluateSolidColorBrush();
             return true;
         }
 
@@ -150,11 +148,11 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// </summary>
         /// <param name="newValue">The new color value.</param>
         /// <returns>Returns true if color was succesfully changed.</returns>
-        public bool setColor(Color newValue)
+        public bool SetColor(Color newValue)
         {
             if (newValue == null || newValue == Color) return false;
             Color = newValue;
-            reevaluateSolidColorBrush();
+            ReevaluateSolidColorBrush();
             return true;
         }
 
@@ -163,7 +161,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// </summary>
         /// <param name="new_name">The new name value.</param>
         /// <returns>Returns true if brush name was succesfully changed.</returns>
-        public bool setBrushName(string new_name)
+        public bool SetBrushName(string new_name)
         {
             if (BrushName != new_name)
             {
@@ -178,7 +176,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// <summary>
         /// Recreates a solid color brush that fits current parameters.
         /// </summary>
-        private void reevaluateSolidColorBrush()
+        private void ReevaluateSolidColorBrush()
         {
             AsSolidColorBrush = new SolidColorBrush(Color) { Opacity = BrushOpacity };
             AsRGBText = "#" + Color.ToString().Remove(0, 3) + (string.IsNullOrEmpty(BrushName) ? "" : " (" + BrushName + ")");
