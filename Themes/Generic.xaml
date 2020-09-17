@@ -6,6 +6,7 @@
     <ResourceDictionary.MergedDictionaries>
         <!-- This Generic.xaml class must be called AFTER MaterialDesignInXAML for WPF MaterialDesignTheme.Defaults.xaml in the app.xaml file
         of the application, as most of our custom controls rely on it -->
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.Banner.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.Cursors.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.CustomColorPicker.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.PressBorder.xaml" />
@@ -13,8 +14,11 @@
     </ResourceDictionary.MergedDictionaries>
 
     <!-- Default styles setup -->
+    <Style TargetType="{x:Type extender:BannerMessage}" BasedOn="{StaticResource MaterialDesignBannerMessage}"/>
+    <Style TargetType="{x:Type extender:Banner}" BasedOn="{StaticResource MaterialDesignBanner}"/>
     <Style TargetType="{x:Type extender:CustomColorPicker}" BasedOn="{StaticResource MaterialDesignCustomColorPicker}" />
     <Style TargetType="{x:Type extender:PressBorder}" BasedOn="{StaticResource MaterialDesignPressBorder}" />
     <Style TargetType="{x:Type extender:ExtendedCheckBox}" BasedOn="{StaticResource MaterialDesignCheckBox}" />
     <Style TargetType="{x:Type extender:ExtendedDataGrid}" BasedOn="{StaticResource MaterialDesignExtendedDataGrid}"/>
+
 </ResourceDictionary>
