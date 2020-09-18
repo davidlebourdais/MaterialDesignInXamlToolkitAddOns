@@ -9,7 +9,7 @@ namespace EMA.MaterialDesignInXAMLExtender.Converters
     /// <summary>
     /// Output suitable dockpanel positionning for the action buttons.
     /// </summary>
-    public class BannerActionPlacementConverter : IMultiValueConverter
+    public class MessageActionPlacementConverter : IMultiValueConverter
     {
         /// <summary>
         /// Converts a set of input values into a <see cref="Dock"/> placement.

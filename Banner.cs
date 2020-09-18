@@ -41,17 +41,17 @@ namespace EMA.MaterialDesignInXAMLExtender
         protected static void Close(object sender, RoutedEventArgs e)
         {
             if (sender is Banner banner)
-                banner.SetCurrentValue(Banner.IsActiveProperty, false);
+                banner.SetCurrentValue(IsActiveProperty, false);
         }
         #endregion
 
         #region Dependency properties
         /// <summary>
-        /// MessageQueue property override to match our own message queue <see cref="BannerMessageQueue"/> type.
+        /// MessageQueue property override to match our own message queue <see cref="InformationMessageQueue"/> type.
         /// </summary>
-        public new BannerMessageQueue MessageQueue
+        public new InformationMessageQueue MessageQueue
         {
-            get => (BannerMessageQueue)GetValue(MessageQueueProperty);
+            get => (InformationMessageQueue)GetValue(MessageQueueProperty);
             set
             {
                 if (!(value is null) && value.Dispatcher != Dispatcher)
@@ -66,7 +66,7 @@ namespace EMA.MaterialDesignInXAMLExtender
             nameof(MessageQueue), typeof(SnackbarMessageQueue), typeof(Banner), new PropertyMetadata(default(SnackbarMessageQueue), MessageQueuePropertyChangedCallback));
 
         /// <summary>
-        /// Override of base private handler so we correctly pair to our own definition of <see cref="BannerMessageQueue"/>.
+        /// Override of base private handler so we correctly pair to our own definition of <see cref="InformationMessageQueue"/>.
         /// </summary>
         /// <param name="dependencyObject">Snackbar that triggered the event.</param>
         /// <param name="dependencyPropertyChangedEventArgs">New property value information.</param>
@@ -74,7 +74,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         {
             var snackbar = (Banner)dependencyObject;
             snackbar._messageQueueRegistrationCleanUp?.Invoke();
-            var messageQueue = dependencyPropertyChangedEventArgs.NewValue as BannerMessageQueue;
+            var messageQueue = dependencyPropertyChangedEventArgs.NewValue as InformationMessageQueue;
             snackbar._messageQueueRegistrationCleanUp = messageQueue?.Pair(snackbar);
         }
 
@@ -141,8 +141,8 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// </summary>
         private void RegisterDismissOnClickEvents()
         {
-            AddHandler(BannerMessage.ActionClickEvent, new RoutedEventHandler(Close), true);
-            AddHandler(BannerMessage.SecondaryActionClickEvent, new RoutedEventHandler(Close), true);
+            AddHandler(InformationMessage.ActionClickEvent, new RoutedEventHandler(Close), true);
+            AddHandler(InformationMessage.SecondaryActionClickEvent, new RoutedEventHandler(Close), true);
         }
 
         /// <summary>
@@ -150,8 +150,8 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// </summary>
         private void UnregisterDismissOnClickEvents()
         {
-            RemoveHandler(BannerMessage.ActionClickEvent, new RoutedEventHandler(Close));
-            RemoveHandler(BannerMessage.SecondaryActionClickEvent, new RoutedEventHandler(Close));
+            RemoveHandler(InformationMessage.ActionClickEvent, new RoutedEventHandler(Close));
+            RemoveHandler(InformationMessage.SecondaryActionClickEvent, new RoutedEventHandler(Close));
         }
         #endregion
     }

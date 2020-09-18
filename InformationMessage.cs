@@ -13,21 +13,21 @@ namespace EMA.MaterialDesignInXAMLExtender
     /// </summary>
     [TemplatePart(Name = ActionButtonPartName, Type = typeof(ButtonBase))]
     [TemplatePart(Name = SecondaryActionButtonPartName, Type = typeof(ButtonBase))]
-    public class BannerMessage : SnackbarMessage
+    public class InformationMessage : SnackbarMessage
     {
         /// <summary>
-        /// Name to be used for the secondary action button in <see cref="BannerMessage"/> control templates.
+        /// Name to be used for the secondary action button in <see cref="InformationMessage"/> control templates.
         /// </summary>
         public const string SecondaryActionButtonPartName = "PART_SecondaryActionButton";
 
         private Action _templateCleanupAction = () => { };  // base override.
 
         /// <summary>
-        /// Static constructor for <see cref="BannerMessage"/>.
+        /// Static constructor for <see cref="InformationMessage"/>.
         /// </summary>
-        static BannerMessage()
+        static InformationMessage()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(BannerMessage), new FrameworkPropertyMetadata(typeof(BannerMessage)));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(InformationMessage), new FrameworkPropertyMetadata(typeof(InformationMessage)));
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// Registers <see cref="IllustrationContent"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IllustrationContentProperty = DependencyProperty.Register(
-            nameof(IllustrationContent), typeof(object), typeof(BannerMessage), new PropertyMetadata(default(object)));
+            nameof(IllustrationContent), typeof(object), typeof(InformationMessage), new PropertyMetadata(default(object)));
 
         /// <summary>
         /// Gets or sets the template for illustration.
@@ -116,7 +116,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// Registers <see cref="IllustrationContentTemplate"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IllustrationContentTemplateProperty = DependencyProperty.Register(
-            nameof(IllustrationContentTemplate), typeof(DataTemplate), typeof(BannerMessage), new PropertyMetadata(default(DataTemplate)));
+            nameof(IllustrationContentTemplate), typeof(DataTemplate), typeof(InformationMessage), new PropertyMetadata(default(DataTemplate)));
 
         /// <summary>
         /// Gets or sets the template for illustration.
@@ -130,7 +130,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// Registers <see cref="IllustrationContentTemplateSelector"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IllustrationContentTemplateSelectorProperty = DependencyProperty.Register(
-            nameof(IllustrationContentTemplateSelector), typeof(DataTemplateSelector), typeof(BannerMessage), new PropertyMetadata(default(DataTemplateSelector)));
+            nameof(IllustrationContentTemplateSelector), typeof(DataTemplateSelector), typeof(InformationMessage), new PropertyMetadata(default(DataTemplateSelector)));
         #endregion
 
         #region Secondary action button
@@ -146,7 +146,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// Registers <see cref="SecondaryActionCommand"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty SecondaryActionCommandProperty = DependencyProperty.Register(
-            nameof(SecondaryActionCommand), typeof(ICommand), typeof(BannerMessage), new PropertyMetadata(default(ICommand)));
+            nameof(SecondaryActionCommand), typeof(ICommand), typeof(InformationMessage), new PropertyMetadata(default(ICommand)));
 
         /// <summary>
         /// Gets or sets the command parameter associated to the secondary button.
@@ -160,7 +160,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// Registers <see cref="SecondaryActionCommandParameter"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty SecondaryActionCommandParameterProperty = DependencyProperty.Register(
-            nameof(SecondaryActionCommandParameter), typeof(object), typeof(BannerMessage), new PropertyMetadata(default(object)));
+            nameof(SecondaryActionCommandParameter), typeof(object), typeof(InformationMessage), new PropertyMetadata(default(object)));
 
         /// <summary>
         /// Gets or sets the content of the secondary action button.
@@ -174,7 +174,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// Registers <see cref="SecondaryActionContent"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty SecondaryActionContentProperty = DependencyProperty.Register(
-            nameof(SecondaryActionContent), typeof(object), typeof(BannerMessage), new PropertyMetadata(default(object)));
+            nameof(SecondaryActionContent), typeof(object), typeof(InformationMessage), new PropertyMetadata(default(object)));
 
         /// <summary>
         /// Gets or sets the content template of the secondary action button.
@@ -188,7 +188,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// Registers <see cref="SecondaryActionCommandParameter"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty SecondaryActionContentTemplateProperty = DependencyProperty.Register(
-            nameof(SecondaryActionContentTemplate), typeof(DataTemplate), typeof(BannerMessage), new PropertyMetadata(default(DataTemplate)));
+            nameof(SecondaryActionContentTemplate), typeof(DataTemplate), typeof(InformationMessage), new PropertyMetadata(default(DataTemplate)));
 
         /// <summary>
         /// Gets or sets the content string format of the secondary action button.
@@ -202,7 +202,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// Registers <see cref="SecondaryActionContentStringFormat"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty SecondaryActionContentStringFormatProperty = DependencyProperty.Register(
-            nameof(SecondaryActionContentStringFormat), typeof(string), typeof(BannerMessage), new PropertyMetadata(default(string)));
+            nameof(SecondaryActionContentStringFormat), typeof(string), typeof(InformationMessage), new PropertyMetadata(default(string)));
 
         /// <summary>
         /// Gets or sets a template selector for the secondary action button.
@@ -216,7 +216,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// Registers <see cref="SecondaryActionContentTemplateSelector"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty SecondaryActionContentTemplateSelectorProperty = DependencyProperty.Register(
-            nameof(SecondaryActionContentTemplateSelector), typeof(DataTemplateSelector), typeof(BannerMessage), new PropertyMetadata(default(DataTemplateSelector)));
+            nameof(SecondaryActionContentTemplateSelector), typeof(DataTemplateSelector), typeof(InformationMessage), new PropertyMetadata(default(DataTemplateSelector)));
         #endregion
 
         #endregion
@@ -232,7 +232,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// Registers <see cref="SecondaryActionClick"/> as a routed event.
         /// </summary>
         public static readonly RoutedEvent SecondaryActionClickEvent = EventManager.RegisterRoutedEvent(
-            nameof(SecondaryActionClick), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(BannerMessage));
+            nameof(SecondaryActionClick), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(InformationMessage));
         #endregion of routed events
     }
 }

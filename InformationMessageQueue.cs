@@ -18,11 +18,11 @@ namespace EMA.MaterialDesignInXAMLExtender
     /// Code here is reproduced and adapted from the <see cref="SnackbarMessageQueue"/> source in MaterialDesignInXamlToolkit
     /// under the MIT license - Copyright (c) James Willock,  Mulholland Software and Contributors the MaterialDesignInXaml 
     /// </remarks>
-    public class BannerMessageQueue : ISnackbarMessageQueue, IDisposable
+    public class InformationMessageQueue : ISnackbarMessageQueue, IDisposable
     {
         private readonly TimeSpan _messageDuration;
         private readonly HashSet<Snackbar> _pairedSnackbars = new HashSet<Snackbar>();
-        private readonly LinkedList<BannerMessageQueueItem> _snackbarMessages = new LinkedList<BannerMessageQueueItem>();
+        private readonly LinkedList<InformationMessageQueueItem> _snackbarMessages = new LinkedList<InformationMessageQueueItem>();
         private readonly ManualResetEvent _disposedEvent = new ManualResetEvent(false);
         private readonly ManualResetEvent _pausedEvent = new ManualResetEvent(false);
         private readonly ManualResetEvent _messageWaitingEvent = new ManualResetEvent(false);
@@ -157,16 +157,16 @@ namespace EMA.MaterialDesignInXAMLExtender
 
         #endregion
         /// <summary>
-        /// Initiates a new instance of <see cref="BannerMessageQueue"/>.
+        /// Initiates a new instance of <see cref="InformationMessageQueue"/>.
         /// </summary>
-        public BannerMessageQueue() : this(TimeSpan.FromSeconds(3))
+        public InformationMessageQueue() : this(TimeSpan.FromSeconds(3))
         { }
 
         /// <summary>
-        /// Initiates a new instance of <see cref="BannerMessageQueue"/>.
+        /// Initiates a new instance of <see cref="InformationMessageQueue"/>.
         /// </summary>
         /// <param name="messageDuration">Custom message duration.</param>
-        public BannerMessageQueue(TimeSpan messageDuration)
+        public InformationMessageQueue(TimeSpan messageDuration)
         {
             _messageDuration = messageDuration;
             Task.Factory.StartNew(PumpAsync, TaskCreationOptions.LongRunning);
@@ -426,7 +426,7 @@ namespace EMA.MaterialDesignInXAMLExtender
                     actionContent != null ? nameof(actionContent) : nameof(actionHandler));
             }
 
-            var snackbarMessageQueueItem = new BannerMessageQueueItem(content, durationOverride ?? _messageDuration,
+            var snackbarMessageQueueItem = new InformationMessageQueueItem(content, durationOverride ?? _messageDuration,
                 actionContent, actionHandler, actionArgument, promote, neverConsiderToBeDuplicate);
             InsertItem(snackbarMessageQueueItem);
 
@@ -461,14 +461,14 @@ namespace EMA.MaterialDesignInXAMLExtender
                     actionContent != null ? nameof(actionContent) : nameof(actionHandler));
             }
 
-            var snackbarMessageQueueItem = new BannerMessageQueueItem(content, durationOverride ?? _messageDuration,
+            var snackbarMessageQueueItem = new InformationMessageQueueItem(content, durationOverride ?? _messageDuration,
                 actionContent, actionHandler, actionArgument, secondActionContent, secondActionHandler, secondActionArgument, promote, neverConsiderToBeDuplicate);
             InsertItem(snackbarMessageQueueItem);
 
             _messageWaitingEvent.Set();
         }
 
-        private void InsertItem(BannerMessageQueueItem item)
+        private void InsertItem(InformationMessageQueueItem item)
         {
             var node = _snackbarMessages.First;
             while (node != null)
@@ -537,7 +537,7 @@ namespace EMA.MaterialDesignInXAMLExtender
             });
         }
 
-        private async Task ShowAsync(Snackbar snackbar, BannerMessageQueueItem messageQueueItem)
+        private async Task ShowAsync(Snackbar snackbar, InformationMessageQueueItem messageQueueItem)
         {
             await Task.Run(async () =>
             {
@@ -585,7 +585,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         }
 
         private static MouseNotOverManagedWaitHandle CreateAndShowMessage(UIElement snackbar,
-            BannerMessageQueueItem messageQueueItem, EventWaitHandle actionClickWaitHandle)
+            InformationMessageQueueItem messageQueueItem, EventWaitHandle actionClickWaitHandle)
         {
             var clickCount = 0;
             var snackbarMessage = Create(messageQueueItem);
@@ -622,7 +622,7 @@ namespace EMA.MaterialDesignInXAMLExtender
                 Task.Factory.StartNew(actionClickWaitHandle.WaitOne));
         }
 
-        private static void DoActionCallback(BannerMessageQueueItem messageQueueItem)
+        private static void DoActionCallback(InformationMessageQueueItem messageQueueItem)
         {
             try
             {
@@ -639,7 +639,7 @@ namespace EMA.MaterialDesignInXAMLExtender
             }
         }
 
-        private static void DoSecondActionCallback(BannerMessageQueueItem messageQueueItem)
+        private static void DoSecondActionCallback(InformationMessageQueueItem messageQueueItem)
         {
             try
             {
@@ -656,9 +656,9 @@ namespace EMA.MaterialDesignInXAMLExtender
             }
         }
 
-        private static BannerMessage Create(BannerMessageQueueItem messageQueueItem)
+        private static InformationMessage Create(InformationMessageQueueItem messageQueueItem)
         {
-            return new BannerMessage
+            return new InformationMessage
             {
                 Content = messageQueueItem.Content,
                 ActionContent = messageQueueItem.ActionContent,

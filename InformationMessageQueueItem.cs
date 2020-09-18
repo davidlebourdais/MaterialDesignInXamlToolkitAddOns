@@ -4,15 +4,15 @@ using MaterialDesignThemes.Wpf;
 namespace EMA.MaterialDesignInXAMLExtender
 {
     /// <summary>
-    /// Concrete <see cref="BannerMessageQueue"/> information holder.
+    /// Concrete <see cref="InformationMessageQueue"/> information holder.
     /// </summary>
     /// <remarks>
     /// Code here is reproduced and adapted from the <see cref="SnackbarMessageQueueItem"/> source in MaterialDesignInXamlToolkit
     /// under the MIT license - Copyright (c) James Willock,  Mulholland Software and Contributors the MaterialDesignInXaml 
     /// </remarks>
-    internal class BannerMessageQueueItem
+    internal class InformationMessageQueueItem
     {
-        public BannerMessageQueueItem(object content, TimeSpan duration, object actionContent = null, Action<object> actionHandler = null, object actionArgument = null,
+        public InformationMessageQueueItem(object content, TimeSpan duration, object actionContent = null, Action<object> actionHandler = null, object actionArgument = null,
             bool isPromoted = false, bool ignoreDuplicate = false)
         {
             Content = content;
@@ -24,7 +24,7 @@ namespace EMA.MaterialDesignInXAMLExtender
             IgnoreDuplicate = ignoreDuplicate;
         }
 
-        public BannerMessageQueueItem(object content, TimeSpan duration, object actionContent = null, Action<object> actionHandler = null, object actionArgument = null,
+        public InformationMessageQueueItem(object content, TimeSpan duration, object actionContent = null, Action<object> actionHandler = null, object actionArgument = null,
             object secondActionContent = null, Action<object> secondActionHandler = null, object secondActionArgument = null,
             bool isPromoted = false, bool ignoreDuplicate = false)
         {
@@ -95,7 +95,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// </summary>
         /// <param name="item">Item to check for duplicate</param>
         /// <returns><c>true</c> if given item is a duplicate to this, <c>false</c> otherwise</returns>
-        public bool IsDuplicate(BannerMessageQueueItem item)
+        public bool IsDuplicate(InformationMessageQueueItem item)
         {
             if (item is null)
             {

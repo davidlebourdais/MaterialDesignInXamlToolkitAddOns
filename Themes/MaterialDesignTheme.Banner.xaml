@@ -15,7 +15,99 @@
     <converters:NullableToVisibilityConverter x:Key="NullableToVisibilityConverter" />
     <converters:MathConverter x:Key="MathAddConverter" Operation="Add" />
     <converters:MathMultipleConverter x:Key="MathMultipleConverter" Operation="Multiply" />
-    <selfconverters:BannerActionPlacementConverter x:Key="BannerActionPlacementConverter" />
+    <selfconverters:MessageActionPlacementConverter x:Key="MessageActionPlacementConverter" />
+
+    <Style x:Key="MaterialDesignBannerMessage" TargetType="{x:Type extender:InformationMessage}" BasedOn="{StaticResource {x:Type wpf:SnackbarMessage}}">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Margin" Value="8" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type extender:InformationMessage}">
+                    <DockPanel MaxHeight="{Binding RelativeSource={RelativeSource AncestorType={x:Type extender:Banner}}, Path=(wpf:SnackbarMessage.ContentMaxHeight)}" 
+                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}">
+                        <Grid Panel.ZIndex="1" HorizontalAlignment="Right">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="PART_ActionButton" Grid.Column="1"
+                                    Command="{TemplateBinding ActionCommand}"
+                                    CommandParameter="{TemplateBinding ActionCommandParameter}"
+                                    Content="{TemplateBinding ActionContent}"
+                                    ContentTemplate="{TemplateBinding ActionContentTemplate}"
+                                    ContentStringFormat="{TemplateBinding ActionContentStringFormat}"
+                                    ContentTemplateSelector="{TemplateBinding ActionContentTemplateSelector}"
+                                    Visibility="{TemplateBinding ActionContent, Converter={StaticResource NullableToVisibilityConverter}}"
+                                    Style="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type extender:Banner}}, Path=ActionButtonStyle}" />
+                            <Button x:Name="PART_SecondaryActionButton" Grid.Column="0"
+                                    Command="{TemplateBinding SecondaryActionCommand}"
+                                    CommandParameter="{TemplateBinding SecondaryActionCommandParameter}"
+                                    Content="{TemplateBinding SecondaryActionContent}" 
+                                    ContentTemplate="{TemplateBinding SecondaryActionContentTemplate}"
+                                    ContentStringFormat="{TemplateBinding SecondaryActionContentStringFormat}"
+                                    ContentTemplateSelector="{TemplateBinding SecondaryActionContentTemplateSelector}"                                      
+                                    Visibility="{TemplateBinding SecondaryActionContent, Converter={StaticResource NullableToVisibilityConverter}}"
+                                    Style="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type extender:Banner}}, Path=SecondaryActionButtonStyle}" />
+                            <DockPanel.Dock>
+                                <MultiBinding Converter="{StaticResource MessageActionPlacementConverter}">
+                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type extender:Banner}}" Path="ActionButtonPlacement" />
+                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type extender:Banner}}" Path="(wpf:SnackbarMessage.InlineActionButtonMaxHeight)" />
+                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type extender:Banner}}" Path="ActualHeight" />
+                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type DockPanel}}" Path="ActualWidth" />
+                                    <Binding ElementName="ContentGrid" Path="ActualWidth" />
+                                    <Binding RelativeSource="{RelativeSource Mode=Self}" Path="ActualWidth" />
+                                </MultiBinding>
+                            </DockPanel.Dock>
+                        </Grid>
+
+                        <Grid x:Name="ContentGrid" HorizontalAlignment="Left">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Viewbox Margin="5,0,10,0" VerticalAlignment="Center" MaxHeight="{Binding ActualHeight, ElementName=TextPresenter, Converter={StaticResource MathAddConverter}, ConverterParameter=4}">
+                                <ContentPresenter Content="{TemplateBinding IllustrationContent}"
+                                                  ContentTemplate="{TemplateBinding IllustrationContentTemplate}"
+                                                  ContentTemplateSelector="{TemplateBinding IllustrationContentTemplateSelector}" />
+                            </Viewbox>
+                            <ContentPresenter Grid.Column="1"
+                                              Name="TextPresenter"
+                                              Content="{TemplateBinding Content}" 
+                                              VerticalAlignment="Center"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                              ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+                                              HorizontalAlignment="Left">
+                                <ContentPresenter.Resources>
+                                    <DataTemplate DataType="{x:Type system:String}">
+                                        <TextBlock Text="{Binding}" Padding="0" >
+                                            <TextBlock.Style>
+                                                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MaterialDesignBody2TextBlock}">
+                                                    <Setter Property="LineHeight" Value="16" />
+                                                    <Setter Property="MaxHeight" Value="48" />
+                                                    <Setter Property="TextWrapping" Value="WrapWithOverflow" />
+                                                    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                                    <Setter Property="LineStackingStrategy" Value="BlockLineHeight" />
+                                                    <Setter Property="VerticalAlignment" Value="Center" />
+                                                    <Setter Property="FontWeight" Value="{Binding Path=(TextElement.FontWeight), RelativeSource={RelativeSource AncestorType={x:Type extender:Banner}}}" />
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
+                        </Grid>
+                    </DockPanel>
+                    <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding AreActionButtonPositionsInverted, RelativeSource={RelativeSource AncestorType={x:Type extender:Banner}}}" Value="True">
+                            <Setter TargetName="PART_ActionButton" Property="Grid.Column" Value="0" />
+                            <Setter TargetName="PART_SecondaryActionButton" Property="Grid.Column" Value="1" />
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
     <Style x:Key="MaterialDesignBanner" TargetType="{x:Type extender:Banner}">
         <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}" />
@@ -77,7 +169,11 @@
                                               Content="{TemplateBinding Message}"
                                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                              Margin="{TemplateBinding Padding}" />
+                                              Margin="{TemplateBinding Padding}" >
+                                <ContentPresenter.Resources>
+                                    <Style TargetType="{x:Type extender:InformationMessage}" BasedOn="{StaticResource MaterialDesignBannerMessage}"/>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
                         </Border>
                     </StackPanel>
                     <ControlTemplate.Triggers>
@@ -89,98 +185,6 @@
                                 <BeginStoryboard Storyboard="{StaticResource DeactivateStoryboard}" />
                             </Trigger.ExitActions>
                         </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style x:Key="MaterialDesignBannerMessage" TargetType="{x:Type extender:BannerMessage}" BasedOn="{StaticResource {x:Type wpf:SnackbarMessage}}">
-        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-        <Setter Property="Margin" Value="8" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type extender:BannerMessage}">
-                    <DockPanel MaxHeight="{Binding RelativeSource={RelativeSource AncestorType={x:Type extender:Banner}}, Path=(wpf:SnackbarMessage.ContentMaxHeight)}" 
-                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}">
-                        <Grid Panel.ZIndex="1" HorizontalAlignment="Right">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <Button x:Name="PART_ActionButton" Grid.Column="1"
-                                    Command="{TemplateBinding ActionCommand}"
-                                    CommandParameter="{TemplateBinding ActionCommandParameter}"
-                                    Content="{TemplateBinding ActionContent}"
-                                    ContentTemplate="{TemplateBinding ActionContentTemplate}"
-                                    ContentStringFormat="{TemplateBinding ActionContentStringFormat}"
-                                    ContentTemplateSelector="{TemplateBinding ActionContentTemplateSelector}"
-                                    Visibility="{TemplateBinding ActionContent, Converter={StaticResource NullableToVisibilityConverter}}"
-                                    Style="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type extender:Banner}}, Path=ActionButtonStyle}" />
-                            <Button x:Name="PART_SecondaryActionButton" Grid.Column="0"
-                                    Command="{TemplateBinding SecondaryActionCommand}"
-                                    CommandParameter="{TemplateBinding SecondaryActionCommandParameter}"
-                                    Content="{TemplateBinding SecondaryActionContent}" 
-                                    ContentTemplate="{TemplateBinding SecondaryActionContentTemplate}"
-                                    ContentStringFormat="{TemplateBinding SecondaryActionContentStringFormat}"
-                                    ContentTemplateSelector="{TemplateBinding SecondaryActionContentTemplateSelector}"                                      
-                                    Visibility="{TemplateBinding SecondaryActionContent, Converter={StaticResource NullableToVisibilityConverter}}"
-                                    Style="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type extender:Banner}}, Path=SecondaryActionButtonStyle}" />
-                            <DockPanel.Dock>
-                                <MultiBinding Converter="{StaticResource BannerActionPlacementConverter}">
-                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type extender:Banner}}" Path="ActionButtonPlacement" />
-                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type extender:Banner}}" Path="(wpf:SnackbarMessage.InlineActionButtonMaxHeight)" />
-                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type extender:Banner}}" Path="ActualHeight" />
-                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type DockPanel}}" Path="ActualWidth" />
-                                    <Binding ElementName="ContentGrid" Path="ActualWidth" />
-                                    <Binding RelativeSource="{RelativeSource Mode=Self}" Path="ActualWidth" />
-                                </MultiBinding>
-                            </DockPanel.Dock>
-                        </Grid>
-
-                        <Grid x:Name="ContentGrid" HorizontalAlignment="Left">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Viewbox Margin="5,0,10,0" VerticalAlignment="Center" MaxHeight="{Binding ActualHeight, ElementName=TextPresenter, Converter={StaticResource MathAddConverter}, ConverterParameter=4}">
-                                <ContentPresenter Content="{TemplateBinding IllustrationContent}"
-                                                  ContentTemplate="{TemplateBinding IllustrationContentTemplate}"
-                                                  ContentTemplateSelector="{TemplateBinding IllustrationContentTemplateSelector}" />
-                            </Viewbox>
-                            <ContentPresenter Grid.Column="1"
-                                              Name="TextPresenter"
-                                              Content="{TemplateBinding Content}" 
-                                              VerticalAlignment="Center"
-                                              ContentTemplate="{TemplateBinding ContentTemplate}"
-                                              ContentStringFormat="{TemplateBinding ContentStringFormat}"
-                                              ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
-                                              HorizontalAlignment="Left">
-                                <ContentPresenter.Resources>
-                                    <DataTemplate DataType="{x:Type system:String}">
-                                        <TextBlock Text="{Binding}" Padding="0" >
-                                            <TextBlock.Style>
-                                                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MaterialDesignBody2TextBlock}">
-                                                    <Setter Property="LineHeight" Value="16" />
-                                                    <Setter Property="MaxHeight" Value="48" />
-                                                    <Setter Property="TextWrapping" Value="WrapWithOverflow" />
-                                                    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-                                                    <Setter Property="LineStackingStrategy" Value="BlockLineHeight" />
-                                                    <Setter Property="VerticalAlignment" Value="Center" />
-                                                    <Setter Property="FontWeight" Value="{Binding Path=(TextElement.FontWeight), RelativeSource={RelativeSource AncestorType={x:Type extender:Banner}}}" />
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </ContentPresenter.Resources>
-                            </ContentPresenter>
-                        </Grid>
-                    </DockPanel>
-                    <ControlTemplate.Triggers>
-                        <DataTrigger Binding="{Binding AreActionButtonPositionsInverted, RelativeSource={RelativeSource AncestorType={x:Type extender:Banner}}}" Value="True">
-                            <Setter TargetName="PART_ActionButton" Property="Grid.Column" Value="0" />
-                            <Setter TargetName="PART_SecondaryActionButton" Property="Grid.Column" Value="1" />
-                        </DataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
