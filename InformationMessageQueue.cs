@@ -20,9 +20,12 @@ namespace EMA.MaterialDesignInXAMLExtender
     /// </remarks>
     public class InformationMessageQueue : ISnackbarMessageQueue, IDisposable
     {
-        private readonly TimeSpan _messageDuration;
+        /// <summary>
+        /// Stores message duration internally.
+        /// </summary>
+        protected readonly TimeSpan _messageDuration;
         private readonly HashSet<Snackbar> _pairedSnackbars = new HashSet<Snackbar>();
-        private readonly LinkedList<InformationMessageQueueItem> _snackbarMessages = new LinkedList<InformationMessageQueueItem>();
+        private readonly LinkedList<InformationMessageQueueItem> _messages = new LinkedList<InformationMessageQueueItem>();
         private readonly ManualResetEvent _disposedEvent = new ManualResetEvent(false);
         private readonly ManualResetEvent _pausedEvent = new ManualResetEvent(false);
         private readonly ManualResetEvent _messageWaitingEvent = new ManualResetEvent(false);
@@ -156,6 +159,7 @@ namespace EMA.MaterialDesignInXAMLExtender
         }
 
         #endregion
+
         /// <summary>
         /// Initiates a new instance of <see cref="InformationMessageQueue"/>.
         /// </summary>
@@ -426,9 +430,9 @@ namespace EMA.MaterialDesignInXAMLExtender
                     actionContent != null ? nameof(actionContent) : nameof(actionHandler));
             }
 
-            var snackbarMessageQueueItem = new InformationMessageQueueItem(content, durationOverride ?? _messageDuration,
+            var messageQueueItem = new InformationMessageQueueItem(content, durationOverride ?? _messageDuration,
                 actionContent, actionHandler, actionArgument, promote, neverConsiderToBeDuplicate);
-            InsertItem(snackbarMessageQueueItem);
+            InsertItem(messageQueueItem);
 
             _messageWaitingEvent.Set();
         }
@@ -461,16 +465,29 @@ namespace EMA.MaterialDesignInXAMLExtender
                     actionContent != null ? nameof(actionContent) : nameof(actionHandler));
             }
 
-            var snackbarMessageQueueItem = new InformationMessageQueueItem(content, durationOverride ?? _messageDuration,
+            var messageQueueItem = new InformationMessageQueueItem(content, durationOverride ?? _messageDuration,
                 actionContent, actionHandler, actionArgument, secondActionContent, secondActionHandler, secondActionArgument, promote, neverConsiderToBeDuplicate);
-            InsertItem(snackbarMessageQueueItem);
+            InsertItem(messageQueueItem);
 
             _messageWaitingEvent.Set();
         }
 
+        /// <summary>
+        /// Performs message insertion into the queue.
+        /// </summary>
+        /// <param name="item">The message to be inserted.</param>
+        protected void InsertItem(object item)
+        {
+            if (item is InformationMessageQueueItem casted)
+            {
+                InsertItem(casted);
+                _messageWaitingEvent.Set();
+            }
+        }
+
         private void InsertItem(InformationMessageQueueItem item)
         {
-            var node = _snackbarMessages.First;
+            var node = _messages.First;
             while (node != null)
             {
                 if (!IgnoreDuplicate && item.IsDuplicate(node.Value))
@@ -478,12 +495,12 @@ namespace EMA.MaterialDesignInXAMLExtender
 
                 if (item.IsPromoted && !node.Value.IsPromoted)
                 {
-                    _snackbarMessages.AddBefore(node, item);
+                    _messages.AddBefore(node, item);
                     return;
                 }
                 node = node.Next;
             }
-            _snackbarMessages.AddLast(item);
+            _messages.AddLast(item);
         }
 
         private async void PumpAsync()
@@ -496,7 +513,7 @@ namespace EMA.MaterialDesignInXAMLExtender
                 if (exemplar == null)
                 {
                     Trace.TraceWarning(
-                        "A snackbar message as waiting, but no Snackbar instances are assigned to the message queue.");
+                        "An information message is waiting, but no snackbar instances (or derived items) are assigned to the message queue.");
                     _disposedEvent.WaitOne(TimeSpan.FromSeconds(1));
                     continue;
                 }
@@ -507,9 +524,9 @@ namespace EMA.MaterialDesignInXAMLExtender
                 //show message
                 if (snackbar != null)
                 {
-                    var message = _snackbarMessages.FirstOrDefault();
+                    var message = _messages.FirstOrDefault();
                     await ShowAsync(snackbar, message);
-                    _snackbarMessages.RemoveFirst();
+                    _messages.RemoveFirst();
                 }
                 else
                 {
@@ -517,7 +534,7 @@ namespace EMA.MaterialDesignInXAMLExtender
                     _disposedEvent.WaitOne(TimeSpan.FromSeconds(1));
                 }
 
-                if (_snackbarMessages.Count > 0)
+                if (_messages.Count > 0)
                     _messageWaitingEvent.Set();
                 else
                     _messageWaitingEvent.Reset();
@@ -546,7 +563,7 @@ namespace EMA.MaterialDesignInXAMLExtender
                 var mouseNotOverManagedWaitHandle =
                     await
                         snackbar.Dispatcher.InvokeAsync(
-                            () => CreateAndShowMessage(snackbar, messageQueueItem, actionClickWaitHandle));
+                            () => CreateAndShowMessage(snackbar, messageQueueItem, actionClickWaitHandle, GenerateMessage));;
                 var durationPassedWaitHandle = new ManualResetEvent(false);
                 DurationMonitor.Start(messageQueueItem.Duration.Add(snackbar.ActivateStoryboardDuration),
                     _pausedEvent, durationPassedWaitHandle, _disposedEvent);
@@ -585,10 +602,10 @@ namespace EMA.MaterialDesignInXAMLExtender
         }
 
         private static MouseNotOverManagedWaitHandle CreateAndShowMessage(UIElement snackbar,
-            InformationMessageQueueItem messageQueueItem, EventWaitHandle actionClickWaitHandle)
+            InformationMessageQueueItem messageQueueItem, EventWaitHandle actionClickWaitHandle, Func<InformationMessageQueueItem, InformationMessage> createMessageHandler)
         {
             var clickCount = 0;
-            var snackbarMessage = Create(messageQueueItem);
+            var snackbarMessage = createMessageHandler?.Invoke(messageQueueItem);
             snackbarMessage.ActionClick += (sender, args) =>
             {
                 if (++clickCount == 1)
@@ -656,7 +673,11 @@ namespace EMA.MaterialDesignInXAMLExtender
             }
         }
 
-        private static InformationMessage Create(InformationMessageQueueItem messageQueueItem)
+        /// <summary>
+        /// Creates a message based on a passed <see cref="InformationMessageQueueItem"/>.
+        /// </summary>
+        /// <param name="messageQueueItem">The seed information message item.</param>
+        internal virtual InformationMessage GenerateMessage(InformationMessageQueueItem messageQueueItem)
         {
             return new InformationMessage
             {

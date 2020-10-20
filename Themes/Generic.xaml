@@ -11,6 +11,7 @@
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.CustomColorPicker.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.PressBorder.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.ExtendedDataGrid.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignInXAMLExtender;component/Themes/MaterialDesignTheme.ToastNotificationBar.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <!-- Default styles setup -->
@@ -19,5 +20,6 @@
     <Style TargetType="{x:Type extender:PressBorder}" BasedOn="{StaticResource MaterialDesignPressBorder}" />
     <Style TargetType="{x:Type extender:ExtendedCheckBox}" BasedOn="{StaticResource MaterialDesignCheckBox}" />
     <Style TargetType="{x:Type extender:ExtendedDataGrid}" BasedOn="{StaticResource MaterialDesignExtendedDataGrid}"/>
+    <Style TargetType="{x:Type extender:ToastNotificationBar}" BasedOn="{StaticResource MaterialDesignToastNotification}"/>
 
 </ResourceDictionary>

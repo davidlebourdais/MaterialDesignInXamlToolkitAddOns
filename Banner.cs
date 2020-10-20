@@ -63,12 +63,12 @@ namespace EMA.MaterialDesignInXAMLExtender
         /// Registers <see cref="MessageQueue"/> as a dependency property.
         /// </summary>
         public static new readonly DependencyProperty MessageQueueProperty = DependencyProperty.Register(
-            nameof(MessageQueue), typeof(SnackbarMessageQueue), typeof(Banner), new PropertyMetadata(default(SnackbarMessageQueue), MessageQueuePropertyChangedCallback));
+            nameof(MessageQueue), typeof(InformationMessageQueue), typeof(Banner), new PropertyMetadata(default(InformationMessageQueue), MessageQueuePropertyChangedCallback));
 
         /// <summary>
         /// Override of base private handler so we correctly pair to our own definition of <see cref="InformationMessageQueue"/>.
         /// </summary>
-        /// <param name="dependencyObject">Snackbar that triggered the event.</param>
+        /// <param name="dependencyObject">Banner that triggered the event.</param>
         /// <param name="dependencyPropertyChangedEventArgs">New property value information.</param>
         private static void MessageQueuePropertyChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {

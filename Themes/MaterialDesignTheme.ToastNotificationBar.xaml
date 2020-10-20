@@ -1,0 +1,368 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:extender="clr-namespace:EMA.MaterialDesignInXAMLExtender"
+                    xmlns:wpf="http://materialdesigninxaml.net/winfx/xaml/themes"
+                    xmlns:converters="http://materialdesigninxaml.net/winfx/xaml/themes"
+                    xmlns:selfconverters="clr-namespace:EMA.MaterialDesignInXAMLExtender.Converters"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Weelab;component/Themes/MaterialDesignTheme.Button.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <converters:NullableToVisibilityConverter x:Key="NullableToVisibilityConverter" />
+    <selfconverters:MessageActionPlacementConverter x:Key="MessageActionPlacementConverter" />
+
+    <DataTemplate x:Key="NeutralIconTemplate">
+        <wpf:PackIcon Kind="InfoCircle" Width="24" Height="24" Margin="10,0,0,0" VerticalAlignment="Center"/>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WarningIconTemplate">
+        <wpf:PackIcon Kind="Alert" Width="24" Height="24" Margin="10,0,0,0" VerticalAlignment="Center"/>
+    </DataTemplate>
+
+    <DataTemplate x:Key="AlertIconTemplate">
+        <wpf:PackIcon Kind="AlertCircle" Width="24" Height="24" Margin="10,0,0,0" VerticalAlignment="Center"/>
+    </DataTemplate>
+
+    <Style x:Key="MaterialDesignClosingActionButton" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignFlatButton}">
+        <Setter Property="Height" Value="26" />
+        <Setter Property="Width" Value="26" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}"/>
+        <Setter Property="Tag" Value="Brushed.White" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ButtonBase}">
+                    <Grid>
+                        <Ellipse x:Name="EllipsedBorder" 
+                                 Fill="{TemplateBinding Background}"
+                                 Opacity="0.1" />
+                        <wpf:Ripple Focusable="False"
+                                    HorizontalContentAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    Padding="{TemplateBinding Padding}"
+                                    Feedback="IndianRed"
+                                    Clip="{Binding ElementName=GeometryEllipse, Path=RenderedGeometry}" ClipToBounds="True"
+                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" >
+                            <wpf:PackIcon x:Name="Icon" Kind="Close" Height="17" Width="18" />
+                        </wpf:Ripple>
+                        <Ellipse x:Name="GeometryEllipse" Fill="Transparent" IsHitTestVisible="False" Focusable="False" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="Fill" TargetName="EllipsedBorder" Value="IndianRed" />
+                            <Setter Property="Foreground" TargetName="Icon" Value="IndianRed" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Opacity" Value="0.23"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="MaterialDesignToastNotificationMessage" TargetType="{x:Type extender:Notification}" BasedOn="{StaticResource {x:Type wpf:SnackbarMessage}}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type extender:Notification}">
+                    <DockPanel MaxHeight="{Binding RelativeSource={RelativeSource AncestorType={x:Type extender:ToastNotificationBar}}, Path=(wpf:SnackbarMessage.ContentMaxHeight)}">
+                        <Grid Panel.ZIndex="1" HorizontalAlignment="Right">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <!-- will become a Panel to wrap a "pretend" button -->
+                            <Button x:Name="PART_ActionButton" Grid.Column="1"
+                                    Command="{TemplateBinding ActionCommand}"
+                                    CommandParameter="{TemplateBinding ActionCommandParameter}"
+                                    Content="{TemplateBinding ActionContent}"
+                                    ContentTemplate="{TemplateBinding ActionContentTemplate}"
+                                    ContentStringFormat="{TemplateBinding ActionContentStringFormat}"
+                                    ContentTemplateSelector="{TemplateBinding ActionContentTemplateSelector}"
+                                    Visibility="{TemplateBinding ActionContent, Converter={StaticResource NullableToVisibilityConverter}}"
+                                    Style="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type extender:ToastNotificationBar}}, Path=ActionButtonStyle}" />
+                            <Button x:Name="PART_SecondaryActionButton" Grid.Column="0"
+                                    Command="{TemplateBinding SecondaryActionCommand}"
+                                    CommandParameter="{TemplateBinding SecondaryActionCommandParameter}"
+                                    Content="{TemplateBinding SecondaryActionContent}" 
+                                    ContentTemplate="{TemplateBinding SecondaryActionContentTemplate}"
+                                    ContentStringFormat="{TemplateBinding SecondaryActionContentStringFormat}"
+                                    ContentTemplateSelector="{TemplateBinding SecondaryActionContentTemplateSelector}"                                      
+                                    Visibility="{TemplateBinding SecondaryActionContent, Converter={StaticResource NullableToVisibilityConverter}}"
+                                    Style="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type extender:ToastNotificationBar}}, Path=SecondaryActionButtonStyle}" />
+                            <DockPanel.Dock>
+                                <MultiBinding Converter="{StaticResource MessageActionPlacementConverter}">
+                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type extender:ToastNotificationBar}}" Path="ActionButtonPlacement" />
+                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type extender:ToastNotificationBar}}" Path="(wpf:SnackbarMessage.InlineActionButtonMaxHeight)" />
+                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type extender:ToastNotificationBar}}" Path="ActualHeight" />
+                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type DockPanel}}" Path="ActualWidth" />
+                                    <Binding ElementName="ContentGrid" Path="ActualWidth" />
+                                    <Binding RelativeSource="{RelativeSource Mode=Self}" Path="ActualWidth" />
+                                </MultiBinding>
+                            </DockPanel.Dock>
+                        </Grid>
+
+                        <ContentPresenter x:Name="ContentGrid" Margin="8,0"
+                                          Content="{TemplateBinding Content}" 
+                                          VerticalAlignment="Center"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                          ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}">
+                            <ContentPresenter.Resources>
+                                <DataTemplate DataType="{x:Type system:String}">
+                                    <TextBlock Text="{Binding}" Padding="0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MaterialDesignBody1TextBlock}">
+                                                <Setter Property="FontSize" Value="14" />
+                                                <Setter Property="TextWrapping" Value="WrapWithOverflow" />
+                                                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                                <Setter Property="VerticalAlignment" Value="Center" />
+                                                <Setter Property="FontWeight" Value="{Binding Path=(TextElement.FontWeight), RelativeSource={RelativeSource AncestorType={x:Type extender:ToastNotificationBar}}}" />
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ContentPresenter.Resources>
+                        </ContentPresenter>
+                    </DockPanel>
+                    <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding AreActionButtonPositionsInverted, RelativeSource={RelativeSource AncestorType={x:Type extender:ToastNotificationBar}}}" Value="True">
+                            <Setter TargetName="PART_ActionButton" Property="Grid.Column" Value="0" />
+                            <Setter TargetName="PART_SecondaryActionButton" Property="Grid.Column" Value="1" />
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="MaterialDesignToastNotification" TargetType="{x:Type extender:ToastNotificationBar}">
+        <Setter Property="VerticalAlignment" Value="Bottom" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="MinHeight" Value="48" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignCardBackground}" />
+        <Setter Property="ActionButtonStyle" Value="{StaticResource MaterialDesignClosingActionButton}" />
+        <Setter Property="SecondaryActionButtonStyle" Value="{StaticResource MaterialDesignFlatButton}" />
+        <Setter Property="MinWidth" Value="288" />
+        <Setter Property="MaxWidth" Value="568" />
+        <Setter Property="Margin" Value="3" /> 
+        <Setter Property="wpf:SnackbarMessage.InlineActionButtonMaxHeight" Value="53" />
+        <Setter Property="wpf:SnackbarMessage.ContentMaxHeight" Value="61" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type extender:ToastNotificationBar}">
+                    <ControlTemplate.Resources>
+                        <Storyboard x:Key="ActivateStoryboard" Duration="0:0:0.5">
+                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Root" Storyboard.TargetProperty="Visibility">
+                                <DiscreteObjectKeyFrame Value="{x:Static Visibility.Visible}" />
+                            </ObjectAnimationUsingKeyFrames>
+                            <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.225">
+                                <DoubleAnimation.EasingFunction>
+                                    <SineEase EasingMode="EaseOut" />
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                            <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" To="0" Duration="0:0:0.5" >
+                                <DoubleAnimation.EasingFunction>
+                                    <SineEase EasingMode="EaseOut" />
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                            <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" To="0" Duration="0:0:0.5" >
+                                <DoubleAnimation.EasingFunction>
+                                    <SineEase EasingMode="EaseOut" />
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                        </Storyboard>
+                        <Storyboard x:Key="DeactivateStoryboard" Duration="0:0:0.6" >
+                            <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="Opacity" From="1" To="0" Duration="0:0:0.1">
+                                <DoubleAnimation.EasingFunction>
+                                    <SineEase EasingMode="EaseOut" />
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                            <ObjectAnimationUsingKeyFrames BeginTime="0:0:0.6" Storyboard.TargetName="Root" Storyboard.TargetProperty="Visibility">
+                                <DiscreteObjectKeyFrame Value="{x:Static Visibility.Collapsed}" />
+                            </ObjectAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </ControlTemplate.Resources>
+                    <StackPanel x:Name="Root" RenderTransformOrigin="0.5,0.5" Visibility="Collapsed">
+                        <StackPanel.RenderTransform>
+                            <TranslateTransform X="0" Y="0" />
+                        </StackPanel.RenderTransform>
+                        <wpf:Card x:Name="ContentCard" UniformCornerRadius="4" Background="{TemplateBinding Background}" VerticalAlignment="Stretch">
+                            <Border x:Name="ContentBorder" MinHeight="{TemplateBinding MinHeight}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border x:Name="TypeBorder" Visibility="Collapsed" Width="7" />
+                                    <ContentControl x:Name="IconContent" Grid.Column="1" ContentTemplate="{StaticResource NeutralIconTemplate}" Visibility="Collapsed" />
+                                    <ContentPresenter Grid.Column="2"
+                                                        Content="{TemplateBinding Message}"
+                                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                        Margin="{TemplateBinding Padding}" >
+                                        <ContentPresenter.Resources>
+                                            <Style TargetType="{x:Type extender:Notification}" BasedOn="{StaticResource MaterialDesignToastNotificationMessage}"/>
+                                        </ContentPresenter.Resources>
+                                    </ContentPresenter>
+                                </Grid>
+                            </Border>
+                        </wpf:Card>
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsActive" Value="True">
+                            <Setter TargetName="Root" Property="Visibility" Value="Visible" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard Storyboard="{StaticResource ActivateStoryboard}" />
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard Storyboard="{StaticResource DeactivateStoryboard}" />
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="HorizontalAlignment" Value="Stretch">
+                            <Setter Property="Margin" Value="0" />
+                            <Setter Property="ClipToBounds" Value="True" />
+                            <Setter TargetName="ContentCard" Property="UniformCornerRadius" Value="0" />
+                        </Trigger>
+                        <Trigger Property="CurrentNotificationType" Value="Information" >
+                            <Setter TargetName="TypeBorder" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="TypeBorder" Property="Background" Value="DodgerBlue" />
+                            <Setter TargetName="IconContent" Property="Foreground" Value="DodgerBlue" />
+                            <Setter Property="TextElement.FontWeight" Value="DemiBold" />
+                            <Setter TargetName="IconContent" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="IconContent" Property="ContentTemplate" Value="{StaticResource NeutralIconTemplate}" />
+                        </Trigger>
+                        <Trigger Property="CurrentNotificationType" Value="Warning" >
+                            <Setter TargetName="TypeBorder" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="TypeBorder" Property="Background" Value="DarkOrange" />
+                            <Setter TargetName="IconContent" Property="Foreground" Value="DarkOrange" />
+                            <Setter Property="TextElement.FontWeight" Value="DemiBold" />
+                            <Setter TargetName="IconContent" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="IconContent" Property="ContentTemplate" Value="{StaticResource WarningIconTemplate}" />
+                        </Trigger>
+                        <Trigger Property="CurrentNotificationType" Value="Alert" >
+                            <Setter TargetName="TypeBorder" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="TypeBorder" Property="Background" Value="IndianRed" />
+                            <Setter TargetName="IconContent" Property="Foreground" Value="IndianRed" />
+                            <Setter Property="TextElement.FontWeight" Value="DemiBold" />
+                            <Setter TargetName="IconContent" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="IconContent" Property="ContentTemplate" Value="{StaticResource AlertIconTemplate}" />
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsActive" Value="True" />
+                                <Condition Property="HorizontalAlignment" Value="Left" />
+                                <Condition Property="VerticalAlignment" Value="Bottom" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Root" Property="RenderTransform" >
+                                <Setter.Value>
+                                    <TranslateTransform X="-4" Y="2" />
+                                </Setter.Value>
+                            </Setter>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsActive" Value="True" />
+                                <Condition Property="HorizontalAlignment" Value="Center" />
+                                <Condition Property="VerticalAlignment" Value="Bottom" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Root" Property="RenderTransform" >
+                                <Setter.Value>
+                                    <TranslateTransform X="0" Y="2" />
+                                </Setter.Value>
+                            </Setter>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsActive" Value="True" />
+                                <Condition Property="HorizontalAlignment" Value="Stretch" />
+                                <Condition Property="VerticalAlignment" Value="Bottom" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Root" Property="RenderTransform" >
+                                <Setter.Value>
+                                    <TranslateTransform X="0" Y="2" />
+                                </Setter.Value>
+                            </Setter>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsActive" Value="True" />
+                                <Condition Property="HorizontalAlignment" Value="Right" />
+                                <Condition Property="VerticalAlignment" Value="Bottom" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Root" Property="RenderTransform" >
+                                <Setter.Value>
+                                    <TranslateTransform X="4" Y="2" />
+                                </Setter.Value>
+                            </Setter>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsActive" Value="True" />
+                                <Condition Property="HorizontalAlignment" Value="Left" />
+                                <Condition Property="VerticalAlignment" Value="Top" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Root" Property="RenderTransform" >
+                                <Setter.Value>
+                                    <TranslateTransform X="-4" Y="-2" />
+                                </Setter.Value>
+                            </Setter>
+                         </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsActive" Value="True" />
+                                <Condition Property="HorizontalAlignment" Value="Center" />
+                                <Condition Property="VerticalAlignment" Value="Top" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Root" Property="RenderTransform" >
+                                <Setter.Value>
+                                    <TranslateTransform X="0" Y="-2" />
+                                </Setter.Value>
+                            </Setter>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsActive" Value="True" />
+                                <Condition Property="HorizontalAlignment" Value="Stretch" />
+                                <Condition Property="VerticalAlignment" Value="Top" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Root" Property="RenderTransform" >
+                                <Setter.Value>
+                                    <TranslateTransform X="0" Y="-2" />
+                                </Setter.Value>
+                            </Setter>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsActive" Value="True" />
+                                <Condition Property="HorizontalAlignment" Value="Right" />
+                                <Condition Property="VerticalAlignment" Value="Top" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Root" Property="RenderTransform" >
+                                <Setter.Value>
+                                    <TranslateTransform X="4" Y="-2" />
+                                </Setter.Value>
+                            </Setter>
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="HorizontalAlignment" Value="Stretch">
+                <Setter Property="MaxWidth" Value="{x:Static system:Double.MaxValue}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+
+
+</ResourceDictionary>
