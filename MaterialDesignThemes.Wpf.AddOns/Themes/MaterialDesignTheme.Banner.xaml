@@ -1,0 +1,195 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:extender="clr-namespace:MaterialDesignThemes.Wpf.AddOns"
+                    xmlns:wpf="http://materialdesigninxaml.net/winfx/xaml/themes"
+                    xmlns:converters="http://materialdesigninxaml.net/winfx/xaml/themes"
+                    xmlns:selfconverters="clr-namespace:MaterialDesignThemes.Wpf.AddOns.Converters"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib"
+                    xmlns:materialDesignInXamlExtender="clr-namespace:MaterialDesignThemes.Wpf.AddOns">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.TextBlock.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Snackbar.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <converters:NullableToVisibilityConverter x:Key="NullableToVisibilityConverter" />
+    <converters:MathConverter x:Key="MathAddConverter" Operation="Add" />
+    <converters:MathMultipleConverter x:Key="MathMultipleConverter" Operation="Multiply" />
+    <selfconverters:MessageActionPlacementConverter x:Key="MessageActionPlacementConverter" />
+
+    <Style x:Key="MaterialDesignBannerMessage" TargetType="{x:Type extender:InformationMessage}" BasedOn="{StaticResource {x:Type wpf:SnackbarMessage}}">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Margin" Value="8" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type extender:InformationMessage}">
+                    <DockPanel MaxHeight="{Binding RelativeSource={RelativeSource AncestorType={x:Type materialDesignInXamlExtender:Banner}}, Path=(wpf:SnackbarMessage.ContentMaxHeight)}" 
+                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}">
+                        <Grid Panel.ZIndex="1" HorizontalAlignment="Right">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="PART_ActionButton" Grid.Column="1"
+                                    Command="{TemplateBinding ActionCommand}"
+                                    CommandParameter="{TemplateBinding ActionCommandParameter}"
+                                    Content="{TemplateBinding ActionContent}"
+                                    ContentTemplate="{TemplateBinding ActionContentTemplate}"
+                                    ContentStringFormat="{TemplateBinding ActionContentStringFormat}"
+                                    ContentTemplateSelector="{TemplateBinding ActionContentTemplateSelector}"
+                                    Visibility="{TemplateBinding ActionContent, Converter={StaticResource NullableToVisibilityConverter}}"
+                                    Style="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type materialDesignInXamlExtender:Banner}}, Path=ActionButtonStyle}" />
+                            <Button x:Name="PART_SecondaryActionButton" Grid.Column="0"
+                                    Command="{TemplateBinding SecondaryActionCommand}"
+                                    CommandParameter="{TemplateBinding SecondaryActionCommandParameter}"
+                                    Content="{TemplateBinding SecondaryActionContent}" 
+                                    ContentTemplate="{TemplateBinding SecondaryActionContentTemplate}"
+                                    ContentStringFormat="{TemplateBinding SecondaryActionContentStringFormat}"
+                                    ContentTemplateSelector="{TemplateBinding SecondaryActionContentTemplateSelector}"                                      
+                                    Visibility="{TemplateBinding SecondaryActionContent, Converter={StaticResource NullableToVisibilityConverter}}"
+                                    Style="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type materialDesignInXamlExtender:Banner}}, Path=SecondaryActionButtonStyle}" />
+                            <DockPanel.Dock>
+                                <MultiBinding Converter="{StaticResource MessageActionPlacementConverter}">
+                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type materialDesignInXamlExtender:Banner}}" Path="ActionButtonPlacement" />
+                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type materialDesignInXamlExtender:Banner}}" Path="(wpf:SnackbarMessage.InlineActionButtonMaxHeight)" />
+                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type materialDesignInXamlExtender:Banner}}" Path="ActualHeight" />
+                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type DockPanel}}" Path="ActualWidth" />
+                                    <Binding ElementName="ContentGrid" Path="ActualWidth" />
+                                    <Binding RelativeSource="{RelativeSource Mode=Self}" Path="ActualWidth" />
+                                </MultiBinding>
+                            </DockPanel.Dock>
+                        </Grid>
+
+                        <Grid x:Name="ContentGrid" HorizontalAlignment="Left">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Viewbox Margin="5,0,10,0" VerticalAlignment="Center" MaxHeight="{Binding ActualHeight, ElementName=TextPresenter, Converter={StaticResource MathAddConverter}, ConverterParameter=4}">
+                                <ContentPresenter Content="{TemplateBinding IllustrationContent}"
+                                                  ContentTemplate="{TemplateBinding IllustrationContentTemplate}"
+                                                  ContentTemplateSelector="{TemplateBinding IllustrationContentTemplateSelector}" />
+                            </Viewbox>
+                            <ContentPresenter Grid.Column="1"
+                                              Name="TextPresenter"
+                                              Content="{TemplateBinding Content}" 
+                                              VerticalAlignment="Center"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                              ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+                                              HorizontalAlignment="Left">
+                                <ContentPresenter.Resources>
+                                    <DataTemplate DataType="{x:Type system:String}">
+                                        <TextBlock Text="{Binding}" Padding="0" >
+                                            <TextBlock.Style>
+                                                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MaterialDesignBody2TextBlock}">
+                                                    <Setter Property="LineHeight" Value="16" />
+                                                    <Setter Property="MaxHeight" Value="48" />
+                                                    <Setter Property="TextWrapping" Value="WrapWithOverflow" />
+                                                    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                                    <Setter Property="LineStackingStrategy" Value="BlockLineHeight" />
+                                                    <Setter Property="VerticalAlignment" Value="Center" />
+                                                    <Setter Property="FontWeight" Value="{Binding Path=(TextElement.FontWeight), RelativeSource={RelativeSource AncestorType={x:Type materialDesignInXamlExtender:Banner}}}" />
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
+                        </Grid>
+                    </DockPanel>
+                    <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding AreActionButtonPositionsInverted, RelativeSource={RelativeSource AncestorType={x:Type materialDesignInXamlExtender:Banner}}}" Value="True">
+                            <Setter TargetName="PART_ActionButton" Property="Grid.Column" Value="0" />
+                            <Setter TargetName="PART_SecondaryActionButton" Property="Grid.Column" Value="1" />
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="MaterialDesignBanner" TargetType="{x:Type materialDesignInXamlExtender:Banner}">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="ActionButtonStyle" Value="{StaticResource MaterialDesignFlatButton}" />
+        <Setter Property="SecondaryActionButtonStyle" Value="{StaticResource MaterialDesignFlatButton}" />
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="wpf:SnackbarMessage.InlineActionButtonMaxHeight" Value="61" />
+        <Setter Property="wpf:SnackbarMessage.ContentMaxHeight" Value="78" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type materialDesignInXamlExtender:Banner}">
+                    <ControlTemplate.Resources>
+                        <Storyboard x:Key="ActivateStoryboard" Duration="0:0:0.3">
+                            <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="Tag" From="0" To="1" Duration="0:0:0.3">
+                                <DoubleAnimation.EasingFunction>
+                                    <SineEase EasingMode="EaseOut" />
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                            <DoubleAnimation Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Opacity" To="0" BeginTime="0" Duration="0" />
+                            <DoubleAnimation Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Opacity" From="0" To="1" BeginTime="0:0:0.075"
+                                             Duration="0:0:0.225">
+                                <DoubleAnimation.EasingFunction>
+                                    <SineEase EasingMode="EaseOut" />
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                        </Storyboard>
+                        <Storyboard x:Key="DeactivateStoryboard" Duration="0:0:0.3">
+                            <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="Tag" From="1" To="0" Duration="0:0:0.3">
+                                <DoubleAnimation.EasingFunction>
+                                    <SineEase EasingMode="EaseOut" />
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                        </Storyboard>
+                    </ControlTemplate.Resources>
+                    <StackPanel x:Name="Root">
+                        <StackPanel.Tag>
+                            <system:Double>0.0</system:Double>
+                        </StackPanel.Tag>
+                        <StackPanel.Height>
+                            <MultiBinding Converter="{StaticResource MathMultipleConverter}">
+                                <Binding ElementName="ContentBorder" Path="ActualHeight" />
+                                <Binding RelativeSource="{RelativeSource Self}" Path="Tag" />
+                            </MultiBinding>
+                        </StackPanel.Height>
+                        <Border x:Name="ContentBorder"
+                                SnapsToDevicePixels="True"
+                                HorizontalAlignment="Stretch" 
+                                VerticalAlignment="Stretch"
+                                Background="{TemplateBinding Background}"
+                                BorderThickness="0,0,0,1"
+                                BorderBrush="{DynamicResource MaterialDesignSelection}">
+
+                            <ContentPresenter x:Name="ContentPresenter" 
+                                              Content="{TemplateBinding Message}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}" >
+                                <ContentPresenter.Resources>
+                                    <Style TargetType="{x:Type extender:InformationMessage}" BasedOn="{StaticResource MaterialDesignBannerMessage}"/>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
+                        </Border>
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsActive" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard Storyboard="{StaticResource ActivateStoryboard}" />
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard Storyboard="{StaticResource DeactivateStoryboard}" />
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

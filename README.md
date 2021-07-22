@@ -1,3 +1,3 @@
-# MaterialDesignInXAMLExtender
+# MaterialDesignInXamlToolkit extensions
 
-Gives some new controls built on Material Design for WPF. 
+Offers some new controls built on Material Design for WPF. 

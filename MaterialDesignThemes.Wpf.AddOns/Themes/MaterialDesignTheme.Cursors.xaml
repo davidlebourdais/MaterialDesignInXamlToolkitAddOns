@@ -1,0 +1,7 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Cursor x:Key="CursorHandOpen">pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Resources/Cursors/hand_open.cur</Cursor>
+    <Cursor x:Key="CursorHandGrab">pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Resources/Cursors/hand_grab.cur</Cursor>
+
+</ResourceDictionary>

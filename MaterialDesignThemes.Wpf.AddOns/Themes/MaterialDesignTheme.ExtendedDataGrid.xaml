@@ -1,0 +1,304 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:wpf="http://materialdesigninxaml.net/winfx/xaml/themes"
+                    xmlns:extender="clr-namespace:MaterialDesignThemes.Wpf.AddOns"
+                    xmlns:extenderutils="clr-namespace:MaterialDesignThemes.Wpf.AddOns.Utils">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.DataGrid.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.Separator.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+    
+    <extenderutils:DataGridCellToDataContextConverter x:Key="DataGridCellToDataContextConverter" />
+    <wpf:NullableToVisibilityConverter x:Key="NullableToVisibilityConverter" />
+
+    <!-- Same as in MaterialDesign Toolkit header style but without arrow animations -->
+    <Style x:Key="MaterialDesignExtendedDataGridColumnHeader" TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type DataGridColumnHeader}">
+                    <Grid>
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <Grid Background="Transparent">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <wpf:ListSortDirectionIndicator Grid.Column="0" Width="12" Height="12"
+                                                                x:Name="SortDirectionIndicator"
+                                                                ListSortDirection="{TemplateBinding SortDirection}" 
+                                                                Visibility="{Binding SortDirection, RelativeSource={RelativeSource Mode=TemplatedParent}, Converter={StaticResource NullableToVisibilityConverter}}"
+                                                                />
+                                <ContentPresenter Grid.Column="1" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                  Margin="{TemplateBinding Padding}"/>
+                            </Grid>
+                        </Border>
+                        <Thumb x:Name="PART_LeftHeaderGripper" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignGridColumnHeaderGripper}"/>
+                        <Thumb x:Name="PART_RightHeaderGripper" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignGridColumnHeaderGripper}"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <DataTemplate x:Key="CheckMarksColumnHeaderTemplate">
+        <extender:ExtendedCheckBox HorizontalAlignment="Center" VerticalAlignment="Center" 
+                  IsThreeState="{Binding SelectAllRowsIsTriStated, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}"
+                  IsThreeStateOrderInverted="True"
+                  IsChecked="{Binding SelectAllRowsState, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="CheckMarkCellTemplate">
+        <CheckBox DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGridCell}, Converter={StaticResource DataGridCellToDataContextConverter}}"
+                  IsChecked="{Binding IsChecked}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    </DataTemplate>
+
+    <DataTemplate x:Key="IDsColumnHeaderTemplate">
+        <TextBlock Text="ID" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="IdCellTemplate">
+        <TextBlock DataContext="{Binding Converter={StaticResource DataGridCellToDataContextConverter}, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGridCell}}"
+                   Text="{Binding StringFormat={}{0}.}" FontWeight="Bold" VerticalAlignment="Center" TextAlignment="Right" HorizontalAlignment="Center"/>
+    </DataTemplate>
+
+    <Style x:Key="IdAndCheckMarksColumnHeaderTemplateStyle" TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MaterialDesignExtendedDataGridColumnHeader}">
+        <Setter Property="OverridesDefaultStyle" Value="False" />
+        <Setter Property="FontStyle" Value="Italic" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <DataTemplate x:Key="ExtendedDataGridRowsPerPageSelectionTemplate">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Items per page:" VerticalAlignment="Center"/>
+            <ComboBox IsEditable="True" Margin="5,0" 
+                      Text="{Binding RowsPerPage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}">
+                <ComboBoxItem>1</ComboBoxItem>
+                <ComboBoxItem>2</ComboBoxItem>
+                <ComboBoxItem>5</ComboBoxItem>
+                <ComboBoxItem>10</ComboBoxItem>
+                <ComboBoxItem>20</ComboBoxItem>
+                <ComboBoxItem>50</ComboBoxItem>
+                <ComboBoxItem>100</ComboBoxItem>
+                <ComboBoxItem>200</ComboBoxItem>
+                <ComboBoxItem>500</ComboBoxItem>
+                <ComboBoxItem>1000</ComboBoxItem>
+            </ComboBox>
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="ExtendedDataGridPageNavigationTemplate">
+        <StackPanel Margin="1,0" Orientation="Horizontal">
+            <TextBlock Text="{Binding CurrentVisibleItemRangeText, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}" Margin="0,0,5,0" VerticalAlignment="Center" />
+            <Button Style="{StaticResource MaterialDesignIconForegroundButton}"
+                    Visibility="{Binding ShowsGoToFirstAndLastPageControls, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    Command="{Binding GoToFirstPageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}"
+                    ToolTip="Go to first page"
+                    Height="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"
+                    Width="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"
+                    Margin="0,0,-8,0"
+                    MinHeight="30"
+                    MinWidth="30" >
+                <wpf:PackIcon Kind="PageFirst" />
+            </Button>
+            <Button Style="{StaticResource MaterialDesignIconForegroundButton}"
+                    Command="{Binding GoToPreviousPageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}"
+                    ToolTip="Go to previous page"
+                    Height="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"
+                    Width="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"
+                    MinHeight="30" 
+                    MinWidth="30"
+                    Margin="5,0" >
+                <wpf:PackIcon Kind="ChevronLeft" />
+            </Button>
+
+            <Button Style="{StaticResource MaterialDesignIconForegroundButton}"
+                    Command="{Binding GoToNextPageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}"
+                    ToolTip="Go to next page"
+                    Height="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"
+                    Width="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"
+                    MinHeight="30"
+                    MinWidth="30" >
+                <wpf:PackIcon Kind="ChevronRight" />
+            </Button>
+            <Button Style="{StaticResource MaterialDesignIconForegroundButton}"
+                    Visibility="{Binding ShowsGoToFirstAndLastPageControls, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    Command="{Binding GoToLastPageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}"
+                    ToolTip="Go to last page"
+                    Height="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"
+                    Width="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"
+                    Margin="-8,0,0,0"
+                    MinHeight="30"
+                    MinWidth="30" >
+                <wpf:PackIcon Kind="PageLast" />
+            </Button>
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="PagingOptionsTemplate">
+        <Grid Visibility="{Binding PagingOptionsVisibility, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Separator Height="2" Margin="0,-1" VerticalAlignment="Top" Style="{StaticResource SeparatorStyle}"/>
+            <Grid Grid.Row="1" Margin="5,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <ContentControl Margin="5,0" VerticalAlignment="Center"  IsTabStop="False"
+                                Visibility="{Binding RowsPerPageSelectionVisibility, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}" 
+                                Content="{Binding}" ContentTemplate="{Binding RowsPerPageSelectionTemplate, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}" />
+
+                <ContentControl Height="35" Grid.Column="2" IsTabStop="False" Content="{Binding}" ContentTemplate="{StaticResource ExtendedDataGridPageNavigationTemplate}"/>
+            </Grid>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="AdditionalOptionsTemplate">
+        <StackPanel Orientation="Horizontal" Margin="10,0">
+            <CheckBox IsChecked="{Binding ShowsHeaders, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}" 
+                      Content="Shows headers" VerticalAlignment="Center" />
+            <CheckBox IsChecked="{Binding UsesPaging, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}" 
+                      Content="Uses paging" VerticalAlignment="Center" Margin="10, 0" />
+            <CheckBox IsChecked="{Binding CanChangeRowsPerPage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}" 
+                      IsEnabled="{Binding UsesPaging, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}" 
+                      Content="Can change page size" VerticalAlignment="Center" Margin="10, 0" />
+        </StackPanel>
+    </DataTemplate>
+
+    <!-- Style is mainly inspired from MaterialDesignTheme.DataGrid.xaml -->
+    <Style x:Key="MaterialDesignExtendedDataGrid" TargetType="{x:Type extender:ExtendedDataGrid}">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignTextBoxBorder}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="3"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="GridLinesVisibility" Value="None" />
+        <Setter Property="RowDetailsVisibilityMode" Value="VisibleWhenSelected"/>
+        <Setter Property="HeadersVisibility" Value="Column" />
+        <Setter Property="ScrollViewer.CanContentScroll" Value="true"/>
+        <Setter Property="ScrollViewer.PanningMode" Value="Both"/>
+        <Setter Property="VirtualizingStackPanel.VirtualizationMode" Value="Standard" />
+        <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource MaterialDesignSelection}" />
+        <Setter Property="wpf:DataGridAssist.AutoGeneratedCheckBoxStyle" Value="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}" />
+        <Setter Property="wpf:DataGridAssist.AutoGeneratedEditingCheckBoxStyle" Value="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}" />
+        <Setter Property="wpf:DataGridAssist.AutoGeneratedEditingTextStyle" Value="{StaticResource MaterialDesignDataGridTextColumnEditingStyle}" />
+        <Setter Property="wpf:DataGridAssist.EnableEditBoxAssist" Value="True" />
+        <Setter Property="UsesPaging" Value="True" />
+        <Setter Property="CanChangeRowsPerPage" Value="True" />
+        <Setter Property="RowsPerPageSelectionTemplate" Value="{StaticResource ExtendedDataGridRowsPerPageSelectionTemplate}" />
+        <Setter Property="PagingOptionsTemplate" Value="{StaticResource PagingOptionsTemplate}" />
+        <Setter Property="CanShowAdditionalOptions" Value="True" />
+        <Setter Property="AdditionalOptionsTemplate" Value="{StaticResource AdditionalOptionsTemplate}" />
+        <Setter Property="CellStyle" Value="{StaticResource MaterialDesignDataGridCell}" />
+        <Setter Property="ColumnHeaderStyle" Value="{StaticResource MaterialDesignExtendedDataGridColumnHeader}" />
+        <Setter Property="CheckMarksColumnHeaderStyle" Value="{StaticResource IdAndCheckMarksColumnHeaderTemplateStyle}" />
+        <Setter Property="CheckMarksColumnHeaderTemplate" Value="{StaticResource CheckMarksColumnHeaderTemplate}" />
+        <Setter Property="CheckMarkCellStyle" Value="{StaticResource MaterialDesignDataGridCell}" />
+        <Setter Property="CheckMarkCellTemplate" Value="{StaticResource CheckMarkCellTemplate}" />
+        <Setter Property="CheckMarkCellEditingTemplate" Value="{StaticResource CheckMarkCellTemplate}" />
+        <Setter Property="IdsColumnHeaderStyle" Value="{StaticResource IdAndCheckMarksColumnHeaderTemplateStyle}" />
+        <Setter Property="IdsColumnHeaderTemplate" Value="{StaticResource IDsColumnHeaderTemplate}" />
+        <Setter Property="IdCellStyle" Value="{StaticResource MaterialDesignDataGridCell}" />
+        <Setter Property="IdCellTemplate" Value="{StaticResource IdCellTemplate}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type extender:ExtendedDataGrid}">
+                    <Border BorderBrush="{TemplateBinding BorderBrush}" 
+                            BorderThickness="{TemplateBinding BorderThickness}" 
+                            Background="{TemplateBinding Background}" 
+                            Padding="{TemplateBinding Padding}" 
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <ScrollViewer x:Name="DG_ScrollViewer" Focusable="false">
+                                <ScrollViewer.Template>
+                                    <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="*"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Button Command="{x:Static DataGrid.SelectAllCommand}" Focusable="false" Style="{DynamicResource {ComponentResourceKey ResourceId=DataGridSelectAllButtonStyle, TypeInTargetAssembly={x:Type DataGrid}}}" Visibility="{Binding HeadersVisibility, ConverterParameter={x:Static DataGridHeadersVisibility.All}, Converter={x:Static DataGrid.HeadersVisibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" Width="{Binding CellsPanelHorizontalOffset, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"/>
+                                            <Border BorderThickness="0 0 0 1" BorderBrush="{DynamicResource MaterialDesignDivider}" Grid.Row="0" Grid.Column="1" Visibility="{Binding HeadersVisibility, ConverterParameter={x:Static DataGridHeadersVisibility.Column}, Converter={x:Static DataGrid.HeadersVisibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}">
+                                                <DataGridColumnHeadersPresenter x:Name="PART_ColumnHeadersPresenter" />
+                                            </Border>
+                                            <ScrollContentPresenter x:Name="PART_ScrollContentPresenter" CanContentScroll="{TemplateBinding CanContentScroll}" Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="1"/>
+                                            <ScrollBar x:Name="PART_VerticalScrollBar" Grid.Column="2" Maximum="{TemplateBinding ScrollableHeight}" Orientation="Vertical" Grid.Row="1" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" Value="{Binding VerticalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" ViewportSize="{TemplateBinding ViewportHeight}"/>
+                                            <Grid Grid.Column="1" Grid.Row="2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="{Binding NonFrozenColumnsViewportHorizontalOffset, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ScrollBar x:Name="PART_HorizontalScrollBar" Grid.Column="1" Maximum="{TemplateBinding ScrollableWidth}" Orientation="Horizontal" Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}" Value="{Binding HorizontalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" ViewportSize="{TemplateBinding ViewportWidth}"/>
+                                            </Grid>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </ScrollViewer.Template>
+                                <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                            </ScrollViewer>
+
+                            <wpf:Card Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10" UniformCornerRadius="16"
+                                      Visibility="{Binding IsPageLoading, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <StackPanel Orientation="Horizontal" Margin="3,3,3,3">
+                                    <TextBlock Text="{TemplateBinding PageLoadingText}" VerticalAlignment="Center" Margin="8,0"/>
+                                    <wpf:Card UniformCornerRadius="14">
+                                        <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" 
+                                     Margin="3,3,4,3"
+                                     Value="0"                   
+                                     IsIndeterminate="True" />
+                                    </wpf:Card>
+                                </StackPanel>
+                            </wpf:Card>
+
+                            <ContentControl Grid.Row="1" x:Name="PageNavigationControl" IsTabStop="False" Content="{Binding}" ContentTemplate="{TemplateBinding PagingOptionsTemplate}"/>
+
+                            <Grid Grid.Row="2" Margin="0,0,0,2" MinHeight="{Binding ActualHeight, ElementName=PageNavigationControl}" Visibility="{TemplateBinding AdditionalOptionsVisibility}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Separator Height="2" Margin="0,-1" VerticalAlignment="Top" Style="{StaticResource SeparatorStyle}"/>
+                                <ContentControl Grid.Row="1" IsTabStop="False" Content="{Binding}" ContentTemplate="{TemplateBinding AdditionalOptionsTemplate}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsGrouping" Value="true"/>
+                    <Condition Property="VirtualizingPanel.IsVirtualizingWhenGrouping" Value="false"/>
+                </MultiTrigger.Conditions>
+                <Setter Property="ScrollViewer.CanContentScroll" Value="false"/>
+            </MultiTrigger>
+        </Style.Triggers>
+    </Style>
+
+</ResourceDictionary>

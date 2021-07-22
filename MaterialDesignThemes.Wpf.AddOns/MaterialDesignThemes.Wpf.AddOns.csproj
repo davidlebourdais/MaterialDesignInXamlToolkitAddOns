@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <AssemblyTitle>MaterialDesignThemes.Wpf.AddOns</AssemblyTitle>
+    <PackageId>MaterialDesignInXamlToolkitAddOns</PackageId>
+    <Title>Extensions for MaterialDesignInXamlToolkit</Title>
+    <PackageDescription>Offers new features and extra controls to use Material Design in Xaml applications</PackageDescription>
+    <PackageTags>WPF;Xaml;ColorPicker;DataGrid</PackageTags>
+    <UseWPF>true</UseWPF>
+    <Version>0.0.1</Version>
+    <Authors>David Le Bourdais</Authors>
+    <Copyright>Copyright © 2021</Copyright>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TargetFrameworks>net471;net5.0-windows;netcoreapp3.1</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Cursors\*.cur" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dynamitey" Version="2.0.10.189" />
+    <PackageReference Include="ExtendedWPFVisualTreeHelper" Version="2.0.2" />
+    <PackageReference Include="MaterialDesignThemes" Version="4.1.0" />
+  </ItemGroup>
+</Project>
