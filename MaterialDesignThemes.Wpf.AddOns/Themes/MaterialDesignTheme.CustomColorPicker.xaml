@@ -48,7 +48,7 @@
     <!-- Template for system color in dropdown menu -->
     <DataTemplate x:Key="SystemColorItemTemplate">
         <StackPanel Orientation="Horizontal">
-            <Ellipse Fill="{Binding Brush}" StrokeThickness="1" Stroke="Gray" Width="12" Height="12" VerticalAlignment="Center"/>
+            <Ellipse Fill="{Binding AsSolidColorBrush}" StrokeThickness="1" Stroke="Gray" Width="12" Height="12" VerticalAlignment="Center"/>
             <TextBlock Text="{Binding BrushName}" Margin="10,0,0,0" VerticalAlignment="Center"/>
         </StackPanel>
     </DataTemplate>
@@ -221,7 +221,7 @@
                             </Border>
                             <TextBox Margin="10, 5"
                                             Text="{Binding PreviewedBrushAsText, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                                            Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" FontSize="14" TextAlignment="Center" helpers:TextBoxAssistExtended.OverrideBorderPadding="0"
+                                            Style="{StaticResource MaterialDesignFilledTextBox}" FontSize="14" TextAlignment="Center" helpers:TextBoxAssistExtended.OverrideBorderPadding="0"
                                             FontWeight="DemiBold" md:HintAssist.IsFloating="False" md:TextFieldAssist.TextFieldCornerRadius="0"/>
                         </StackPanel>
 
@@ -234,7 +234,7 @@
                                 </Border>
                                 <TextBox DockPanel.Dock="Right" 
                                                 Text="{Binding PreviewedBrushAsText, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                                                Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" FontSize="14" TextAlignment="Center" helpers:TextBoxAssistExtended.OverrideBorderPadding="0"
+                                                Style="{StaticResource MaterialDesignFilledTextBox}" FontSize="14" TextAlignment="Center" helpers:TextBoxAssistExtended.OverrideBorderPadding="0"
                                                 FontWeight="DemiBold" md:HintAssist.IsFloating="False" md:TextFieldAssist.TextFieldCornerRadius="0"/>
                             </DockPanel>
                             <StackPanel Orientation="Horizontal" Margin="5,15,0,0">
@@ -399,7 +399,7 @@
                                 </Border>
                                 <TextBox Margin="10, 5"
                                             Text="{Binding PreviewedBrushAsText, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                                            Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" FontSize="14" TextAlignment="Center" helpers:TextBoxAssistExtended.OverrideBorderPadding="0"
+                                            Style="{StaticResource MaterialDesignFilledTextBox}" FontSize="14" TextAlignment="Center" helpers:TextBoxAssistExtended.OverrideBorderPadding="0"
                                             FontWeight="DemiBold" md:HintAssist.IsFloating="False" md:TextFieldAssist.TextFieldCornerRadius="0"/>
                             </StackPanel>
 
@@ -412,7 +412,7 @@
                                     </Border>
                                     <TextBox DockPanel.Dock="Right" 
                                                 Text="{Binding PreviewedBrushAsText, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                                                Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" FontSize="14" TextAlignment="Center" helpers:TextBoxAssistExtended.OverrideBorderPadding="0"
+                                                Style="{StaticResource MaterialDesignFilledTextBox}" FontSize="14" TextAlignment="Center" helpers:TextBoxAssistExtended.OverrideBorderPadding="0"
                                                 FontWeight="DemiBold" md:HintAssist.IsFloating="False" md:TextFieldAssist.TextFieldCornerRadius="0"/>
                                 </DockPanel>
                                 <StackPanel Orientation="Horizontal" Margin="5,15,0,0">

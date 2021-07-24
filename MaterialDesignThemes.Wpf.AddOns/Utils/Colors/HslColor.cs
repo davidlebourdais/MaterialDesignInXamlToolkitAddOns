@@ -147,10 +147,10 @@
         private static double GetTemp2(HslColor hslColor)
         {
             double temp2;
-            if (hslColor.Luminosity < 0.5)  //<=??
-                temp2 = hslColor.Luminosity * (1.0 + hslColor.Saturation);
+            if (hslColor._luminosity < 0.5)  //<=??
+                temp2 = hslColor._luminosity * (1.0 + hslColor._saturation);
             else
-                temp2 = hslColor.Luminosity + hslColor.Saturation - (hslColor.Luminosity * hslColor.Saturation);
+                temp2 = hslColor._luminosity + hslColor._saturation - (hslColor._luminosity * hslColor._saturation);
             return temp2;
         }
 
