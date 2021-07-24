@@ -8,7 +8,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
     /// Used to enhance <see cref="DataGridTemplateColumn"/> by offering additional
     /// properties like column name and changing some methods like OnCopyingCellClipboardContent.
     /// </summary>
-    /// <remarks>Used with <see cref="ExtendedDataGrid"/>.</remarks>
+    /// <remarks>Used with <see cref="PagedDataGrid"/>.</remarks>
     public class ExtendedDataGridTemplateColumn : DataGridTemplateColumn
     {
         /// <summary>

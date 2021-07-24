@@ -18,7 +18,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
     /// This control extends conventional DataGrid so it displays features
     /// that helps it match the material design specifications.
     /// </summary>
-    public class ExtendedDataGrid : DataGrid
+    public class PagedDataGrid : DataGrid
     {
         #region Private attributes and properties
         private const string _defaultSortMemberPath = "1";   // default invalid but non-null member path for column initialization.
@@ -46,9 +46,9 @@ namespace MaterialDesignThemes.Wpf.AddOns
 
         #region Constructors
         /// <summary>
-        /// Creates a new instance of <see cref="ExtendedDataGrid"/>.
+        /// Creates a new instance of <see cref="PagedDataGrid"/>.
         /// </summary>
-        public ExtendedDataGrid()
+        public PagedDataGrid()
         {
             // Set default values:
             _userDefinedColumns = new List<DataGridColumn>();
@@ -94,14 +94,14 @@ namespace MaterialDesignThemes.Wpf.AddOns
         }
 
         /// <summary>
-        /// Static constructor for <see cref="ExtendedDataGrid"/> type.
+        /// Static constructor for <see cref="PagedDataGrid"/> type.
         /// Override some base dependency properties.
         /// </summary>
-        static ExtendedDataGrid()
+        static PagedDataGrid()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(typeof(ExtendedDataGrid)));
-            ItemsSourceProperty.OverrideMetadata(typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(null, ItemsSourcePropertyChanged));
-            CanUserAddRowsProperty.OverrideMetadata(typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(false, CanUserAddRowsPropertyChanged));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(PagedDataGrid), new FrameworkPropertyMetadata(typeof(PagedDataGrid)));
+            ItemsSourceProperty.OverrideMetadata(typeof(PagedDataGrid), new FrameworkPropertyMetadata(null, ItemsSourcePropertyChanged));
+            CanUserAddRowsProperty.OverrideMetadata(typeof(PagedDataGrid), new FrameworkPropertyMetadata(false, CanUserAddRowsPropertyChanged));
         }
         #endregion
 
@@ -113,7 +113,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void ItemsSourcePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is ExtendedDataGrid casted))
+            if (!(sender is PagedDataGrid casted))
                 return;
             
             var newSource = (args.NewValue as IEnumerable<object>)?.ToArray();
@@ -460,7 +460,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void CanUserAddRowsPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is ExtendedDataGrid casted))
+            if (!(sender is PagedDataGrid casted))
                 return;
             
             if (!casted._canAddRowsInnerChange)  // store backup when user change value.
@@ -540,7 +540,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IntermediatePropertyValueType"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IntermediatePropertyValueTypeProperty
-            = DependencyProperty.Register(nameof(IntermediatePropertyValueType), typeof(Type), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(Type), IntermediatePropertyValueTypeChanged));
+            = DependencyProperty.Register(nameof(IntermediatePropertyValueType), typeof(Type), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(Type), IntermediatePropertyValueTypeChanged));
 
         /// <summary>
         /// Called whenever the <see cref="IntermediatePropertyValueType"/> property changes.
@@ -549,7 +549,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void IntermediatePropertyValueTypeChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is ExtendedDataGrid casted))
+            if (!(sender is PagedDataGrid casted))
                 return;
             
             casted.CancelEditWithCare();
@@ -571,7 +571,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CornerRadius"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CornerRadiusProperty
-            = DependencyProperty.Register(nameof(CornerRadius), typeof(CornerRadius), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(CornerRadius)));
+            = DependencyProperty.Register(nameof(CornerRadius), typeof(CornerRadius), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(CornerRadius)));
 
         /// <summary>
         /// Gets or sets a value indicating if column headers must be shown.
@@ -586,7 +586,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="ShowsHeadersProperty"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty ShowsHeadersProperty
-            = DependencyProperty.Register(nameof(ShowsHeaders), typeof(bool), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(true, ShowsHeadersChanged));
+            = DependencyProperty.Register(nameof(ShowsHeaders), typeof(bool), typeof(PagedDataGrid), new FrameworkPropertyMetadata(true, ShowsHeadersChanged));
 
         /// <summary>
         /// Called whenever the <see cref="ShowsHeaders"/> property changes.
@@ -595,7 +595,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void ShowsHeadersChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is ExtendedDataGrid casted) || !(args.NewValue is bool newValue))
+            if (!(sender is PagedDataGrid casted) || !(args.NewValue is bool newValue))
                 return;
             
             if (newValue)
@@ -626,7 +626,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="UsesPagingProperty"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty UsesPagingProperty
-            = DependencyProperty.Register(nameof(UsesPaging), typeof(bool), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(true, UsesPagingChanged));
+            = DependencyProperty.Register(nameof(UsesPaging), typeof(bool), typeof(PagedDataGrid), new FrameworkPropertyMetadata(true, UsesPagingChanged));
 
         /// <summary>
         /// Called whenever the <see cref="UsesPaging"/> property changes.
@@ -635,7 +635,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void UsesPagingChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is ExtendedDataGrid casted) || !(args.NewValue is bool newValue))
+            if (!(sender is PagedDataGrid casted) || !(args.NewValue is bool newValue))
                 return;
             
             casted.CancelEditWithCare();
@@ -671,7 +671,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             protected set => SetValue(_pagingOptionsVisibilityPropertyKey, value);
         }
         private static readonly DependencyPropertyKey _pagingOptionsVisibilityPropertyKey =
-            DependencyProperty.RegisterReadOnly(nameof(PagingOptionsVisibility), typeof(Visibility), typeof(ExtendedDataGrid), new PropertyMetadata(Visibility.Visible));
+            DependencyProperty.RegisterReadOnly(nameof(PagingOptionsVisibility), typeof(Visibility), typeof(PagedDataGrid), new PropertyMetadata(Visibility.Visible));
         /// <summary>
         /// Registers <see cref="PagingOptionsVisibility"/> as a readonly dependency property.
         /// </summary>
@@ -689,7 +689,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="PagingOptionsTemplate"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty PagingOptionsTemplateProperty
-            = DependencyProperty.Register(nameof(PagingOptionsTemplate), typeof(DataTemplate), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(null));
+            = DependencyProperty.Register(nameof(PagingOptionsTemplate), typeof(DataTemplate), typeof(PagedDataGrid), new FrameworkPropertyMetadata(null));
 
         /// <summary>
         /// Gets or sets a value indicating if controls allowing to go to first or last page should be shown.
@@ -704,7 +704,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="ShowsGoToFirstAndLastPageControls"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty ShowsGoToFirstAndLastPageControlsProperty
-            = DependencyProperty.Register(nameof(ShowsGoToFirstAndLastPageControls), typeof(bool), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(bool)));
+            = DependencyProperty.Register(nameof(ShowsGoToFirstAndLastPageControls), typeof(bool), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(bool)));
 
         /// <summary>
         /// Gets or sets from how many rows found in the source background loading must be used.
@@ -718,7 +718,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="BackgroundLoadingThreshold"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty BackgroundLoadingThresholdProperty
-            = DependencyProperty.Register(nameof(BackgroundLoadingThreshold), typeof(int), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(DataTablePagingManager.DefaultThresholdBgLoadSize, BackgroundLoadingThresholdChanged));
+            = DependencyProperty.Register(nameof(BackgroundLoadingThreshold), typeof(int), typeof(PagedDataGrid), new FrameworkPropertyMetadata(DataTablePagingManager.DefaultThresholdBgLoadSize, BackgroundLoadingThresholdChanged));
 
         /// <summary>
         /// Called whenever the <see cref="BackgroundLoadingThreshold"/> property changes.
@@ -727,7 +727,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void BackgroundLoadingThresholdChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (sender is ExtendedDataGrid casted && args.NewValue is int newValue)
+            if (sender is PagedDataGrid casted && args.NewValue is int newValue)
                 casted._pagedTable.SetLoadSizeThreshold(newValue);
         }
 
@@ -743,7 +743,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="BackgroundLoadSize"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty BackgroundLoadSizeProperty
-            = DependencyProperty.Register(nameof(BackgroundLoadSize), typeof(int), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(DataTablePagingManager.DefaultItemBgLoadSize, BackgroundLoadSizeChanged));
+            = DependencyProperty.Register(nameof(BackgroundLoadSize), typeof(int), typeof(PagedDataGrid), new FrameworkPropertyMetadata(DataTablePagingManager.DefaultItemBgLoadSize, BackgroundLoadSizeChanged));
 
         /// <summary>
         /// Called whenever the <see cref="BackgroundLoadSize"/> property changes.
@@ -752,7 +752,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void BackgroundLoadSizeChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (sender is ExtendedDataGrid casted && args.NewValue is int newValue)
+            if (sender is PagedDataGrid casted && args.NewValue is int newValue)
                 casted._pagedTable.SetLoadSize(newValue);
         }
 
@@ -769,7 +769,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="ForceBackgroundLoading"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty ForceBackgroundLoadingProperty
-            = DependencyProperty.Register(nameof(ForceBackgroundLoading), typeof(bool), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(bool), ForceBackgroundLoadingChanged));
+            = DependencyProperty.Register(nameof(ForceBackgroundLoading), typeof(bool), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(bool), ForceBackgroundLoadingChanged));
 
         /// <summary>
         /// Called whenever the <see cref="ForceBackgroundLoading"/> property changes.
@@ -778,7 +778,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void ForceBackgroundLoadingChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is ExtendedDataGrid casted) || !(args.NewValue is bool newValue))
+            if (!(sender is PagedDataGrid casted) || !(args.NewValue is bool newValue))
                 return;
             
             // In case setting this property enabled paging 
@@ -815,7 +815,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             protected set => SetValue(_isPageLoadingPropertyKey, value);
         }
         private static readonly DependencyPropertyKey _isPageLoadingPropertyKey =
-            DependencyProperty.RegisterReadOnly(nameof(IsPageLoading), typeof(bool), typeof(ExtendedDataGrid), new PropertyMetadata(default(bool)));
+            DependencyProperty.RegisterReadOnly(nameof(IsPageLoading), typeof(bool), typeof(PagedDataGrid), new PropertyMetadata(default(bool)));
         /// <summary>
         /// Registers <see cref="IsPageLoading"/> as a readonly dependency property.
         /// </summary>
@@ -833,7 +833,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="PageLoadingText"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty PageLoadingTextProperty
-            = DependencyProperty.Register(nameof(PageLoadingText), typeof(string), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata("Background loading in progress"));
+            = DependencyProperty.Register(nameof(PageLoadingText), typeof(string), typeof(PagedDataGrid), new FrameworkPropertyMetadata("Background loading in progress"));
         #endregion
 
         #region Rows per page
@@ -849,7 +849,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CanChangeRowsPerPage"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CanChangeRowsPerPageProperty
-            = DependencyProperty.Register(nameof(CanChangeRowsPerPage), typeof(bool), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(true, CanChangeRowsPerPageChanged));
+            = DependencyProperty.Register(nameof(CanChangeRowsPerPage), typeof(bool), typeof(PagedDataGrid), new FrameworkPropertyMetadata(true, CanChangeRowsPerPageChanged));
 
         /// <summary>
         /// Called whenever the <see cref="CanChangeRowsPerPage"/> property changes.
@@ -858,7 +858,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void CanChangeRowsPerPageChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (sender is ExtendedDataGrid casted && args.NewValue is bool)
+            if (sender is PagedDataGrid casted && args.NewValue is bool)
                 casted.RowsPerPageSelectionVisibility = args.NewValue as bool? == true ? Visibility.Visible : Visibility.Collapsed;
         }
 
@@ -871,7 +871,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             protected set => SetValue(_rowsPerPageSelectionVisibilityPropertyKey, value);
         }
         private static readonly DependencyPropertyKey _rowsPerPageSelectionVisibilityPropertyKey =
-            DependencyProperty.RegisterReadOnly(nameof(RowsPerPageSelectionVisibility), typeof(Visibility), typeof(ExtendedDataGrid), new PropertyMetadata(Visibility.Visible));
+            DependencyProperty.RegisterReadOnly(nameof(RowsPerPageSelectionVisibility), typeof(Visibility), typeof(PagedDataGrid), new PropertyMetadata(Visibility.Visible));
         /// <summary>
         /// Registers <see cref="RowsPerPageSelectionVisibility"/> as a readonly dependency property.
         /// </summary>
@@ -889,7 +889,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="RowsPerPageSelectionTemplate"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty RowsPerPageSelectionTemplateProperty
-            = DependencyProperty.Register(nameof(RowsPerPageSelectionTemplate), typeof(DataTemplate), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(null));
+            = DependencyProperty.Register(nameof(RowsPerPageSelectionTemplate), typeof(DataTemplate), typeof(PagedDataGrid), new FrameworkPropertyMetadata(null));
 
         /// <summary>
         /// Gets or sets a value indicating how many rows shall are displayed per page.
@@ -904,7 +904,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="RowsPerPage"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty RowsPerPageProperty
-            = DependencyProperty.Register(nameof(RowsPerPage), typeof(int), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(0, RowsPerPageChanged));
+            = DependencyProperty.Register(nameof(RowsPerPage), typeof(int), typeof(PagedDataGrid), new FrameworkPropertyMetadata(0, RowsPerPageChanged));
 
         /// <summary>
         /// Called whenever the <see cref="RowsPerPage"/> property changes.
@@ -913,7 +913,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void RowsPerPageChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is ExtendedDataGrid casted) || !(args.NewValue is int newValue))
+            if (!(sender is PagedDataGrid casted) || !(args.NewValue is int newValue))
                 return;
             
             casted.CancelEditWithCare();
@@ -931,7 +931,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             protected set => SetValue(_currentPageIndexPropertyKey, value);
         }
         private static readonly DependencyPropertyKey _currentPageIndexPropertyKey =
-            DependencyProperty.RegisterReadOnly(nameof(CurrentPageIndex), typeof(uint), typeof(ExtendedDataGrid), new PropertyMetadata(default(uint)));
+            DependencyProperty.RegisterReadOnly(nameof(CurrentPageIndex), typeof(uint), typeof(PagedDataGrid), new PropertyMetadata(default(uint)));
         /// <summary>
         /// Registers <see cref="CurrentPageIndex"/> as a readonly dependency property.
         /// </summary>
@@ -946,7 +946,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             protected set => SetValue(_currentVisibleItemRangeTextPropertyKey, value);
         }
         private static readonly DependencyPropertyKey _currentVisibleItemRangeTextPropertyKey =
-            DependencyProperty.RegisterReadOnly(nameof(CurrentVisibleItemRangeText), typeof(string), typeof(ExtendedDataGrid), new PropertyMetadata(default(string)));
+            DependencyProperty.RegisterReadOnly(nameof(CurrentVisibleItemRangeText), typeof(string), typeof(PagedDataGrid), new PropertyMetadata(default(string)));
         /// <summary>
         /// Registers <see cref="CurrentVisibleItemRangeText"/> as a readonly dependency property.
         /// </summary>
@@ -964,7 +964,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="PageCountsSeparatorText"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty PageCountsSeparatorTextProperty =
-            DependencyProperty.Register(nameof(PageCountsSeparatorText), typeof(string), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(" of ", PageCountsSeparatorTextChanged));
+            DependencyProperty.Register(nameof(PageCountsSeparatorText), typeof(string), typeof(PagedDataGrid), new FrameworkPropertyMetadata(" of ", PageCountsSeparatorTextChanged));
 
         /// <summary>
         /// Called whenever the <see cref="PageCountsSeparatorText"/> property changes.
@@ -973,7 +973,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void PageCountsSeparatorTextChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (sender is ExtendedDataGrid casted && args.NewValue is string)
+            if (sender is PagedDataGrid casted && args.NewValue is string)
                 casted.UpdateCurrentVisibleItemRangeText();
         }
 
@@ -1001,7 +1001,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="SortedColumnIndex"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty SortedColumnIndexProperty
-            = DependencyProperty.Register(nameof(SortedColumnIndex), typeof(int), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(-1, SortedColumnIndexChanged));
+            = DependencyProperty.Register(nameof(SortedColumnIndex), typeof(int), typeof(PagedDataGrid), new FrameworkPropertyMetadata(-1, SortedColumnIndexChanged));
 
         /// <summary>
         /// Called whenever the <see cref="SortedColumnIndex"/> property changes.
@@ -1010,7 +1010,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void SortedColumnIndexChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is ExtendedDataGrid casted) || !(args.NewValue is int newValue))
+            if (!(sender is PagedDataGrid casted) || !(args.NewValue is int newValue))
                 return;
             
             casted.UnsetSortingOnPreviousSortedColumn();
@@ -1048,7 +1048,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IsSortingDescending"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IsSortingDescendingProperty
-            = DependencyProperty.Register(nameof(IsSortingDescending), typeof(bool), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(bool), IsSortingDescendingChanged));
+            = DependencyProperty.Register(nameof(IsSortingDescending), typeof(bool), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(bool), IsSortingDescendingChanged));
 
         /// <summary>
         /// Called whenever the <see cref="IsSortingDescending"/> property changes.
@@ -1057,7 +1057,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void IsSortingDescendingChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is ExtendedDataGrid casted))
+            if (!(sender is PagedDataGrid casted))
                 return;
             
             if (!casted._sortingInnerChange)
@@ -1079,7 +1079,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IsSortingPersistent"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IsSortingPersistentProperty
-            = DependencyProperty.Register(nameof(IsSortingPersistent), typeof(bool), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(bool), IsSortingPersistentChanged));
+            = DependencyProperty.Register(nameof(IsSortingPersistent), typeof(bool), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(bool), IsSortingPersistentChanged));
 
         /// <summary>
         /// Called whenever the <see cref="IsSortingPersistent"/> property changes.
@@ -1088,7 +1088,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void IsSortingPersistentChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (sender is ExtendedDataGrid casted && args.NewValue is bool newValue)
+            if (sender is PagedDataGrid casted && args.NewValue is bool newValue)
                 casted._pagedTable.IsSortingPersistent = newValue;
         }
 
@@ -1106,7 +1106,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CommonSortedMemberPath"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CommonSortedMemberPathProperty  // init with fake non-null.
-            = DependencyProperty.Register(nameof(CommonSortedMemberPath), typeof(string), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata("1", CommonSortedMemberPathChanged));   
+            = DependencyProperty.Register(nameof(CommonSortedMemberPath), typeof(string), typeof(PagedDataGrid), new FrameworkPropertyMetadata("1", CommonSortedMemberPathChanged));   
 
         /// <summary>
         /// Called whenever the <see cref="CommonSortedMemberPath"/> property changes.
@@ -1115,7 +1115,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void CommonSortedMemberPathChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is ExtendedDataGrid casted))
+            if (!(sender is PagedDataGrid casted))
                 return;
             
             if (casted._pagedTable.IsSorting)
@@ -1136,7 +1136,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CanShowAdditionalOptions"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CanShowAdditionalOptionsProperty
-            = DependencyProperty.Register(nameof(CanShowAdditionalOptions), typeof(bool), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(bool), CanShowAdditionalOptionsChanged));
+            = DependencyProperty.Register(nameof(CanShowAdditionalOptions), typeof(bool), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(bool), CanShowAdditionalOptionsChanged));
 
         /// <summary>
         /// Called whenever the <see cref="CanShowAdditionalOptions"/> property changes.
@@ -1145,7 +1145,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void CanShowAdditionalOptionsChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (sender is ExtendedDataGrid casted && args.NewValue is bool)
+            if (sender is PagedDataGrid casted && args.NewValue is bool)
                 casted.AdditionalOptionsVisibility = args.NewValue as bool? == true ? Visibility.Visible : Visibility.Collapsed;
         }
 
@@ -1158,7 +1158,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             protected set => SetValue(_additionalOptionsVisibilityPropertyKey, value);
         }
         private static readonly DependencyPropertyKey _additionalOptionsVisibilityPropertyKey =
-            DependencyProperty.RegisterReadOnly(nameof(AdditionalOptionsVisibility), typeof(Visibility), typeof(ExtendedDataGrid), new PropertyMetadata(Visibility.Collapsed));
+            DependencyProperty.RegisterReadOnly(nameof(AdditionalOptionsVisibility), typeof(Visibility), typeof(PagedDataGrid), new PropertyMetadata(Visibility.Collapsed));
         /// <summary>
         /// Registers <see cref="AdditionalOptionsVisibility"/> as a readonly dependency property.
         /// </summary>
@@ -1176,7 +1176,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="AdditionalOptionsTemplate"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty AdditionalOptionsTemplateProperty
-            = DependencyProperty.Register(nameof(AdditionalOptionsTemplate), typeof(DataTemplate), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(null));
+            = DependencyProperty.Register(nameof(AdditionalOptionsTemplate), typeof(DataTemplate), typeof(PagedDataGrid), new FrameworkPropertyMetadata(null));
         #endregion
 
         #region Checkmarks and ID columns settings
@@ -1193,7 +1193,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CanUserReorderIDsAndCheckMarksColumns"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CanUserReorderIDsAndCheckMarksColumnsProperty
-            = DependencyProperty.Register(nameof(CanUserReorderIDsAndCheckMarksColumns), typeof(bool), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(bool), CanUserReorderIDsAndCheckMarksColumnsChanged));
+            = DependencyProperty.Register(nameof(CanUserReorderIDsAndCheckMarksColumns), typeof(bool), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(bool), CanUserReorderIDsAndCheckMarksColumnsChanged));
 
         /// <summary>
         /// Called whenever the <see cref="CanUserReorderIDsAndCheckMarksColumns"/> property changes.
@@ -1202,7 +1202,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void CanUserReorderIDsAndCheckMarksColumnsChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is ExtendedDataGrid casted))
+            if (!(sender is PagedDataGrid casted))
                 return;
             
             casted.CancelEditWithCare();
@@ -1222,7 +1222,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CheckMarkedItems"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CheckMarkedItemsProperty =
-            DependencyProperty.Register(nameof(CheckMarkedItems), typeof(IEnumerable<object>), typeof(ExtendedDataGrid), new PropertyMetadata(null, CheckMarkedItemsChanged));
+            DependencyProperty.Register(nameof(CheckMarkedItems), typeof(IEnumerable<object>), typeof(PagedDataGrid), new PropertyMetadata(null, CheckMarkedItemsChanged));
 
         /// <summary>
         /// Called whenever the <see cref="CheckMarkedItems"/> property changes.
@@ -1231,12 +1231,12 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void CheckMarkedItemsChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is ExtendedDataGrid casted))
+            if (!(sender is PagedDataGrid casted))
                 return;
             
             if (!Equals(args.NewValue, casted._pagedTable.CheckMarkedRows))
             {
-                throw new NotSupportedException(nameof(CheckMarkedItems) + " property of " + nameof(ExtendedDataGrid) +
+                throw new NotSupportedException(nameof(CheckMarkedItems) + " property of " + nameof(PagedDataGrid) +
                                                 " is not set as read-only for convenience but must be treated as it is. Set binding mode to OneWayToSource or avoid changing this property value.");
             }
         }
@@ -1253,7 +1253,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="ShowsCheckMarks"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty SelectAllRowsStateProperty
-            = DependencyProperty.Register(nameof(SelectAllRowsState), typeof(bool?), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(true, SelectAllRowsStateChanged));
+            = DependencyProperty.Register(nameof(SelectAllRowsState), typeof(bool?), typeof(PagedDataGrid), new FrameworkPropertyMetadata(true, SelectAllRowsStateChanged));
 
         /// <summary>
         /// Called whenever the <see cref="SelectAllRowsState"/> property changes.
@@ -1262,7 +1262,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void SelectAllRowsStateChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is ExtendedDataGrid casted) || !(args.NewValue is bool newValue))
+            if (!(sender is PagedDataGrid casted) || !(args.NewValue is bool newValue))
                 return;
             
             casted.CancelEditWithCare();
@@ -1281,7 +1281,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             protected set => SetValue(_selectAllRowsIsTriStatedPropertyKey, value);
         }
         private static readonly DependencyPropertyKey _selectAllRowsIsTriStatedPropertyKey =
-            DependencyProperty.RegisterReadOnly(nameof(SelectAllRowsIsTriStated), typeof(bool), typeof(ExtendedDataGrid), new PropertyMetadata(default(bool)));
+            DependencyProperty.RegisterReadOnly(nameof(SelectAllRowsIsTriStated), typeof(bool), typeof(PagedDataGrid), new PropertyMetadata(default(bool)));
         /// <summary>
         /// Registers <see cref="SelectAllRowsIsTriStated"/> as a readonly dependency property.
         /// </summary>
@@ -1301,7 +1301,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="ShowsCheckMarks"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty ShowsCheckMarksProperty
-            = DependencyProperty.Register(nameof(ShowsCheckMarks), typeof(bool), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(bool), ShowsCheckMarksChanged));
+            = DependencyProperty.Register(nameof(ShowsCheckMarks), typeof(bool), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(bool), ShowsCheckMarksChanged));
 
         /// <summary>
         /// Called whenever the <see cref="ShowsCheckMarks"/> property changes.
@@ -1310,7 +1310,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void ShowsCheckMarksChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is ExtendedDataGrid casted) || !(args.NewValue is bool newValue))
+            if (!(sender is PagedDataGrid casted) || !(args.NewValue is bool newValue))
                 return;
             
             casted.CancelEditWithCare();
@@ -1344,7 +1344,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CheckMarksValues"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CheckMarksValuesProperty
-            = DependencyProperty.Register(nameof(CheckMarksValues), typeof(IList<bool>), typeof(ExtendedDataGrid), 
+            = DependencyProperty.Register(nameof(CheckMarksValues), typeof(IList<bool>), typeof(PagedDataGrid), 
                 new FrameworkPropertyMetadata(default(IList<bool>), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, CheckMarksValuesChanged));
 
         /// <summary>
@@ -1354,7 +1354,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void CheckMarksValuesChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is ExtendedDataGrid casted) || !(args.NewValue is IList<bool> newValue))
+            if (!(sender is PagedDataGrid casted) || !(args.NewValue is IList<bool> newValue))
                 return;
             
             if (!casted.IsLoaded)
@@ -1378,7 +1378,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CheckMarksColumnIndex"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CheckMarksColumnIndexProperty
-            = DependencyProperty.Register(nameof(CheckMarksColumnIndex), typeof(int), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(0, CheckMarksColumnIndexChanged));
+            = DependencyProperty.Register(nameof(CheckMarksColumnIndex), typeof(int), typeof(PagedDataGrid), new FrameworkPropertyMetadata(0, CheckMarksColumnIndexChanged));
 
         /// <summary>
         /// Called whenever the <see cref="CheckMarksColumnIndex"/> property changes.
@@ -1387,7 +1387,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void CheckMarksColumnIndexChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is ExtendedDataGrid casted) || !(args.NewValue is int newValue))
+            if (!(sender is PagedDataGrid casted) || !(args.NewValue is int newValue))
                 return;
             
             casted.CancelEditWithCare();
@@ -1406,7 +1406,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CheckMarksColumnHeaderStyle"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CheckMarksColumnHeaderStyleProperty
-            = DependencyProperty.Register(nameof(CheckMarksColumnHeaderStyle), typeof(Style), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(null));
+            = DependencyProperty.Register(nameof(CheckMarksColumnHeaderStyle), typeof(Style), typeof(PagedDataGrid), new FrameworkPropertyMetadata(null));
 
         /// <summary>
         /// Gets or sets the template for the selector column header.
@@ -1420,7 +1420,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CheckMarksColumnHeaderTemplate"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CheckMarksColumnHeaderTemplateProperty
-            = DependencyProperty.Register(nameof(CheckMarksColumnHeaderTemplate), typeof(DataTemplate), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(null));
+            = DependencyProperty.Register(nameof(CheckMarksColumnHeaderTemplate), typeof(DataTemplate), typeof(PagedDataGrid), new FrameworkPropertyMetadata(null));
 
         /// <summary>
         /// Gets or sets a template selector for the selector column header.
@@ -1434,7 +1434,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CheckMarksColumnHeaderTemplateSelector"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CheckMarksColumnHeaderTemplateSelectorProperty
-            = DependencyProperty.Register(nameof(CheckMarksColumnHeaderTemplateSelector), typeof(DataTemplateSelector), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(DataTemplateSelector)));
+            = DependencyProperty.Register(nameof(CheckMarksColumnHeaderTemplateSelector), typeof(DataTemplateSelector), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(DataTemplateSelector)));
 
         /// <summary>
         /// Gets or sets the style of the selector cell.
@@ -1448,7 +1448,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CheckMarkCellStyle"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CheckMarkCellStyleProperty
-            = DependencyProperty.Register(nameof(CheckMarkCellStyle), typeof(Style), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(Style)));
+            = DependencyProperty.Register(nameof(CheckMarkCellStyle), typeof(Style), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(Style)));
 
         /// <summary>
         /// Gets or sets a specific template for selector cells.
@@ -1462,7 +1462,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CheckMarkCellTemplate"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CheckMarkCellTemplateProperty
-            = DependencyProperty.Register(nameof(CheckMarkCellTemplate), typeof(DataTemplate), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(DataTemplate)));
+            = DependencyProperty.Register(nameof(CheckMarkCellTemplate), typeof(DataTemplate), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(DataTemplate)));
 
         /// <summary>
         /// Gets or sets a template selector for selector cells.
@@ -1476,7 +1476,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CheckMarkCellTemplateSelector"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CheckMarkCellTemplateSelectorProperty
-            = DependencyProperty.Register(nameof(CheckMarkCellTemplateSelector), typeof(DataTemplateSelector), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(DataTemplateSelector)));
+            = DependencyProperty.Register(nameof(CheckMarkCellTemplateSelector), typeof(DataTemplateSelector), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(DataTemplateSelector)));
 
         /// <summary>
         /// Gets or sets a template to be applied when selector cells are being edited.
@@ -1490,7 +1490,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CheckMarkCellEditingTemplate"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CheckMarkCellEditingTemplateProperty
-            = DependencyProperty.Register(nameof(CheckMarkCellEditingTemplate), typeof(DataTemplate), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(DataTemplate)));
+            = DependencyProperty.Register(nameof(CheckMarkCellEditingTemplate), typeof(DataTemplate), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(DataTemplate)));
 
         /// <summary>
         /// Gets or sets a template selector for selector cells in edit mode.
@@ -1504,7 +1504,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CheckMarkCellEditingTemplateSelector"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CheckMarkCellEditingTemplateSelectorProperty
-            = DependencyProperty.Register(nameof(CheckMarkCellEditingTemplateSelector), typeof(DataTemplateSelector), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(DataTemplateSelector)));
+            = DependencyProperty.Register(nameof(CheckMarkCellEditingTemplateSelector), typeof(DataTemplateSelector), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(DataTemplateSelector)));
         #endregion
 
         #region ID part
@@ -1520,7 +1520,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="ShowsIDs"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty ShowsIDsProperty
-            = DependencyProperty.Register(nameof(ShowsIDs), typeof(bool), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(bool), ShowsIDsChanged));
+            = DependencyProperty.Register(nameof(ShowsIDs), typeof(bool), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(bool), ShowsIDsChanged));
 
         /// <summary>
         /// Called whenever the <see cref="ShowsIDs"/> property changes.
@@ -1529,7 +1529,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void ShowsIDsChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is ExtendedDataGrid casted) || !(args.NewValue is bool newValue))
+            if (!(sender is PagedDataGrid casted) || !(args.NewValue is bool newValue))
                 return;
             
             casted.CancelEditWithCare();
@@ -1560,7 +1560,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             protected set => SetValue(_displayedIDsPropertyKey, value);
         }
         private static readonly DependencyPropertyKey _displayedIDsPropertyKey =
-            DependencyProperty.RegisterReadOnly(nameof(DisplayedIDs), typeof(ReadOnlyCollection<int>), typeof(ExtendedDataGrid), new PropertyMetadata(default(ReadOnlyCollection<int>)));
+            DependencyProperty.RegisterReadOnly(nameof(DisplayedIDs), typeof(ReadOnlyCollection<int>), typeof(PagedDataGrid), new PropertyMetadata(default(ReadOnlyCollection<int>)));
         /// <summary>
         /// Registers <see cref="DisplayedIDs"/> as a readonly dependency property.
         /// </summary>
@@ -1579,7 +1579,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IdsStartFromZero"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IdsStartFromZeroProperty
-            = DependencyProperty.Register(nameof(IdsStartFromZero), typeof(bool), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(bool), IdsStartFromZeroChanged));
+            = DependencyProperty.Register(nameof(IdsStartFromZero), typeof(bool), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(bool), IdsStartFromZeroChanged));
 
         /// <summary>
         /// Called whenever the <see cref="IdsStartFromZero"/> property changes.
@@ -1588,7 +1588,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void IdsStartFromZeroChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (sender is ExtendedDataGrid casted)
+            if (sender is PagedDataGrid casted)
                 casted._pagedTable.IndexesStartAtZero = args.NewValue as bool? == true;
         }
 
@@ -1604,7 +1604,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IdsColumnIndex"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IdsColumnIndexProperty
-            = DependencyProperty.Register(nameof(IdsColumnIndex), typeof(int), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(1, IdsColumnIndexChanged));
+            = DependencyProperty.Register(nameof(IdsColumnIndex), typeof(int), typeof(PagedDataGrid), new FrameworkPropertyMetadata(1, IdsColumnIndexChanged));
 
         /// <summary>
         /// Called whenever the <see cref="IdsColumnIndex"/> property changes.
@@ -1613,7 +1613,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void IdsColumnIndexChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (sender is ExtendedDataGrid casted && args.NewValue is int newValue)
+            if (sender is PagedDataGrid casted && args.NewValue is int newValue)
                 casted._pagedTable.IndexesColumnPosition = newValue;
         }
 
@@ -1629,7 +1629,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IdsColumnHeaderStyle"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IdsColumnHeaderStyleProperty
-            = DependencyProperty.Register(nameof(IdsColumnHeaderStyle), typeof(Style), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(null));
+            = DependencyProperty.Register(nameof(IdsColumnHeaderStyle), typeof(Style), typeof(PagedDataGrid), new FrameworkPropertyMetadata(null));
 
         /// <summary>
         /// Gets or sets the template for the index column header.
@@ -1643,7 +1643,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IdsColumnHeaderTemplate"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IdsColumnHeaderTemplateProperty
-            = DependencyProperty.Register(nameof(IdsColumnHeaderTemplate), typeof(DataTemplate), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(null));
+            = DependencyProperty.Register(nameof(IdsColumnHeaderTemplate), typeof(DataTemplate), typeof(PagedDataGrid), new FrameworkPropertyMetadata(null));
 
         /// <summary>
         /// Gets or sets a template selector for the index column header.
@@ -1657,7 +1657,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IdsColumnHeaderTemplateSelector"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IdsColumnHeaderTemplateSelectorProperty
-            = DependencyProperty.Register(nameof(IdsColumnHeaderTemplateSelector), typeof(DataTemplateSelector), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(DataTemplateSelector)));
+            = DependencyProperty.Register(nameof(IdsColumnHeaderTemplateSelector), typeof(DataTemplateSelector), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(DataTemplateSelector)));
 
         /// <summary>
         /// Gets or sets the style of the ID cell.
@@ -1671,7 +1671,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IdCellStyle"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IdCellStyleProperty
-            = DependencyProperty.Register(nameof(IdCellStyle), typeof(Style), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(Style)));
+            = DependencyProperty.Register(nameof(IdCellStyle), typeof(Style), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(Style)));
 
         /// <summary>
         /// Gets or sets a specific template for ID cells.
@@ -1685,7 +1685,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IdCellTemplate"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IdCellTemplateProperty
-            = DependencyProperty.Register(nameof(IdCellTemplate), typeof(DataTemplate), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(DataTemplate)));
+            = DependencyProperty.Register(nameof(IdCellTemplate), typeof(DataTemplate), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(DataTemplate)));
 
         /// <summary>
         /// Gets or sets a template selector for ID cells.
@@ -1699,7 +1699,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IdCellTemplateSelector"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IdCellTemplateSelectorProperty
-            = DependencyProperty.Register(nameof(IdCellTemplateSelector), typeof(DataTemplateSelector), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(DataTemplateSelector)));
+            = DependencyProperty.Register(nameof(IdCellTemplateSelector), typeof(DataTemplateSelector), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(DataTemplateSelector)));
         #endregion
 
         #endregion
@@ -1717,7 +1717,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CellTemplate"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CellTemplateProperty
-            = DependencyProperty.Register(nameof(CellTemplate), typeof(DataTemplate), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(DataTemplate)));
+            = DependencyProperty.Register(nameof(CellTemplate), typeof(DataTemplate), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(DataTemplate)));
 
         /// <summary>
         /// Gets or sets a template selector for cells.
@@ -1731,7 +1731,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CellTemplateSelector"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CellTemplateSelectorProperty
-            = DependencyProperty.Register(nameof(CellTemplateSelector), typeof(DataTemplateSelector), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(DataTemplateSelector)));
+            = DependencyProperty.Register(nameof(CellTemplateSelector), typeof(DataTemplateSelector), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(DataTemplateSelector)));
 
         /// <summary>
         /// Gets or sets a uniform template to be applied when cells are being edited.
@@ -1745,7 +1745,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CellEditingTemplate"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CellEditingTemplateProperty
-            = DependencyProperty.Register(nameof(CellEditingTemplate), typeof(DataTemplate), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(DataTemplate)));
+            = DependencyProperty.Register(nameof(CellEditingTemplate), typeof(DataTemplate), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(DataTemplate)));
 
         /// <summary>
         /// Gets or sets a template selector for cells in edit mode.
@@ -1759,7 +1759,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="CellEditingTemplateSelector"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty CellEditingTemplateSelectorProperty
-            = DependencyProperty.Register(nameof(CellEditingTemplateSelector), typeof(DataTemplateSelector), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(DataTemplateSelector)));
+            = DependencyProperty.Register(nameof(CellEditingTemplateSelector), typeof(DataTemplateSelector), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(DataTemplateSelector)));
 
         /// <summary>
         /// Gets or sets a template for column headers.
@@ -1773,7 +1773,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="ColumnHeaderTemplate"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty ColumnHeaderTemplateProperty
-            = DependencyProperty.Register(nameof(ColumnHeaderTemplate), typeof(DataTemplate), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(DataTemplate)));
+            = DependencyProperty.Register(nameof(ColumnHeaderTemplate), typeof(DataTemplate), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(DataTemplate)));
 
         /// <summary>
         /// Gets or sets a template selector for column headers.
@@ -1787,7 +1787,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="ColumnHeaderTemplateSelector"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty ColumnHeaderTemplateSelectorProperty
-            = DependencyProperty.Register(nameof(ColumnHeaderTemplateSelector), typeof(DataTemplateSelector), typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(default(DataTemplateSelector)));
+            = DependencyProperty.Register(nameof(ColumnHeaderTemplateSelector), typeof(DataTemplateSelector), typeof(PagedDataGrid), new FrameworkPropertyMetadata(default(DataTemplateSelector)));
         #endregion
 
         #region Add/delete items, column reordering and item sorting

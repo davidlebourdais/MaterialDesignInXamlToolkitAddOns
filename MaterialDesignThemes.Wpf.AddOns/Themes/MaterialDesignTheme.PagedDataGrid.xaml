@@ -47,10 +47,10 @@
     </Style>
 
     <DataTemplate x:Key="CheckMarksColumnHeaderTemplate">
-        <extender:ExtendedCheckBox HorizontalAlignment="Center" VerticalAlignment="Center" 
-                  IsThreeState="{Binding SelectAllRowsIsTriStated, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}"
+        <extender:ThreeStateCheckBox HorizontalAlignment="Center" VerticalAlignment="Center" 
+                  IsThreeState="{Binding SelectAllRowsIsTriStated, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}"
                   IsThreeStateOrderInverted="True"
-                  IsChecked="{Binding SelectAllRowsState, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}" />
+                  IsChecked="{Binding SelectAllRowsState, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}" />
     </DataTemplate>
 
     <DataTemplate x:Key="CheckMarkCellTemplate">
@@ -78,7 +78,7 @@
         <StackPanel Orientation="Horizontal">
             <TextBlock Text="Items per page:" VerticalAlignment="Center"/>
             <ComboBox IsEditable="True" Margin="5,0" 
-                      Text="{Binding RowsPerPage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}">
+                      Text="{Binding RowsPerPage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}">
                 <ComboBoxItem>1</ComboBoxItem>
                 <ComboBoxItem>2</ComboBoxItem>
                 <ComboBoxItem>5</ComboBoxItem>
@@ -95,10 +95,10 @@
 
     <DataTemplate x:Key="ExtendedDataGridPageNavigationTemplate">
         <StackPanel Margin="1,0" Orientation="Horizontal">
-            <TextBlock Text="{Binding CurrentVisibleItemRangeText, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}" Margin="0,0,5,0" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding CurrentVisibleItemRangeText, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}" Margin="0,0,5,0" VerticalAlignment="Center" />
             <Button Style="{StaticResource MaterialDesignIconForegroundButton}"
-                    Visibility="{Binding ShowsGoToFirstAndLastPageControls, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                    Command="{Binding GoToFirstPageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}"
+                    Visibility="{Binding ShowsGoToFirstAndLastPageControls, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    Command="{Binding GoToFirstPageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}"
                     ToolTip="Go to first page"
                     Height="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"
                     Width="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"
@@ -108,7 +108,7 @@
                 <wpf:PackIcon Kind="PageFirst" />
             </Button>
             <Button Style="{StaticResource MaterialDesignIconForegroundButton}"
-                    Command="{Binding GoToPreviousPageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}"
+                    Command="{Binding GoToPreviousPageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}"
                     ToolTip="Go to previous page"
                     Height="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"
                     Width="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"
@@ -119,7 +119,7 @@
             </Button>
 
             <Button Style="{StaticResource MaterialDesignIconForegroundButton}"
-                    Command="{Binding GoToNextPageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}"
+                    Command="{Binding GoToNextPageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}"
                     ToolTip="Go to next page"
                     Height="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"
                     Width="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"
@@ -128,8 +128,8 @@
                 <wpf:PackIcon Kind="ChevronRight" />
             </Button>
             <Button Style="{StaticResource MaterialDesignIconForegroundButton}"
-                    Visibility="{Binding ShowsGoToFirstAndLastPageControls, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                    Command="{Binding GoToLastPageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}"
+                    Visibility="{Binding ShowsGoToFirstAndLastPageControls, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    Command="{Binding GoToLastPageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}"
                     ToolTip="Go to last page"
                     Height="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"
                     Width="{Binding ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentControl}}}"
@@ -142,7 +142,7 @@
     </DataTemplate>
 
     <DataTemplate x:Key="PagingOptionsTemplate">
-        <Grid Visibility="{Binding PagingOptionsVisibility, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}">
+        <Grid Visibility="{Binding PagingOptionsVisibility, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition />
@@ -156,8 +156,8 @@
                 </Grid.ColumnDefinitions>
 
                 <ContentControl Margin="5,0" VerticalAlignment="Center"  IsTabStop="False"
-                                Visibility="{Binding RowsPerPageSelectionVisibility, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}" 
-                                Content="{Binding}" ContentTemplate="{Binding RowsPerPageSelectionTemplate, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}" />
+                                Visibility="{Binding RowsPerPageSelectionVisibility, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}" 
+                                Content="{Binding}" ContentTemplate="{Binding RowsPerPageSelectionTemplate, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}" />
 
                 <ContentControl Height="35" Grid.Column="2" IsTabStop="False" Content="{Binding}" ContentTemplate="{StaticResource ExtendedDataGridPageNavigationTemplate}"/>
             </Grid>
@@ -166,18 +166,18 @@
 
     <DataTemplate x:Key="AdditionalOptionsTemplate">
         <StackPanel Orientation="Horizontal" Margin="10,0">
-            <CheckBox IsChecked="{Binding ShowsHeaders, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}" 
+            <CheckBox IsChecked="{Binding ShowsHeaders, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}" 
                       Content="Shows headers" VerticalAlignment="Center" />
-            <CheckBox IsChecked="{Binding UsesPaging, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}" 
+            <CheckBox IsChecked="{Binding UsesPaging, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}" 
                       Content="Uses paging" VerticalAlignment="Center" Margin="10, 0" />
-            <CheckBox IsChecked="{Binding CanChangeRowsPerPage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}" 
-                      IsEnabled="{Binding UsesPaging, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}}" 
+            <CheckBox IsChecked="{Binding CanChangeRowsPerPage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}" 
+                      IsEnabled="{Binding UsesPaging, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}" 
                       Content="Can change page size" VerticalAlignment="Center" Margin="10, 0" />
         </StackPanel>
     </DataTemplate>
 
     <!-- Style is mainly inspired from MaterialDesignTheme.DataGrid.xaml -->
-    <Style x:Key="MaterialDesignExtendedDataGrid" TargetType="{x:Type extender:ExtendedDataGrid}">
+    <Style x:Key="MaterialDesignExtendedDataGrid" TargetType="{x:Type extender:PagedDataGrid}">
         <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
         <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignTextBoxBorder}"/>
@@ -215,7 +215,7 @@
         <Setter Property="IdCellTemplate" Value="{StaticResource IdCellTemplate}" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type extender:ExtendedDataGrid}">
+                <ControlTemplate TargetType="{x:Type extender:PagedDataGrid}">
                     <Border BorderBrush="{TemplateBinding BorderBrush}" 
                             BorderThickness="{TemplateBinding BorderThickness}" 
                             Background="{TemplateBinding Background}" 
@@ -263,7 +263,7 @@
                             </ScrollViewer>
 
                             <wpf:Card Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10" UniformCornerRadius="16"
-                                      Visibility="{Binding IsPageLoading, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:ExtendedDataGrid}}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                      Visibility="{Binding IsPageLoading, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <StackPanel Orientation="Horizontal" Margin="3,3,3,3">
                                     <TextBlock Text="{TemplateBinding PageLoadingText}" VerticalAlignment="Center" Margin="8,0"/>
                                     <wpf:Card UniformCornerRadius="14">
