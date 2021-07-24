@@ -6,7 +6,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
     /// <summary>
     /// An extension of the checkbox control.
     /// </summary>
-    public class ExtendedCheckBox : CheckBox
+    public class ThreeStateCheckBox : CheckBox
     {
         /// <summary>
         /// Gets or sets a value that allows three state order inversion
@@ -21,7 +21,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IsThreeStateOrderInverted"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IsThreeStateOrderInvertedProperty
-            = DependencyProperty.Register(nameof(IsThreeStateOrderInverted), typeof(bool), typeof(ExtendedCheckBox), new FrameworkPropertyMetadata(default(bool)));
+            = DependencyProperty.Register(nameof(IsThreeStateOrderInverted), typeof(bool), typeof(ThreeStateCheckBox), new FrameworkPropertyMetadata(true));
 
         /// <summary>
         /// Override of toggle to perform custom actions.
@@ -31,12 +31,18 @@ namespace MaterialDesignThemes.Wpf.AddOns
             // Invert order of three state sequence if required:
             if (IsThreeState && IsThreeStateOrderInverted)
             {
-                if (IsChecked == true)
-                    IsChecked = false;
-                else if (IsChecked == false)
-                    IsChecked = null;
-                else
-                    IsChecked = true;
+                switch (IsChecked)
+                {
+                    case true:
+                        IsChecked = false;
+                        break;
+                    case false:
+                        IsChecked = null;
+                        break;
+                    default:
+                        IsChecked = true;
+                        break;
+                }
             }
             else
                 base.OnToggle();

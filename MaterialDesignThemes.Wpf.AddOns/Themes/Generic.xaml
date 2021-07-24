@@ -19,8 +19,8 @@
     <Style TargetType="{x:Type materialDesignInXamlExtender:Banner}" BasedOn="{StaticResource MaterialDesignBanner}"/>
     <Style TargetType="{x:Type extender:CustomColorPicker}" BasedOn="{StaticResource MaterialDesignCustomColorPicker}" />
     <Style TargetType="{x:Type extender:PressBorder}" BasedOn="{StaticResource MaterialDesignPressBorder}" />
-    <Style TargetType="{x:Type extender:ExtendedCheckBox}" BasedOn="{StaticResource MaterialDesignCheckBox}" />
     <Style TargetType="{x:Type extender:ExtendedDataGrid}" BasedOn="{StaticResource MaterialDesignExtendedDataGrid}"/>
+    <Style TargetType="{x:Type extender:ThreeStateCheckBox}" BasedOn="{StaticResource MaterialDesignCheckBox}" />
     <Style TargetType="{x:Type extender:ToastNotificationBar}" BasedOn="{StaticResource MaterialDesignToastNotification}"/>
     <Style TargetType="{x:Type extender:SelectBox}" BasedOn="{StaticResource MaterialDesignSelectBox}"/>
 </ResourceDictionary>
