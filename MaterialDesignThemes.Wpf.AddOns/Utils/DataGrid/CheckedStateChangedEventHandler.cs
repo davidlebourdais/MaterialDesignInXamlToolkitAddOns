@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MaterialDesignThemes.Wpf.AddOns.Utils
+namespace MaterialDesignThemes.Wpf.AddOns.Utils.DataGrid
 {
     /// <summary>
     /// A delegate to be used to notify a check state change.

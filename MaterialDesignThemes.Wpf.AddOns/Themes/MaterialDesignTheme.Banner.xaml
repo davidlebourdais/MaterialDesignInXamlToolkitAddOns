@@ -3,7 +3,7 @@
                     xmlns:extender="clr-namespace:MaterialDesignThemes.Wpf.AddOns"
                     xmlns:wpf="http://materialdesigninxaml.net/winfx/xaml/themes"
                     xmlns:converters="http://materialdesigninxaml.net/winfx/xaml/themes"
-                    xmlns:selfconverters="clr-namespace:MaterialDesignThemes.Wpf.AddOns.Converters"
+                    xmlns:selfConverters="clr-namespace:MaterialDesignThemes.Wpf.AddOns.Converters"
                     xmlns:system="clr-namespace:System;assembly=mscorlib"
                     xmlns:materialDesignInXamlExtender="clr-namespace:MaterialDesignThemes.Wpf.AddOns">
 
@@ -16,7 +16,7 @@
     <converters:NullableToVisibilityConverter x:Key="NullableToVisibilityConverter" />
     <converters:MathConverter x:Key="MathAddConverter" Operation="Add" />
     <converters:MathMultipleConverter x:Key="MathMultipleConverter" Operation="Multiply" />
-    <selfconverters:MessageActionPlacementConverter x:Key="MessageActionPlacementConverter" />
+    <selfConverters:MessageActionPlacementConverter x:Key="MessageActionPlacementConverter" />
 
     <Style x:Key="MaterialDesignBannerMessage" TargetType="{x:Type extender:InformationMessage}" BasedOn="{StaticResource {x:Type wpf:SnackbarMessage}}">
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />

@@ -11,6 +11,8 @@ using System.ComponentModel;
 using MaterialDesignThemes.Wpf.AddOns.Utils;
 using System.Collections.Specialized;
 using System.Windows.Data;
+using MaterialDesignThemes.Wpf.AddOns.Utils.Commands;
+using MaterialDesignThemes.Wpf.AddOns.Utils.DataGrid;
 
 namespace MaterialDesignThemes.Wpf.AddOns
 {

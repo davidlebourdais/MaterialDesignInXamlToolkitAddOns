@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace MaterialDesignThemes.Wpf.AddOns.Utils
+namespace MaterialDesignThemes.Wpf.AddOns.Utils.Commands
 {
     /// <summary>
     /// Provides a simple implementation of <see cref="ICommand"/> for internal usage.
@@ -29,20 +29,29 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils
             _execute = execute;
             _canExecute = canExecute;
         }
-
-        /// <inheritdoc />
+        
+        /// <summary>
+        /// Indicates if the command can be executed for a given parameter.
+        /// </summary>
+        /// <param name="parameter">Input parameter.</param>
+        /// <returns>True if the command can be executed.</returns>
         public bool CanExecute(object parameter)
         {
             return _canExecute == null || _canExecute();
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Executes the command for a given parameter.
+        /// </summary>
+        /// <param name="parameter">Input parameter.</param>
         public void Execute(object parameter)
         {
             _execute(parameter);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Notifies that <see cref="CanExecute"/> state changed.
+        /// </summary>
         public event EventHandler CanExecuteChanged
         {
             add => CommandManager.RequerySuggested += value;
@@ -50,7 +59,7 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils
         }
 
         /// <summary>
-        /// Causes <see cref="CanExecute"/> invocation.
+        /// Causes a reevaluation of <see cref="CanExecute"/>.
         /// </summary>
         public void RaiseCanExecuteChanged()
         {

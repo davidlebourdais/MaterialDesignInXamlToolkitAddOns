@@ -5,7 +5,7 @@
                     xmlns:extender="clr-namespace:MaterialDesignThemes.Wpf.AddOns"
                     xmlns:materialDesignInXamlExtender="clr-namespace:MaterialDesignThemes.Wpf.AddOns"
                     xmlns:helpers="clr-namespace:MaterialDesignThemes.Wpf.AddOns.Helpers"
-                    xmlns:utilsForXaml="clr-namespace:MaterialDesignThemes.Wpf.AddOns.Utils">
+                    xmlns:utils="clr-namespace:MaterialDesignThemes.Wpf.AddOns.Utils">
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.Separator.xaml"/>
@@ -13,7 +13,7 @@
 
     <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" TrueValue="Visible" FalseValue="Collapsed"/>
     <converters:BooleanToVisibilityConverter x:Key="InverseBoolToVisConverter" TrueValue="Collapsed" FalseValue="Visible"/>
-    <utilsForXaml:BindingProxy x:Key="MaterialDesignBodyColor" Data="{DynamicResource MaterialDesignBody}" />
+    <utils:BindingProxy x:Key="MaterialDesignBodyColor" Data="{DynamicResource MaterialDesignBody}" />
 
     <!-- Tiled background to be shown behind transparent colors -->
     <DrawingBrush x:Key="TransparentBackground" 

@@ -1,4 +1,4 @@
-﻿namespace MaterialDesignThemes.Wpf.AddOns.Utils
+﻿namespace MaterialDesignThemes.Wpf.AddOns.Utils.Colors
 {
     /// <summary>
     /// A color that is specified by Hue, Saturation and Luminosity levels (HSL)

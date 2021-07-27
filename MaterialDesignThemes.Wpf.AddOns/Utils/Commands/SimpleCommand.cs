@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace MaterialDesignThemes.Wpf.AddOns.Utils
+namespace MaterialDesignThemes.Wpf.AddOns.Utils.Commands
 {
     /// <summary>
     /// Provides a simple implementation of <see cref="ICommand"/> for internal usage.

@@ -12,7 +12,7 @@ using System.Windows.Threading;
 using Dynamitey;
 using MaterialDesignThemes.Wpf.AddOns.Extensions;
 
-namespace MaterialDesignThemes.Wpf.AddOns.Utils
+namespace MaterialDesignThemes.Wpf.AddOns.Utils.DataGrid
 {
     /// <summary>
     /// A class to manage paging of items placed into an <see cref="IEnumerable"/>.

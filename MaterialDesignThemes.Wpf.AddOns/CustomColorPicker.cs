@@ -7,6 +7,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using MaterialDesignThemes.Wpf.AddOns.Utils;
+using MaterialDesignThemes.Wpf.AddOns.Utils.Colors;
+using MaterialDesignThemes.Wpf.AddOns.Utils.Commands;
 
 namespace MaterialDesignThemes.Wpf.AddOns
 {

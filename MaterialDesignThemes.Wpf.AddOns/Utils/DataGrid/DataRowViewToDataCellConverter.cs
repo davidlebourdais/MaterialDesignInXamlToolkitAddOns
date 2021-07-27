@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Markup;
 
-namespace MaterialDesignThemes.Wpf.AddOns.Utils
+namespace MaterialDesignThemes.Wpf.AddOns.Utils.DataGrid
 {
     /// <summary>
     /// Extracts a DataContext object from a given <see cref="DataGridCell"/>.

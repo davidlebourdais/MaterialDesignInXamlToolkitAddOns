@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Windows.Media;
 
-namespace MaterialDesignThemes.Wpf.AddOns.Utils
+namespace MaterialDesignThemes.Wpf.AddOns.Utils.Colors
 {
     /// <summary>
     /// An helper class for color processing.
@@ -13,7 +13,7 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils
         /// <summary>
         /// Default color to be used when color conversions fail.
         /// </summary>
-        private static Color DefaultColor { get; } = Colors.Transparent;
+        private static Color DefaultColor { get; } = System.Windows.Media.Colors.Transparent;
 
         #region System colors
         /// <summary>
