@@ -12,6 +12,7 @@
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.PressBorder.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.PagedDataGrid.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.ToastNotificationBar.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.ToggleButton.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <!-- Default styles setup -->
