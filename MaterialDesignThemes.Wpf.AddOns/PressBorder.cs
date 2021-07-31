@@ -134,6 +134,9 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="e">Event info.</param>
         private void Touch_FrameReported(object sender, TouchFrameEventArgs e)
         {
+            if (Application.Current?.MainWindow == null)
+                return;
+            
             var relativeToApplication = e.GetPrimaryTouchPoint(Application.Current.MainWindow);
             if (relativeToApplication == null || relativeToApplication.Action != TouchAction.Up)
                 return;
@@ -156,7 +159,11 @@ namespace MaterialDesignThemes.Wpf.AddOns
             if (!usedTouch)
             {
                 if (_evaluatePressTimer == null)
-                    _evaluatePressTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Input, EvaluateClickState, Application.Current.Dispatcher);
+                {
+                    var dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
+                    _evaluatePressTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Input, EvaluateClickState, dispatcher);
+                }
+
                 _evaluatePressTimer.Start();
             }
             else

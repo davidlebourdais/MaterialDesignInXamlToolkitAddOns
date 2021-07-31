@@ -8,7 +8,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.ComponentModel;
-using MaterialDesignThemes.Wpf.AddOns.Utils;
 using System.Collections.Specialized;
 using System.Windows.Data;
 using MaterialDesignThemes.Wpf.AddOns.Utils.Commands;
@@ -71,7 +70,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
 
             // Hook to base events:
             Columns.CollectionChanged += Columns_CollectionChanged;
-            Loaded += ExtendedDataGrid_Loaded;
+            Loaded += PagedDataGrid_Loaded;
         }
 
         /// <summary>
@@ -79,9 +78,9 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         /// <param name="sender">Unused.</param>
         /// <param name="e">unused.</param>
-        private void ExtendedDataGrid_Loaded(object sender, RoutedEventArgs e)
+        private void PagedDataGrid_Loaded(object sender, RoutedEventArgs e)
         {
-            Loaded -= ExtendedDataGrid_Loaded;
+            Loaded -= PagedDataGrid_Loaded;
 
             // Reevaluate selected values if set
             // to other than default and control is loaded
@@ -118,7 +117,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             if (!(sender is PagedDataGrid casted))
                 return;
             
-            var newSource = (args.NewValue as IEnumerable<object>)?.ToArray();
+            var newSource = args.NewValue as IEnumerable<object>;
             
             if (args.NewValue != null && newSource == null)
                 return;
@@ -231,7 +230,8 @@ namespace MaterialDesignThemes.Wpf.AddOns
                 _userDefinedColumns.ForEach(x =>
                 {
                     x.CanUserSort &= !UsesPagingInternal;  // user defined columns sorting not supported in paging system for now.
-                    Columns.Add(x);
+                    if (!Columns.Contains(x))
+                        Columns.Add(x);
                 });
 
             // Determine if a TextBox Column was generated as default type while underlying type is not string
@@ -263,7 +263,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             // Cancel only when necessary, i.e. when a checkmark, id, or template column:
             if (isSelect || isId || (e.Column is DataGridTemplateColumn) || asTemplateColumn)
             {               
-                e.Column = new ExtendedDataGridTemplateColumn(isId, isSelect)
+                e.Column = new PagedDataGridTemplateColumn(isId, isSelect)
                 {
                     Header = e.Column.Header,
                     HeaderStringFormat = e.Column.HeaderStringFormat,

@@ -1,16 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
+    <TargetFrameworks>net471;net5.0-windows;netcoreapp3.1</TargetFrameworks>
+    <UseWPF>true</UseWPF>
+    
     <AssemblyTitle>MaterialDesignThemes.Wpf.AddOns</AssemblyTitle>
     <PackageId>MaterialDesignInXamlToolkitAddOns</PackageId>
+    <Version>0.0.1</Version>
+    
     <Title>Extensions for MaterialDesignInXamlToolkit</Title>
     <PackageDescription>Offers new features and extra controls to use Material Design in Xaml applications</PackageDescription>
     <PackageTags>WPF;Xaml;ColorPicker;DataGrid</PackageTags>
-    <UseWPF>true</UseWPF>
-    <Version>0.0.1</Version>
     <Authors>David Le Bourdais</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>Copyright © 2021</Copyright>
+    <RepositoryUrl>https://github.com/davidlebourdais/MaterialDesignInXamlToolkitAddOns</RepositoryUrl>
+    
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <TargetFrameworks>net471;net5.0-windows;netcoreapp3.1</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

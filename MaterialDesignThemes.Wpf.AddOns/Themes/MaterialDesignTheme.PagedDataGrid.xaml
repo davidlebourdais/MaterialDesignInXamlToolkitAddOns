@@ -5,7 +5,9 @@
                     xmlns:utils="clr-namespace:MaterialDesignThemes.Wpf.AddOns.Utils.DataGrid">
 
     <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.DataGrid.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ProgressBar.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.Separator.xaml"/>
     </ResourceDictionary.MergedDictionaries>
     
@@ -13,7 +15,7 @@
     <wpf:NullableToVisibilityConverter x:Key="NullableToVisibilityConverter" />
 
     <!-- Same as in MaterialDesign Toolkit header style but without arrow animations -->
-    <Style x:Key="MaterialDesignExtendedDataGridColumnHeader" TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+    <Style x:Key="MaterialDesignPagedDataGridColumnHeader" TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type DataGridColumnHeader}">
@@ -54,6 +56,7 @@
     </DataTemplate>
 
     <DataTemplate x:Key="CheckMarkCellTemplate">
+        <!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
         <CheckBox DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGridCell}, Converter={StaticResource DataGridCellToDataContextConverter}}"
                   IsChecked="{Binding IsChecked}"
                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -68,13 +71,13 @@
                    Text="{Binding StringFormat={}{0}.}" FontWeight="Bold" VerticalAlignment="Center" TextAlignment="Right" HorizontalAlignment="Center"/>
     </DataTemplate>
 
-    <Style x:Key="IdAndCheckMarksColumnHeaderTemplateStyle" TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MaterialDesignExtendedDataGridColumnHeader}">
+    <Style x:Key="IdAndCheckMarksColumnHeaderTemplateStyle" TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MaterialDesignPagedDataGridColumnHeader}">
         <Setter Property="OverridesDefaultStyle" Value="False" />
         <Setter Property="FontStyle" Value="Italic" />
         <Setter Property="HorizontalAlignment" Value="Center" />
     </Style>
 
-    <DataTemplate x:Key="ExtendedDataGridRowsPerPageSelectionTemplate">
+    <DataTemplate x:Key="PagedDataGridRowsPerPageSelectionTemplate">
         <StackPanel Orientation="Horizontal">
             <TextBlock Text="Items per page:" VerticalAlignment="Center"/>
             <ComboBox IsEditable="True" Margin="5,0" 
@@ -93,7 +96,7 @@
         </StackPanel>
     </DataTemplate>
 
-    <DataTemplate x:Key="ExtendedDataGridPageNavigationTemplate">
+    <DataTemplate x:Key="PagedDataGridPageNavigationTemplate">
         <StackPanel Margin="1,0" Orientation="Horizontal">
             <TextBlock Text="{Binding CurrentVisibleItemRangeText, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}" Margin="0,0,5,0" VerticalAlignment="Center" />
             <Button Style="{StaticResource MaterialDesignIconForegroundButton}"
@@ -159,7 +162,7 @@
                                 Visibility="{Binding RowsPerPageSelectionVisibility, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}" 
                                 Content="{Binding}" ContentTemplate="{Binding RowsPerPageSelectionTemplate, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:PagedDataGrid}}}" />
 
-                <ContentControl Height="35" Grid.Column="2" IsTabStop="False" Content="{Binding}" ContentTemplate="{StaticResource ExtendedDataGridPageNavigationTemplate}"/>
+                <ContentControl Height="35" Grid.Column="2" IsTabStop="False" Content="{Binding}" ContentTemplate="{StaticResource PagedDataGridPageNavigationTemplate}"/>
             </Grid>
         </Grid>
     </DataTemplate>
@@ -177,7 +180,7 @@
     </DataTemplate>
 
     <!-- Style is mainly inspired from MaterialDesignTheme.DataGrid.xaml -->
-    <Style x:Key="MaterialDesignExtendedDataGrid" TargetType="{x:Type extender:PagedDataGrid}">
+    <Style x:Key="MaterialDesignPagedDataGrid" TargetType="{x:Type extender:PagedDataGrid}">
         <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
         <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignTextBoxBorder}"/>
@@ -198,12 +201,12 @@
         <Setter Property="wpf:DataGridAssist.EnableEditBoxAssist" Value="True" />
         <Setter Property="UsesPaging" Value="True" />
         <Setter Property="CanChangeRowsPerPage" Value="True" />
-        <Setter Property="RowsPerPageSelectionTemplate" Value="{StaticResource ExtendedDataGridRowsPerPageSelectionTemplate}" />
+        <Setter Property="RowsPerPageSelectionTemplate" Value="{StaticResource PagedDataGridRowsPerPageSelectionTemplate}" />
         <Setter Property="PagingOptionsTemplate" Value="{StaticResource PagingOptionsTemplate}" />
         <Setter Property="CanShowAdditionalOptions" Value="True" />
         <Setter Property="AdditionalOptionsTemplate" Value="{StaticResource AdditionalOptionsTemplate}" />
         <Setter Property="CellStyle" Value="{StaticResource MaterialDesignDataGridCell}" />
-        <Setter Property="ColumnHeaderStyle" Value="{StaticResource MaterialDesignExtendedDataGridColumnHeader}" />
+        <Setter Property="ColumnHeaderStyle" Value="{StaticResource MaterialDesignPagedDataGridColumnHeader}" />
         <Setter Property="CheckMarksColumnHeaderStyle" Value="{StaticResource IdAndCheckMarksColumnHeaderTemplateStyle}" />
         <Setter Property="CheckMarksColumnHeaderTemplate" Value="{StaticResource CheckMarksColumnHeaderTemplate}" />
         <Setter Property="CheckMarkCellStyle" Value="{StaticResource MaterialDesignDataGridCell}" />

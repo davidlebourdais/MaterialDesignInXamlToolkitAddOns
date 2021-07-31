@@ -1,13 +1,19 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                     xmlns:converters="clr-namespace:MaterialDesignThemes.Wpf.Converters;assembly=MaterialDesignThemes.Wpf"
                     xmlns:extender="clr-namespace:MaterialDesignThemes.Wpf.AddOns"
                     xmlns:materialDesignInXamlExtender="clr-namespace:MaterialDesignThemes.Wpf.AddOns"
                     xmlns:helpers="clr-namespace:MaterialDesignThemes.Wpf.AddOns.Helpers"
-                    xmlns:utils="clr-namespace:MaterialDesignThemes.Wpf.AddOns.Utils">
+                    xmlns:utils="clr-namespace:MaterialDesignThemes.Wpf.AddOns.Utils"
+                    mc:Ignorable="d">
 
     <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.RadioButton.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.TextBox.xaml"/>
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.Separator.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
@@ -42,12 +48,12 @@
 
     <!-- Template for system color selected item -->
     <DataTemplate x:Key="SystemColorItemNameOnlyTemplate">
-        <TextBlock Text="{Binding BrushName}" VerticalAlignment="Center"/>
+        <TextBlock Text="{Binding BrushName}" VerticalAlignment="Center" d:DataContext="{d:DesignInstance extender:BrushItem}"/>
     </DataTemplate>
 
     <!-- Template for system color in dropdown menu -->
     <DataTemplate x:Key="SystemColorItemTemplate">
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Horizontal" d:DataContext="{d:DesignInstance extender:BrushItem}">
             <Ellipse Fill="{Binding AsSolidColorBrush}" StrokeThickness="1" Stroke="Gray" Width="12" Height="12" VerticalAlignment="Center"/>
             <TextBlock Text="{Binding BrushName}" Margin="10,0,0,0" VerticalAlignment="Center"/>
         </StackPanel>
@@ -92,7 +98,8 @@
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Effect">
                                 <Setter.Value>
-                                    <DropShadowEffect ShadowDepth="2" BlurRadius="3" Direction="280" Opacity="0.2" Color="{Binding Data.Color, Source={StaticResource MaterialDesignBodyColor}}"/>
+                                    <!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
+                                    <DropShadowEffect ShadowDepth="2" BlurRadius="3" Direction="280" Opacity="0.2" Color="{Binding Data.Color, Source={StaticResource MaterialDesignBodyColor}}" />
                                 </Setter.Value>
                             </Setter>
                             <Trigger.EnterActions>
@@ -173,7 +180,7 @@
                         <DockPanel Margin="5,0" Grid.Row="1">
                             <ScrollViewer HorizontalScrollBarVisibility="Auto" MaxWidth="140"
                                             Margin="10,0,0,0" 
-                                            ScrollViewer.CanContentScroll="True" 
+                                            CanContentScroll="True" 
                                             helpers:ScrollViewerAssistExtended.ScrollsToEnd="True">
                                 <ItemsControl HorizontalAlignment="Stretch"
                                             VerticalAlignment="Center" 
@@ -201,7 +208,8 @@
                 </Grid>
 
                 <!-- Custom colors picker part -->
-                <Grid Visibility="{Binding IsCustomColorPickingShown, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" VerticalAlignment="Stretch">
+                <Grid Grid.Row="0" VerticalAlignment="Stretch"
+                      Visibility="{Binding IsCustomColorPickingShown, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
@@ -351,7 +359,7 @@
                             <DockPanel Margin="5,0" Grid.Row="1">
                                 <ScrollViewer HorizontalScrollBarVisibility="Auto" MaxWidth="140"
                                             Margin="10,0,0,0" 
-                                            ScrollViewer.CanContentScroll="True" 
+                                            CanContentScroll="True" 
                                             helpers:ScrollViewerAssistExtended.ScrollsToEnd="True">
                                     <ItemsControl HorizontalAlignment="Stretch"
                                                   VerticalAlignment="Center" 

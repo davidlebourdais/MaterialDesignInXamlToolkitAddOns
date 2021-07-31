@@ -865,7 +865,8 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils.DataGrid
                 {
                     _noReentrancyCollectionWeakEvent = true;
                     // Process through dispatcher in case we are invoked from another thread:
-                    Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.DataBind, (Action)(() =>
+                    var dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
+                    dispatcher.BeginInvoke(DispatcherPriority.DataBind, (Action)(() =>
                     {
                         try
                         {
@@ -1242,9 +1243,10 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils.DataGrid
             var interlocked = true;
 
             // Stop if current table is no more valid or if succeeded to load every rows of partial source:
+            var dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
             while (_currentPageToken == data.Token && data.CurrentIndex < data.PartialSourceCount)
             {
-                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.DataBind, new Action(() =>
+                dispatcher.BeginInvoke(DispatcherPriority.DataBind, new Action(() =>
                 {
                     // Calculate load size:
                     var actualLoadSize = Math.Min(data.PartialSourceCount - data.CurrentIndex, _loadSize);
@@ -1446,7 +1448,8 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils.DataGrid
                     UpdateSortedLists();
 
                     // Do this in UI thread queue to not lock it in case of too quick updates:
-                    Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.DataBind, (Action)(() =>
+                    var dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
+                    dispatcher.BeginInvoke(DispatcherPriority.DataBind, (Action)(() =>
                     {
                         UpdateCurrentPage();
                         _noReentrancyPropChangedWeakEvent = false;

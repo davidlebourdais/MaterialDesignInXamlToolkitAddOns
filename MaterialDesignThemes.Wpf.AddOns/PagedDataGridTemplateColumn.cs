@@ -9,7 +9,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
     /// properties like column name and changing some methods like OnCopyingCellClipboardContent.
     /// </summary>
     /// <remarks>Used with <see cref="PagedDataGrid"/>.</remarks>
-    public class ExtendedDataGridTemplateColumn : DataGridTemplateColumn
+    public class PagedDataGridTemplateColumn : DataGridTemplateColumn
     {
         /// <summary>
         /// Gets a value indicating if the column
@@ -24,11 +24,11 @@ namespace MaterialDesignThemes.Wpf.AddOns
         private bool IsSelectColumn { get; }
 
         /// <summary>
-        /// Initiates a new instance of <see cref="ExtendedDataGridTemplateColumn"/>.
+        /// Initiates a new instance of <see cref="PagedDataGridTemplateColumn"/>.
         /// </summary>
         /// <param name="asIdColumn">Set this if this column is used to show IDs.</param>
         /// <param name="asSelectColumn">Set this if this column is used to show line selection boxes.</param>
-        public ExtendedDataGridTemplateColumn(bool asIdColumn = false, bool asSelectColumn = false)
+        public PagedDataGridTemplateColumn(bool asIdColumn = false, bool asSelectColumn = false)
         {
             IsIDsColumn = asIdColumn;
             IsSelectColumn = asSelectColumn;

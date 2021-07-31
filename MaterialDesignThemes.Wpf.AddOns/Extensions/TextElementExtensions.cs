@@ -20,7 +20,7 @@ namespace MaterialDesignThemes.Wpf.AddOns.Extensions
         /// <param name="ignoreCase">If set to true, string comparison with filter ignores casing.</param>
         /// <returns>True if the text element holds one or several matches, false otherwise.</returns>
         /// <remarks>Highlighting might create new <see cref="Run"/> items. Use <see cref="ClearAppliedProperties"/> to reset the text element to its initial state.</remarks>
-        public static bool FindAndHighlightTextMatches(this TextElement textElement, string filter, IDictionary<DependencyProperty, object> highlightPropertiesAndValues, bool ignoreCase = true)
+        public static bool FindAndHighlightTextMatches(this TextElement textElement, string filter, IDictionary<DependencyProperty, object> highlightPropertiesAndValues, bool ignoreCase)
         {
             var range = new TextRange(textElement.ContentStart, textElement.ContentEnd);
             range.ClearAllProperties();
