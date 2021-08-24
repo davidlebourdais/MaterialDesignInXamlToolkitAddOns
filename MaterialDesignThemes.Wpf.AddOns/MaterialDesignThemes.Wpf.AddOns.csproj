@@ -16,7 +16,14 @@
     <RepositoryUrl>https://github.com/davidlebourdais/MaterialDesignInXamlToolkitAddOns</RepositoryUrl>
     
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
   </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>$(AssemblyName).Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Resources\Cursors\*.cur" />
@@ -24,6 +31,7 @@
 
   <ItemGroup>
     <PackageReference Include="Dynamitey" Version="2.0.10.189" />
+    <PackageReference Include="ExtendedWPFConverters" Version="2.0.2" />
     <PackageReference Include="ExtendedWPFVisualTreeHelper" Version="2.0.2" />
     <PackageReference Include="MaterialDesignThemes" Version="4.1.0" />
   </ItemGroup>

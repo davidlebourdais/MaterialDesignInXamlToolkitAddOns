@@ -1,0 +1,156 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:extender="clr-namespace:MaterialDesignThemes.Wpf.AddOns">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ComboBox.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <ControlTemplate x:Key="MaterialDesignSelectBoxItemTemplate" TargetType="{x:Type extender:SelectBoxItem}">
+        <Grid x:Name="GridWrapper">
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup Name="CommonStates">
+                    <VisualStateGroup.Transitions>
+                        <VisualTransition GeneratedDuration="0:0:0.3" To="Normal">
+                            <VisualTransition.GeneratedEasingFunction>
+                                <CircleEase EasingMode="EaseOut" />
+                            </VisualTransition.GeneratedEasingFunction>
+                        </VisualTransition>
+                    </VisualStateGroup.Transitions>
+                    <VisualState Name="Normal" />
+                    <VisualState Name="MouseOver">
+                        <Storyboard>
+                            <DoubleAnimation Duration="0"
+                                         Storyboard.TargetName="MouseOverBorder"
+                                         Storyboard.TargetProperty="Opacity"
+                                         To="0.1" />
+                        </Storyboard>
+                    </VisualState>
+                </VisualStateGroup>
+                <VisualStateGroup Name="SelectionStates">
+                    <VisualStateGroup.Transitions>
+                        <VisualTransition GeneratedDuration="0:0:0.3" />
+                    </VisualStateGroup.Transitions>
+                    <VisualState Name="Selected">
+                        <Storyboard>
+                            <DoubleAnimation Duration="0"
+                                         Storyboard.TargetName="SelectedBorder"
+                                         Storyboard.TargetProperty="Opacity"
+                                         To="0.04" />
+                        </Storyboard>
+                    </VisualState>
+                    <VisualState Name="Unselected" />
+                </VisualStateGroup>
+                <VisualStateGroup Name="PreSelectionStates">
+                    <VisualStateGroup.Transitions>
+                        <VisualTransition GeneratedDuration="0:0:0.3" />
+                    </VisualStateGroup.Transitions>
+                    <VisualState Name="Preselected">
+                        <Storyboard>
+                            <DoubleAnimation Duration="0"
+                                             Storyboard.TargetName="PreSelectedBorder"
+                                             Storyboard.TargetProperty="Opacity"
+                                             To="0.1" />
+                        </Storyboard>
+                    </VisualState>
+                    <VisualState Name="NotPreselected" />
+                </VisualStateGroup>
+                <VisualStateGroup Name="FocusStates">
+                    <VisualStateGroup.Transitions>
+                        <VisualTransition GeneratedDuration="0:0:0.3" To="Unfocused" />
+                    </VisualStateGroup.Transitions>
+                    <VisualState Name="Focused">
+                        <Storyboard>
+                            <DoubleAnimation Duration="0"
+                                         Storyboard.TargetName="MouseOverBorder"
+                                         Storyboard.TargetProperty="Opacity"
+                                         To="0.1" />
+                        </Storyboard>
+                    </VisualState>
+                    <VisualState Name="Unfocused" />
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Column="0"
+                    x:Name="BackBorder"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    SnapsToDevicePixels="True" />
+
+            <Border Grid.Column="0"
+                    x:Name="MouseOverBorder"
+                    Background="{TemplateBinding Foreground, Converter={StaticResource BrushRoundConverter}}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    Opacity="0"
+                    SnapsToDevicePixels="True" />
+
+            <Border Grid.Column="0"
+                    x:Name="PreSelectedBorder"
+                    Background="{TemplateBinding Foreground, Converter={StaticResource BrushRoundConverter}}"
+                    Opacity="0"
+                    RenderTransformOrigin="0.5,0.5" />
+
+            <Border Grid.Column="0"
+                    x:Name="SelectedBorder"
+                    Background="{TemplateBinding Foreground, Converter={StaticResource BrushRoundConverter}}"
+                    Opacity="0"
+                    RenderTransformOrigin="0.5,0.5" />
+
+            <Border Padding="{TemplateBinding Padding}">
+                <Grid>
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <CheckBox x:Name="SelectionCheckBox"
+                              Grid.Column="0" Margin="0, 0, 12, 0"
+                              Visibility="Collapsed"
+                              Focusable="False"
+                              IsChecked="{Binding IsSelected, RelativeSource={RelativeSource TemplatedParent}}" />
+
+                    <ContentControl Grid.Column="1"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                    Content="{TemplateBinding Content}"
+                                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                                    ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+                                    Focusable="False"
+                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter TargetName="GridWrapper" Property="Opacity" Value="0.56" />
+            </Trigger>
+            <Trigger Property="CanUseCheckBoxForSelection" Value="True">
+                <Setter TargetName="SelectionCheckBox" Property="Visibility" Value="Visible" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <Style x:Key="MaterialDesignSelectBoxItem" TargetType="{x:Type extender:SelectBoxItem}">
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Padding" Value="16 8" />
+        <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" />
+        <Setter Property="VerticalContentAlignment" Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+        <Setter Property="Template" Value="{StaticResource MaterialDesignSelectBoxItemTemplate}" />
+    </Style>
+
+    <Style x:Key="MaterialDesignSelectBoxItemWithCheckBox" TargetType="{x:Type extender:SelectBoxItem}" BasedOn="{StaticResource MaterialDesignSelectBoxItem}">
+        <Setter Property="CanUseCheckBoxForSelection" Value="True" />
+    </Style>
+</ResourceDictionary>

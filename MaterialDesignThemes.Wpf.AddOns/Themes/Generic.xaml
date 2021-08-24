@@ -11,6 +11,7 @@
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.CustomColorPicker.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.PressBorder.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.PagedDataGrid.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.SingleSelectBox.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.ToastNotificationBar.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.ToggleButton.xaml" />
     </ResourceDictionary.MergedDictionaries>
@@ -19,6 +20,7 @@
     <Style TargetType="{x:Type materialDesignInXamlExtender:Banner}" BasedOn="{StaticResource MaterialDesignBanner}"/>
     <Style TargetType="{x:Type extender:CustomColorPicker}" BasedOn="{StaticResource MaterialDesignCustomColorPicker}" />
     <Style TargetType="{x:Type extender:PressBorder}" BasedOn="{StaticResource MaterialDesignPressBorder}" />
+    <Style TargetType="{x:Type extender:SingleSelectBox}" BasedOn="{StaticResource MaterialDesignSingleSelectBox}"/>
     <Style TargetType="{x:Type extender:ThreeStateCheckBox}" BasedOn="{StaticResource MaterialDesignCheckBox}" />
     <Style TargetType="{x:Type extender:PagedDataGrid}" BasedOn="{StaticResource MaterialDesignPagedDataGrid}"/>
     <Style TargetType="{x:Type extender:ToastNotificationBar}" BasedOn="{StaticResource MaterialDesignToastNotification}"/>

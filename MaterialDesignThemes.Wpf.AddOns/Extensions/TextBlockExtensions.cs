@@ -19,8 +19,11 @@ namespace MaterialDesignThemes.Wpf.AddOns.Extensions
             {
                 span.Inlines.Add(textBlock.Inlines.FirstInline);
             }
-
-            textBlock.Inlines.Add(span);
+            
+            while (span.Inlines.Count > 0)
+            {
+                textBlock.Inlines.Add(span.Inlines.FirstInline);
+            }
         }
     }
 }
