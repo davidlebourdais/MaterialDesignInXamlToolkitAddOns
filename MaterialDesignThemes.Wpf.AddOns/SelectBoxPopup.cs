@@ -7,7 +7,7 @@ using EMA.ExtendedWPFVisualTreeHelper;
 namespace MaterialDesignThemes.Wpf.AddOns
 {
     /// <summary>
-    /// A popup to be used within a <see cref="SingleSelectBox"/> or a <see cref="MultiSelectBox"/>.
+    /// A popup to be used within a <see cref="SingleSelectBox"/>.
     /// </summary>
     [StyleTypedProperty(Property = "PART_PopupFilterTextBox", StyleTargetType = typeof(TextBox))]
     public class SelectBoxPopup : ComboBoxPopup
@@ -73,7 +73,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
                 return;
             }
 
-            CurrentPopupFilterTextBox = child.FindChild<TextBox>("PART_PopupFilterTextBox"); // child.Template.FindName("PART_PopupFilterTextBox", child) as TextBox;
+            CurrentPopupFilterTextBox = child.FindChild<TextBox>("PART_PopupFilterTextBox");
 
             if (CurrentPopupFilterTextBox != null)
                 return;
@@ -85,8 +85,6 @@ namespace MaterialDesignThemes.Wpf.AddOns
                 throw new Exception(nameof(DownContentTemplate) + " must contain a TextBox named 'PART_PopupFilterTextBox'.");
             if (child.Template == UpContentTemplate)
                 throw new Exception(nameof(UpContentTemplate) + " must contain a TextBox named 'PART_PopupFilterTextBox'.");
-            if (child.Template == ClassicContentTemplate)
-            {}
         }
 
         private void ChildOnLoaded(object sender, RoutedEventArgs e)

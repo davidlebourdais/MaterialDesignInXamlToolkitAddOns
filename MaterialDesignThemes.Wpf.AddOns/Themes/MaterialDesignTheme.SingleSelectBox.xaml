@@ -175,7 +175,7 @@
                                  x:Name="PART_FilterTextBox"
                                  Style="{StaticResource MaterialDesignFilledTextBox}"
                                  BorderThickness="0" HorizontalAlignment="Stretch" Background="Transparent"
-                                 Text=""
+                                 Text="{Binding Filter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}, UpdateSourceTrigger=PropertyChanged}"
                                  wpf:HintAssist.Hint="{Binding FilterHint, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}"
                                  wpf:HintAssist.IsFloating="False"
                                  wpf:TextFieldAssist.HasClearButton="True" />
@@ -288,7 +288,11 @@
                                 </Setter.Value>
                             </Setter>
                         </Trigger>
-                        <Trigger Property="HasASelectedItem" Value="True">
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="HasASelectedItem" Value="True" />
+                                <Condition Property="IsOpen" Value="False" />
+                            </MultiTrigger.Conditions>
                             <Setter TargetName="SelectedItemPresenter" Property="Visibility" Value="Visible" />
                             <Setter TargetName="BackgroundBorder" Property="Opacity" Value="0.6" />
                             <Setter TargetName="PART_FilterTextBox" Property="Grid.Column" Value="0" />
@@ -300,7 +304,7 @@
                                     <wpf:PackIcon Kind="SwapHorizontal" />
                                 </Setter.Value>
                             </Setter>
-                        </Trigger>
+                        </MultiTrigger>
 
                         <Trigger Property="IsSelectedItemFilteredOut" Value="True">
                             <Setter TargetName="SelectionShortcut" Property="Visibility" Value="Collapsed" />

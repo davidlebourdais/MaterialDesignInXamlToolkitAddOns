@@ -15,7 +15,7 @@ using MaterialDesignThemes.Wpf.AddOns.Extensions;
 namespace MaterialDesignThemes.Wpf.AddOns
 {
     /// <summary>
-    /// Item for <see cref="SingleSelectBox"/> or <see cref="MultiSelectBox"/> control.
+    /// Item for <see cref="SingleSelectBox"/> control.
     /// </summary>
     [TemplatePart(Name = "GridWrapper", Type = typeof(Grid))]
     public class SelectBoxItem : ContentControl
@@ -121,13 +121,19 @@ namespace MaterialDesignThemes.Wpf.AddOns
         #endregion
 
         #region Preselection
-        internal void SetAsPreselected()
+        /// <summary>
+        /// Sets the item in the preselected mode.
+        /// </summary>
+        public void SetAsPreselected()
         {
             _isPreselected = true;
             UpdateVisualState();
         }
 
-        internal void SetAsNotPreselected()
+        /// <summary>
+        /// Unsets preselection mode.
+        /// </summary>
+        public void SetAsNotPreselected()
         {
             _isPreselected = false;
             UpdateVisualState();
