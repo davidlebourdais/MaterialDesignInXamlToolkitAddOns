@@ -46,8 +46,15 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils.Filtering
                 {
                     foreach (var filterWord in filterWords)
                     {
-                        if (DoesStartOfAlphanumericalWordValueMatchFilter(word, filterWord, ignoreCase))
-                            matchingFilterAndWords.Add((word, filterWord, propertyPath));
+                        if (!DoesStartOfAlphanumericalWordValueMatchFilter(word, filterWord, ignoreCase))
+                            continue;
+                        
+                        if (matchingFilterAndWords.Any(x => string.Equals(x.ItemWord, word, StringComparison.Ordinal) 
+                                                            && x.FilterWord != filterWord 
+                                                            && StartsWithNonAlphaNumericalLetters(x.FilterWord)))
+                            continue;
+                        
+                        matchingFilterAndWords.Add((word, filterWord, propertyPath));
                     }
                 }
             }
@@ -71,7 +78,7 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils.Filtering
             
             return false;
         }
-
+        
         private static string[] GetWords(string input)
             => input?.Split(Array.Empty<char>(), StringSplitOptions.RemoveEmptyEntries).ToArray();
         
@@ -107,6 +114,14 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils.Filtering
             }
 
             return count == index;
+        }
+        
+        private static bool StartsWithNonAlphaNumericalLetters(string word)
+        {
+            if (word.Length == 0)
+                return false;
+
+            return !char.IsLetterOrDigit(word[0]);
         }
         
         private static StringComparison GetComparison(bool ignoreCase)

@@ -117,6 +117,27 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
             Assert.IsTrue(result);
         }
         
+                
+        [Test]
+        public void should_match_when_word_starts_with_non_alphanumerical_chars()
+        {
+            var testData = new TestData("Some (text)");
+
+            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So (t", matchFilterWordsWithFirstWordLetters: true);
+            
+            Assert.IsTrue(result);
+        }
+        
+        [Test]
+        public void should_not_match_when_two_word_matches_can_occur_with_non_alphanumerical_chars()
+        {
+            var testData = new TestData("Some (text)");
+
+            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So ( t", matchFilterWordsWithFirstWordLetters: true);
+            
+            Assert.IsFalse(result);
+        }
+        
         [Test]
         public void should_not_match_first_word_letters_across_members()
         {

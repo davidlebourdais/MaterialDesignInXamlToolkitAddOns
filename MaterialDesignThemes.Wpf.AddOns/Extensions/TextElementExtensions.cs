@@ -55,13 +55,34 @@ namespace MaterialDesignThemes.Wpf.AddOns.Extensions
         }
 
         private static bool FilterWordsMatch(IEnumerable<string> filterWords, TextRange toCheck, bool ignoreCase)
-            => filterWords.Any(x => !string.IsNullOrWhiteSpace(x) && DoesValueMatchFilter(toCheck.Text, x, ignoreCase));
+            => filterWords.Any(x => !string.IsNullOrWhiteSpace(x) && DoesStartOfAlphanumericalWordValueMatchFilter(toCheck.Text, x, ignoreCase));
         
         private static StringComparison GetComparison(bool ignoreCase)
             => ignoreCase ? StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture;
         
-        private static bool DoesValueMatchFilter(string value, string filter, bool ignoreCase)
-            => value?.IndexOf(filter, GetComparison(ignoreCase)) >= 0;
+        private static bool DoesStartOfAlphanumericalWordValueMatchFilter(string value, string filter, bool ignoreCase)
+        {
+            foreach (var word in value.Split(Array.Empty<char>(), StringSplitOptions.RemoveEmptyEntries))
+            {
+                var index = word.IndexOf(filter, GetComparison(ignoreCase));
+                if (index < 0)
+                    continue;
+
+                if (index == 0)
+                    return true;
+
+                var count = 0;
+                while (count < index && !char.IsLetterOrDigit(word[count]))
+                {
+                    count++;
+                }
+
+                if (count == index)
+                    return true;
+            }
+
+            return false;
+        }
 
         private static bool FindAndHighlightText(TextPointer start, TextPointer end, string filter, bool ignoreCase, bool firstLettersOnly, IDictionary<DependencyProperty, object> highlightPropertiesAndValues)
         {
@@ -87,13 +108,24 @@ namespace MaterialDesignThemes.Wpf.AddOns.Extensions
                         if (string.IsNullOrEmpty(subText))
                             continue;
 
-                        if (subText.IndexOf(filter, comparisonType) == 0)
+                        var matchIndex = subText.IndexOf(filter, comparisonType);
+                        if (matchIndex >= 0)
                         {
-
-                            HighLightWords(pointer, i, filter, highlightPropertiesAndValues);
-                            return true;
+                            var nonAlphaCharsOffset = 0;
+                            while (matchIndex != 0 && nonAlphaCharsOffset < subText.Length && !char.IsLetterOrDigit(subText[nonAlphaCharsOffset]))
+                            {
+                                nonAlphaCharsOffset++;
+                                matchIndex = subText.Substring(nonAlphaCharsOffset)
+                                                    .IndexOf(filter, comparisonType);
+                            }
+                            
+                            if (matchIndex == 0)
+                            {
+                                HighLightWords(pointer, i + nonAlphaCharsOffset, filter, highlightPropertiesAndValues);
+                                return true;
+                            }
                         }
-
+                        
                         i += subText.Length - 1;
                     }
                 }
