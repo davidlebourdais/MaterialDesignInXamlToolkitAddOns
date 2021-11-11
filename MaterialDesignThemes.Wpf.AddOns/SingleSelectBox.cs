@@ -260,6 +260,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             if (args.NewValue != null)
                 singleSelectBox.IsOpen = false;
             singleSelectBox.HasASelectedItem = singleSelectBox.SelectedItem != null;
+            singleSelectBox.ClearAllFilterText();
         }
 
         /// <summary>

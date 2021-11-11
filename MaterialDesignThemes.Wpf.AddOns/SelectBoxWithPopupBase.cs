@@ -110,8 +110,6 @@ namespace MaterialDesignThemes.Wpf.AddOns
         {
             if (_ownFilterTextBox != null)
                 _ownFilterTextBox.Text = string.Empty;
-            
-            _textBoxCache.ClearCache();
         }
 
         private void InitializeCurrentTextBoxText()
@@ -119,11 +117,22 @@ namespace MaterialDesignThemes.Wpf.AddOns
             if (_currentFilterTextBox != null)
                 _textBoxCache.SetFromCache(_currentFilterTextBox);
         }
-        
+
         private void ClearCurrentTextBoxText()
         {
             if (_currentFilterTextBox != null)
                 _currentFilterTextBox.Text = string.Empty;
+        }
+        
+        /// <summary>
+        /// Clears the filters along with TextBox cache.
+        /// </summary>
+        protected void ClearAllFilterText()
+        {
+            if (_currentFilterTextBox != null)
+                _currentFilterTextBox.Text = string.Empty;
+            if (_ownFilterTextBox != null)
+                _ownFilterTextBox.Text = string.Empty;
             
             _textBoxCache.ClearCache();
         }
@@ -457,6 +466,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
 
             if (selectBoxWithPopup._popup.IsOpen != newValue)
                 selectBoxWithPopup._popup.IsOpen = newValue;
+            selectBoxWithPopup.ApplyFilter(true);
         }
         
         /// <summary>

@@ -53,6 +53,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             selectBox.SetItemFilterSetMemberPaths(selectBox.ItemFilterMemberPaths);
             selectBox.SetItemIsSelectedMemberPath(selectBox.IsSelectedMemberPath);
             selectBox.ItemsCount = (args.NewValue as IEnumerable<object>)?.Count() ?? 0;
+            selectBox.OnItemsSourceChanged();
         }
         
         /// <summary>
@@ -82,7 +83,8 @@ namespace MaterialDesignThemes.Wpf.AddOns
                                                                        IgnoreCase, 
                                                                        AlsoMatchFilterWordsAcrossBoundProperties,
                                                                        AlsoMatchFilterWordsAcrossBoundProperties);
-
+                
+                ItemsCount = Items.Count;
                 OnFilterApplied();
             }));
         }
