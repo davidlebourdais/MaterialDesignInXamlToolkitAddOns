@@ -21,25 +21,25 @@
                     <VisualState Name="MouseOver">
                         <Storyboard>
                             <DoubleAnimation Duration="0"
-                                         Storyboard.TargetName="MouseOverBorder"
-                                         Storyboard.TargetProperty="Opacity"
-                                         To="0.1" />
-                        </Storyboard>
-                    </VisualState>
+                                             Storyboard.TargetName="MouseOverBorder"
+                                             Storyboard.TargetProperty="Opacity"
+                                             To="0.1" />
+                        </Storyboard> 
+                    </VisualState>           
                 </VisualStateGroup>
                 <VisualStateGroup Name="SelectionStates">
                     <VisualStateGroup.Transitions>
                         <VisualTransition GeneratedDuration="0:0:0.3" />
                     </VisualStateGroup.Transitions>
-                    <VisualState Name="Selected">
+                    <VisualState Name="Selected" />
+                    <VisualState Name="Unselected" >
                         <Storyboard>
                             <DoubleAnimation Duration="0"
-                                         Storyboard.TargetName="SelectedBorder"
-                                         Storyboard.TargetProperty="Opacity"
-                                         To="0.04" />
+                                             Storyboard.TargetName="SelectedBorder"
+                                             Storyboard.TargetProperty="Opacity"
+                                             To="0" />
                         </Storyboard>
                     </VisualState>
-                    <VisualState Name="Unselected" />
                 </VisualStateGroup>
                 <VisualStateGroup Name="PreSelectionStates">
                     <VisualStateGroup.Transitions>
@@ -62,9 +62,9 @@
                     <VisualState Name="Focused">
                         <Storyboard>
                             <DoubleAnimation Duration="0"
-                                         Storyboard.TargetName="MouseOverBorder"
-                                         Storyboard.TargetProperty="Opacity"
-                                         To="0.1" />
+                                             Storyboard.TargetName="MouseOverBorder"
+                                             Storyboard.TargetProperty="Opacity"
+                                             To="0.1" />
                         </Storyboard>
                     </VisualState>
                     <VisualState Name="Unfocused" />
@@ -99,7 +99,7 @@
             <Border Grid.Column="0"
                     x:Name="SelectedBorder"
                     Background="{TemplateBinding Foreground, Converter={StaticResource BrushRoundConverter}}"
-                    Opacity="0"
+                    Opacity="0.04"
                     RenderTransformOrigin="0.5,0.5" />
 
             <Border Padding="{TemplateBinding Padding}">
@@ -135,6 +135,7 @@
             </Trigger>
             <Trigger Property="CanUseCheckBoxForSelection" Value="True">
                 <Setter TargetName="SelectionCheckBox" Property="Visibility" Value="Visible" />
+                <Setter TargetName="SelectedBorder" Property="Opacity" Value="0.01" />
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
