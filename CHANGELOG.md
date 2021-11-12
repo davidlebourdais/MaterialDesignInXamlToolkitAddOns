@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.0.3
+Improvements on the SelectBox.
+
 ## v0.0.2
 Add a SelectBox, a kind of ComboBox with enhanced search capabilities.
 
