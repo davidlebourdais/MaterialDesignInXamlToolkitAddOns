@@ -13,7 +13,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
     /// <summary>
     /// Base class for selectors with filter.
     /// </summary>
-    public abstract class SelectBoxBase : ItemsControl
+    public abstract class FilterBox : ItemsControl
     {
         /// <summary>
         /// Current filter value.
@@ -21,7 +21,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         protected string _filterCache;
 
         /// <summary>
-        /// Holds description of the property bound to item's <see cref="SelectBoxItem.IsSelected"/> property.
+        /// Holds description of the property bound to item's <see cref="FilterBoxItem.IsSelected"/> property.
         /// </summary>
         protected PropertyDescriptor _itemIsSelectedProperty;
         
@@ -29,13 +29,13 @@ namespace MaterialDesignThemes.Wpf.AddOns
 
         #region Constructors and initializations
         /// <summary>
-        /// Static constructor for <see cref="SelectBoxBase"/> type.
+        /// Static constructor for <see cref="FilterBox"/> type.
         /// Override some base dependency properties.
         /// </summary>
-        static SelectBoxBase()
+        static FilterBox()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(SelectBoxBase), new FrameworkPropertyMetadata(typeof(SelectBoxBase)));
-            ItemsSourceProperty.OverrideMetadata(typeof(SelectBoxBase), new FrameworkPropertyMetadata(null, ItemsSourcePropertyChanged));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(FilterBox), new FrameworkPropertyMetadata(typeof(FilterBox)));
+            ItemsSourceProperty.OverrideMetadata(typeof(FilterBox), new FrameworkPropertyMetadata(null, ItemsSourcePropertyChanged));
         }
         #endregion
 
@@ -59,14 +59,14 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void ItemsSourcePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is SelectBoxBase selectBox))
+            if (!(sender is FilterBox filterBox))
                 return;
             
-            selectBox.SetItemFilterSetMemberPaths(selectBox.ItemFilterMemberPaths);
-            selectBox.SetItemIsSelectedMemberPath(selectBox.IsSelectedMemberPath);
-            selectBox.ItemsCount = selectBox.Items.Count;
-            selectBox.OnItemsSourceChanged();
-            selectBox.IsLoadingItemsInBackground = false;
+            filterBox.SetItemFilterSetMemberPaths(filterBox.ItemFilterMemberPaths);
+            filterBox.SetItemIsSelectedMemberPath(filterBox.IsSelectedMemberPath);
+            filterBox.ItemsCount = filterBox.Items.Count;
+            filterBox.OnItemsSourceChanged();
+            filterBox.IsLoadingItemsInBackground = false;
         }
         
         /// <summary>
@@ -119,9 +119,9 @@ namespace MaterialDesignThemes.Wpf.AddOns
             if (item == null)
                 return;
 
-            var selectBoxItem = GetSelectBoxItem(item);
-            if (selectBoxItem != null)
-                selectBoxItem.IsSelected = false;
+            var filterBoxItem = GetFilterBoxItem(item);
+            if (filterBoxItem != null)
+                filterBoxItem.IsSelected = false;
             else
                 _itemIsSelectedProperty?.SetValue(item, false);
         }
@@ -140,7 +140,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="Filter"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty FilterProperty
-            = DependencyProperty.Register(nameof(Filter), typeof(string), typeof(SelectBoxBase), new FrameworkPropertyMetadata(default(string), FilterPropertyChanged));
+            = DependencyProperty.Register(nameof(Filter), typeof(string), typeof(FilterBox), new FrameworkPropertyMetadata(default(string), FilterPropertyChanged));
 
         /// <summary>
         /// Called whenever the <see cref="Filter"/> property changes.
@@ -149,10 +149,10 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void FilterPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is SelectBoxBase selectBox))
+            if (!(sender is FilterBox filterBox))
                 return;
 
-            selectBox.ApplyFilter();
+            filterBox.ApplyFilter();
         }
 
         /// <summary>
@@ -168,7 +168,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IgnoreCase"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IgnoreCaseProperty
-            = DependencyProperty.Register(nameof(IgnoreCase), typeof(bool), typeof(SelectBoxBase), new FrameworkPropertyMetadata(true, FilterRulesChanged));
+            = DependencyProperty.Register(nameof(IgnoreCase), typeof(bool), typeof(FilterBox), new FrameworkPropertyMetadata(true, FilterRulesChanged));
 
         /// <summary>
         /// Gets or sets a value indicating if text comparisons during
@@ -183,7 +183,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="AlsoMatchWithFirstWordLetters"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty AlsoMatchWithFirstWordLettersProperty
-            = DependencyProperty.Register(nameof(AlsoMatchWithFirstWordLetters), typeof(bool), typeof(SelectBoxBase), new FrameworkPropertyMetadata(true, FilterRulesChanged));
+            = DependencyProperty.Register(nameof(AlsoMatchWithFirstWordLetters), typeof(bool), typeof(FilterBox), new FrameworkPropertyMetadata(true, FilterRulesChanged));
         
         /// <summary>
         /// Gets or sets a value indicating if text comparisons during
@@ -202,7 +202,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="AlsoMatchFilterWordsAcrossBoundProperties"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty AlsoMatchFilterWordsAcrossBoundPropertiesProperty
-            = DependencyProperty.Register(nameof(AlsoMatchFilterWordsAcrossBoundProperties), typeof(bool), typeof(SelectBoxBase), new FrameworkPropertyMetadata(true, FilterRulesChanged));
+            = DependencyProperty.Register(nameof(AlsoMatchFilterWordsAcrossBoundProperties), typeof(bool), typeof(FilterBox), new FrameworkPropertyMetadata(true, FilterRulesChanged));
         
         /// <summary>
         /// Called whenever the <see cref="IgnoreCase"/>, <see cref="AlsoMatchWithFirstWordLetters"/>
@@ -212,10 +212,10 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void FilterRulesChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is SelectBoxBase selectBox))
+            if (!(sender is FilterBox filterBox))
                 return;
 
-            selectBox.ApplyFilter(true);
+            filterBox.ApplyFilter(true);
         }
         
         /// <summary>
@@ -230,7 +230,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="FilterHint"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty FilterHintProperty
-            = DependencyProperty.Register(nameof(FilterHint), typeof(string), typeof(SelectBoxBase), new FrameworkPropertyMetadata("Search and add..."));
+            = DependencyProperty.Register(nameof(FilterHint), typeof(string), typeof(FilterBox), new FrameworkPropertyMetadata("Search and add..."));
 
         /// <summary>
         /// Gets or sets the hint to be set when there is no items to be displayed.
@@ -244,7 +244,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="NothingToDisplayHint"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty NothingToDisplayHintProperty
-            = DependencyProperty.Register(nameof(NothingToDisplayHint), typeof(string), typeof(SelectBoxBase), new FrameworkPropertyMetadata("Nothing to display"));
+            = DependencyProperty.Register(nameof(NothingToDisplayHint), typeof(string), typeof(FilterBox), new FrameworkPropertyMetadata("Nothing to display"));
 
         /// <summary>
         /// Gets or sets a value indicating the path to item string properties on
@@ -259,7 +259,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="ItemFilterMemberPaths"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty ItemFilterMemberPathsProperty
-            = DependencyProperty.Register(nameof(ItemFilterMemberPaths), typeof(string), typeof(SelectBoxBase), new FrameworkPropertyMetadata(default(string), FilterMemberPathsChanged));
+            = DependencyProperty.Register(nameof(ItemFilterMemberPaths), typeof(string), typeof(FilterBox), new FrameworkPropertyMetadata(default(string), FilterMemberPathsChanged));
 
         /// <summary>
         /// Called whenever the <see cref="ItemFilterMemberPaths"/> property changes.
@@ -268,7 +268,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void FilterMemberPathsChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is SelectBoxBase item) || !(args.NewValue is string rawMemberPaths))
+            if (!(sender is FilterBox item) || !(args.NewValue is string rawMemberPaths))
                 return;
 
             item.SetItemFilterSetMemberPaths(rawMemberPaths);
@@ -302,7 +302,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IsSelectedMemberPath"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IsSelectedMemberPathProperty
-            = DependencyProperty.Register(nameof(IsSelectedMemberPath), typeof(string), typeof(SelectBoxBase), new FrameworkPropertyMetadata(default(string), ItemIsSelectedMemberPathChanged));
+            = DependencyProperty.Register(nameof(IsSelectedMemberPath), typeof(string), typeof(FilterBox), new FrameworkPropertyMetadata(default(string), ItemIsSelectedMemberPathChanged));
 
         /// <summary>
         /// Called whenever the <see cref="IsSelectedMemberPath"/> property changes.
@@ -311,7 +311,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void ItemIsSelectedMemberPathChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is SelectBoxBase item) || !(args.NewValue is string memberPath))
+            if (!(sender is FilterBox item) || !(args.NewValue is string memberPath))
                 return;
 
             item.SetItemIsSelectedMemberPath(memberPath);
@@ -327,7 +327,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
 
             foreach (var item in Items)
             {
-                GetSelectBoxItem(item)?.TrySetIsSelectedBinding(memberPath);
+                GetFilterBoxItem(item)?.TrySetIsSelectedBinding(memberPath);
             }
         }
 
@@ -340,7 +340,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             protected set => SetValue(_itemsCountPropertyKey, value);
         }
         private static readonly DependencyPropertyKey _itemsCountPropertyKey =
-            DependencyProperty.RegisterReadOnly(nameof(ItemsCount), typeof(int), typeof(SelectBoxBase),
+            DependencyProperty.RegisterReadOnly(nameof(ItemsCount), typeof(int), typeof(FilterBox),
                                                 new PropertyMetadata(default(int), ItemsCountChanged));
 
         /// <summary>
@@ -355,7 +355,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void ItemsCountChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is SelectBoxBase item) || !(args.NewValue is int newCount))
+            if (!(sender is FilterBox item) || !(args.NewValue is int newCount))
                 return;
 
             item.HasItemsToDisplay = newCount != 0;
@@ -377,7 +377,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             protected set => SetValue(_hasItemsToDisplayPropertyKey, value);
         }
         private static readonly DependencyPropertyKey _hasItemsToDisplayPropertyKey =
-            DependencyProperty.RegisterReadOnly(nameof(HasItemsToDisplay), typeof(bool), typeof(SelectBoxBase), new PropertyMetadata(default(bool)));
+            DependencyProperty.RegisterReadOnly(nameof(HasItemsToDisplay), typeof(bool), typeof(FilterBox), new PropertyMetadata(default(bool)));
         /// <summary>
         /// Registers <see cref="HasItemsToDisplay"/> as a readonly dependency property.
         /// </summary>
@@ -392,7 +392,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             protected set => SetValue(_isLoadingItemsInBackgroundPropertyKey, value);
         }
         private static readonly DependencyPropertyKey _isLoadingItemsInBackgroundPropertyKey =
-            DependencyProperty.RegisterReadOnly(nameof(IsLoadingItemsInBackground), typeof(bool), typeof(SelectBoxBase), new PropertyMetadata(default(bool)));
+            DependencyProperty.RegisterReadOnly(nameof(IsLoadingItemsInBackground), typeof(bool), typeof(FilterBox), new PropertyMetadata(default(bool)));
         /// <summary>
         /// Registers <see cref="IsLoadingItemsInBackground"/> as a readonly dependency property.
         /// </summary>
@@ -410,7 +410,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IsLoadingItemsInBackgroundHint"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IsLoadingItemsInBackgroundHintProperty
-            = DependencyProperty.Register(nameof(IsLoadingItemsInBackgroundHint), typeof(string), typeof(SelectBoxBase), new FrameworkPropertyMetadata("Loading your data..."));
+            = DependencyProperty.Register(nameof(IsLoadingItemsInBackgroundHint), typeof(string), typeof(FilterBox), new FrameworkPropertyMetadata("Loading your data..."));
         #endregion
 
         #region ItemContainer management
@@ -421,16 +421,16 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <returns>True is item is its own container.</returns>
         protected override bool IsItemItsOwnContainerOverride(object item)
         {
-            return item is SelectBoxItem;
+            return item is FilterBoxItem;
         }
 
         /// <summary>
         /// Provides a visual object to a given item.
         /// </summary>
-        /// <returns>A pre-initialized <see cref="SelectBoxItem"/>.</returns>
+        /// <returns>A pre-initialized <see cref="FilterBoxItem"/>.</returns>
         protected override DependencyObject GetContainerForItemOverride()
         {
-            return new SelectBoxItem(_filterCache, AlsoMatchWithFirstWordLetters || AlsoMatchFilterWordsAcrossBoundProperties, false, _itemIsSelectedProperty?.Name);
+            return new FilterBoxItem(_filterCache, AlsoMatchWithFirstWordLetters || AlsoMatchFilterWordsAcrossBoundProperties,  _itemIsSelectedProperty?.Name);
         }
         
         /// <summary>
@@ -438,14 +438,14 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         /// <param name="item">The item to be retrieved.</param>
         /// <returns>The item itself if a visual item or the generated visual item if of other type.</returns>
-        protected SelectBoxItem GetSelectBoxItem(object item)
+        protected FilterBoxItem GetFilterBoxItem(object item)
         {
-            if (!(item is SelectBoxItem selectBoxItem))
+            if (!(item is FilterBoxItem filterBoxItem))
             {
-                selectBoxItem = ItemContainerGenerator.ContainerFromItem(item) as SelectBoxItem;
+                filterBoxItem = ItemContainerGenerator.ContainerFromItem(item) as FilterBoxItem;
             }
 
-            return selectBoxItem;
+            return filterBoxItem;
         }
         #endregion
     }

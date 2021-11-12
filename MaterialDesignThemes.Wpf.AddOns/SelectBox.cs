@@ -12,14 +12,14 @@ using MaterialDesignThemes.Wpf.AddOns.Utils.Commands;
 namespace MaterialDesignThemes.Wpf.AddOns
 {
     /// <summary>
-    /// A <see cref="SelectBoxBase"/> implementation with a <see cref="SelectBoxPopup"/> for
+    /// A <see cref="FilterBox"/> implementation with a <see cref="SelectBoxPopup"/> for
     /// items display. 
     /// </summary>
     [TemplatePart(Name = "PART_FilterTextBox", Type = typeof(TextBox))]
     [TemplatePart(Name = "PART_Popup", Type = typeof(Popup))]
     [TemplatePart(Name = "ItemsScrollViewer", Type = typeof(ScrollViewer))]
     [StyleTypedProperty(Property = "ItemContainerStyle", StyleTargetType = typeof(SelectBoxItem))]
-    public abstract class SelectBoxWithPopupBase : SelectBoxBase
+    public abstract class SelectBox : FilterBox
     {
         /// <summary>
         /// The current <see cref="TextBox"/> holding the filter.
@@ -36,9 +36,9 @@ namespace MaterialDesignThemes.Wpf.AddOns
 
         #region Constructors and initializations
         /// <summary>
-        /// Creates a new instance of <see cref="SelectBoxWithPopupBase"/>.
+        /// Creates a new instance of <see cref="SelectBox"/>.
         /// </summary>
-        protected SelectBoxWithPopupBase()
+        protected SelectBox()
         {
             _textBoxCache = new TextBoxCache();
             
@@ -46,12 +46,12 @@ namespace MaterialDesignThemes.Wpf.AddOns
         }
 
         /// <summary>
-        /// Static constructor for <see cref="SelectBoxWithPopupBase"/> type.
+        /// Static constructor for <see cref="SelectBox"/> type.
         /// Override some base dependency properties.
         /// </summary>
-        static SelectBoxWithPopupBase()
+        static SelectBox()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(SelectBoxWithPopupBase), new FrameworkPropertyMetadata(typeof(SelectBoxWithPopupBase)));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(SelectBox), new FrameworkPropertyMetadata(typeof(SelectBox)));
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         {
             var popup = Template.FindName("PART_Popup", this);
             if (popup == null || (_popup = popup as SelectBoxPopup) == null)
-                throw new Exception(nameof(SelectBoxWithPopupBase) + " template must contain a " + nameof(SelectBoxPopup) + " named 'PART_Popup'.");
+                throw new Exception(nameof(SelectBox) + " template must contain a " + nameof(SelectBoxPopup) + " named 'PART_Popup'.");
 
             _popup.Opened += PopupOnOpened;
             _popup.Closed += PopupOnClosed;
@@ -653,7 +653,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IsOpen"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IsOpenProperty
-            = DependencyProperty.Register(nameof(IsOpen), typeof(bool?), typeof(SelectBoxWithPopupBase), new FrameworkPropertyMetadata(false, IsOpenPropertyChanged));
+            = DependencyProperty.Register(nameof(IsOpen), typeof(bool?), typeof(SelectBox), new FrameworkPropertyMetadata(false, IsOpenPropertyChanged));
 
         /// <summary>
         /// Called whenever the <see cref="IsOpen"/> property changes.
@@ -662,12 +662,12 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void IsOpenPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is SelectBoxWithPopupBase selectBoxWithPopup) || !(args.NewValue is bool newValue))
+            if (!(sender is SelectBox selectBox) || !(args.NewValue is bool newValue))
                 return;
 
-            if (selectBoxWithPopup._popup.IsOpen != newValue)
-                selectBoxWithPopup._popup.IsOpen = newValue;
-            selectBoxWithPopup.ApplyFilter(true);
+            if (selectBox._popup.IsOpen != newValue)
+                selectBox._popup.IsOpen = newValue;
+            selectBox.ApplyFilter(true);
         }
         
         /// <summary>
@@ -683,7 +683,43 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="MaxDropDownHeight"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty MaxDropDownHeightProperty
-            = DependencyProperty.Register(nameof(MaxDropDownHeight), typeof(double), typeof(SelectBoxWithPopupBase), new FrameworkPropertyMetadata(SystemParameters.PrimaryScreenHeight / 3));
+            = DependencyProperty.Register(nameof(MaxDropDownHeight), typeof(double), typeof(SelectBox), new FrameworkPropertyMetadata(SystemParameters.PrimaryScreenHeight / 3));
+        #endregion
+        
+        #region ItemContainer management
+        /// <summary>
+        /// Indicates if the child item is its own container (i.e. a visual object).
+        /// </summary>
+        /// <param name="item">The item to be checked.</param>
+        /// <returns>True is item is its own container.</returns>
+        protected override bool IsItemItsOwnContainerOverride(object item)
+        {
+            return item is SelectBoxItem;
+        }
+
+        /// <summary>
+        /// Provides a visual object to a given item.
+        /// </summary>
+        /// <returns>A pre-initialized <see cref="SelectBoxItem"/>.</returns>
+        protected override DependencyObject GetContainerForItemOverride()
+        {
+            return new SelectBoxItem(_filterCache, AlsoMatchWithFirstWordLetters || AlsoMatchFilterWordsAcrossBoundProperties, false, _itemIsSelectedProperty?.Name);
+        }
+        
+        /// <summary>
+        /// Gets the visual item of a given source item.
+        /// </summary>
+        /// <param name="item">The item to be retrieved.</param>
+        /// <returns>The item itself if a visual item or the generated visual item if of other type.</returns>
+        protected SelectBoxItem GetSelectBoxItem(object item)
+        {
+            if (!(item is SelectBoxItem selectBoxItem))
+            {
+                selectBoxItem = ItemContainerGenerator.ContainerFromItem(item) as SelectBoxItem;
+            }
+
+            return selectBoxItem;
+        }
         #endregion
     }
 }

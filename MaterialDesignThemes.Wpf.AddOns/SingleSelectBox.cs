@@ -11,7 +11,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
     /// Displays items to select them quickly through a persistent ComboBox-like popup.
     /// </summary>
     [TemplatePart(Name = "PART_CopyButton", Type = typeof(SelectBoxItem))]
-    public class SingleSelectBox : SelectBoxWithPopupBase
+    public class SingleSelectBox : SelectBox
     {
         private Button _copyButton;
         
@@ -31,7 +31,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             AddHandler(SelectBoxItem.IsSelectedChangedEvent, new RoutedEventHandler((sender, args) =>
             {
                 if (!_itemIsBeingInitialized && args.OriginalSource is SelectBoxItem selectBoxItem && selectBoxItem.IsSelected)
-                    SelectItem(selectBoxItem, false);
+                    SelectItem(selectBoxItem);
 
                 args.Handled = true;
             }));
