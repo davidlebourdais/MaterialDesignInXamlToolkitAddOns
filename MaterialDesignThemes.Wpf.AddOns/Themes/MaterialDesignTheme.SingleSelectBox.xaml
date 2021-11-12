@@ -5,8 +5,8 @@
                     xmlns:converters="clr-namespace:EMA.ExtendedWPFConverters;assembly=ExtendedWPFConverters">
 
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.TextBox.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.Button.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.SelectBoxItem.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.ToggleButton.xaml" />
     </ResourceDictionary.MergedDictionaries>
@@ -27,6 +27,7 @@
             <Button Grid.Row="0" Grid.Column="0"
                         Foreground="{DynamicResource MaterialDesignBodyLight}"
                         Style="{StaticResource MaterialDesignIconForegroundButton}"
+                        wpf:RippleAssist.Feedback="Transparent"
                         Height="35" Width="35"
                         Content="{wpf:PackIcon Kind=ArrowLeft}"
                         Command="{Binding ToggleOpenStateCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}" />
@@ -158,12 +159,14 @@
                                 x:Name="PART_PrefixButton"
                                 Foreground="{DynamicResource MaterialDesignBodyLight}"
                                 Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                wpf:RippleAssist.Feedback="Transparent"
                                 Height="35" Width="35"
                                 Content="{wpf:PackIcon Kind=MagnifyPlusOutline}"
                                 Command="{Binding ToggleOpenStateCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}" />
-
+                        
                         <ContentControl Grid.Column="0" Grid.ColumnSpan="2"
                                         x:Name="SelectedItemPresenter"
+                                        Focusable="False"
                                         FontWeight="SemiBold"
                                         Visibility="Collapsed" Margin="15,0"
                                         VerticalAlignment="Center"
@@ -213,14 +216,14 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
 
-                                        <ContentControl VerticalAlignment="Center" Margin="5,0" FontWeight="SemiBold"
+                                        <ContentControl VerticalAlignment="Center" Margin="5,0" FontWeight="SemiBold" Focusable="False"
                                                         Content="{Binding SelectedItem, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
                                                         ContentTemplate="{Binding SelectedItemTemplate, RelativeSource={RelativeSource TemplatedParent}}"
                                                         ContentTemplateSelector="{Binding SelectedItemTemplateSelector, RelativeSource={RelativeSource TemplatedParent}}" />
 
                                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                             <Button x:Name="SelectionShortcut"
-                                                    Style="{StaticResource MaterialDesignFlatMidBgButton}" Padding="6,0" Height="24" wpf:ButtonAssist.CornerRadius="5"
+                                                    Style="{StaticResource MaterialDesignDiscreteOutlinedButton}" Padding="6,0" Height="22" wpf:ButtonAssist.CornerRadius="10"
                                                     Command="{Binding GoToSelectedItemCommand, RelativeSource={RelativeSource TemplatedParent}}"
                                                     ToolTip="{Binding GoToSelectionHint, RelativeSource={RelativeSource TemplatedParent}}">
                                                 <StackPanel Orientation="Horizontal">
@@ -232,7 +235,7 @@
 
                                             <Border x:Name="UnavailableSelectionInformation"
                                                     Visibility="Collapsed"
-                                                    CornerRadius="5" VerticalAlignment="Center"
+                                                    CornerRadius="10" VerticalAlignment="Center"
                                                     TextElement.Foreground="IndianRed"
                                                     TextElement.FontWeight="SemiBold"
                                                     Background="{Binding (TextElement.Foreground), RelativeSource={RelativeSource Mode=Self}, Converter={StaticResource BrushOpacityConverter}, ConverterParameter=0.16}"
@@ -266,7 +269,8 @@
                                                    FontWeight="ExtraLight" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0, 8, 0, 10"
                                                    Visibility="{Binding HasItemsToDisplay, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource NotBooleanToVisibilityConverter}}" />
 
-                                        <ScrollViewer MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                        <ScrollViewer x:Name="ItemsScrollViewer" 
+                                                      MaxHeight="{TemplateBinding MaxDropDownHeight}"
                                                       VerticalScrollBarVisibility="Auto"
                                                       MinHeight="1" VerticalAlignment="Top"
                                                       Background="{Binding Background, ElementName=PART_Popup}">
@@ -309,6 +313,19 @@
                         <Trigger Property="IsSelectedItemFilteredOut" Value="True">
                             <Setter TargetName="SelectionShortcut" Property="Visibility" Value="Collapsed" />
                             <Setter TargetName="UnavailableSelectionInformation" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        
+                        <Trigger Property="IsLoadingItemsInBackground" Value="True">
+                            <Setter TargetName="PART_PrefixButton" Property="IsEnabled" Value="False" />
+                            <Setter TargetName="PART_PrefixButton" Property="Content">
+                                <Setter.Value>
+                                    <wpf:PackIcon Kind="ReloadAlert" />
+                                </Setter.Value>
+                            </Setter>
+                            <Setter TargetName="PART_FilterTextBox" Property="IsEnabled" Value="False" />
+                            <Setter TargetName="PART_FilterTextBox" 
+                                    Property="wpf:HintAssist.Hint" 
+                                    Value="{Binding IsLoadingItemsInBackgroundHint, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

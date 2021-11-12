@@ -3,8 +3,9 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Threading;
+using EMA.ExtendedWPFVisualTreeHelper;
 using MaterialDesignThemes.Wpf.AddOns.Utils.Caching;
 using MaterialDesignThemes.Wpf.AddOns.Utils.Commands;
 
@@ -14,8 +15,9 @@ namespace MaterialDesignThemes.Wpf.AddOns
     /// A <see cref="SelectBoxBase"/> implementation with a <see cref="SelectBoxPopup"/> for
     /// items display. 
     /// </summary>
-    [StyleTypedProperty(Property = "PART_FilterTextBox", StyleTargetType = typeof(TextBox))]
-    [StyleTypedProperty(Property = "PART_Popup", StyleTargetType = typeof(Popup))]
+    [TemplatePart(Name = "PART_FilterTextBox", Type = typeof(TextBox))]
+    [TemplatePart(Name = "PART_Popup", Type = typeof(Popup))]
+    [TemplatePart(Name = "ItemsScrollViewer", Type = typeof(ScrollViewer))]
     [StyleTypedProperty(Property = "ItemContainerStyle", StyleTargetType = typeof(SelectBoxItem))]
     public abstract class SelectBoxWithPopupBase : SelectBoxBase
     {
@@ -26,6 +28,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         
         private TextBox _ownFilterTextBox;
         private SelectBoxPopup _popup;
+        private ScrollViewer _itemsScrollViewer;
         
         private readonly TextBoxCache _textBoxCache;
 
@@ -60,6 +63,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             base.OnApplyTemplate();
 
             InitializePopUpOrThrow();
+            InitializeItemsScrollViewerIfAny();
             InitializeOwnFilterTextBoxIfAny();
         }
 
@@ -72,6 +76,12 @@ namespace MaterialDesignThemes.Wpf.AddOns
             _popup.Opened += PopupOnOpened;
             _popup.Closed += PopupOnClosed;
             _popup.FilterTextBoxChanged += PopupOnFilterTextBoxChanged;
+        }
+        
+        private void InitializeItemsScrollViewerIfAny()
+        {
+            var scrollViewer = Template.FindName("ItemsScrollViewer", this);
+            _itemsScrollViewer = scrollViewer as ScrollViewer;
         }
 
         private void InitializeOwnFilterTextBoxIfAny()
@@ -190,8 +200,18 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="e">Event args.</param>
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
+            if (IsOpen != true)
+            {
+                _lastKeyWasPageChange = false;
+                base.OnPreviewKeyDown(e);
+                return;
+            }
+            
             var isFromFilterTextBox = Equals(e.OriginalSource, _currentFilterTextBox);
 
+            if (!ProcessRepetitivePageKeyPressed(ref e, isFromFilterTextBox))
+                return;
+            
             if (ProcessTabNavigation(e, isFromFilterTextBox))
                 return;
 
@@ -209,18 +229,16 @@ namespace MaterialDesignThemes.Wpf.AddOns
                     if (!isFromFilterTextBox)
                         return;
                     break;
-
-     
-                case Key.PageDown:
-                case Key.PageUp:
-                    break;
-
+                
                 default:
-                    TryToNavigateAmongItems(ref e, isFromFilterTextBox);
-
-                    if (!e.Handled)
-                        if (!Equals(e.OriginalSource, _currentFilterTextBox) && !(e.OriginalSource is TextElement))
+                    if (!TryToNavigateAmongItems(ref e, isFromFilterTextBox))
+                    {
+                        if (!isFromFilterTextBox && !e.Handled)
+                        {
                             SetFocusOnFilterTextBox();
+                            e.Handled = true;
+                        }
+                    }
                     break;
             }
 
@@ -229,13 +247,25 @@ namespace MaterialDesignThemes.Wpf.AddOns
 
         private bool ProcessTabNavigation(KeyEventArgs e, bool isFromFilterTextBox)
         {
-            if (e.Key != Key.Tab || IsOpen != true)
+            if (e.Key != Key.Tab)
                 return false;
 
             if (isFromFilterTextBox)
                 SetFocusOnPopup();
+
+            if (!(e.OriginalSource is FrameworkElement source))
+                return false;
             
-            e.Handled = false;
+            var nextFocus = source.PredictFocus(FocusNavigationDirection.Right) ?? source.PredictFocus(FocusNavigationDirection.Down);
+            var nextFocusParent = nextFocus as SelectBoxItem ?? nextFocus.FindParent<SelectBoxItem>();
+            if (nextFocusParent == null)
+            {
+                e.Handled = false;
+                return true;
+            }
+
+            SetFocusOnItem(nextFocusParent);
+            e.Handled = true;
             return true;
         }
         
@@ -254,73 +284,171 @@ namespace MaterialDesignThemes.Wpf.AddOns
         #endregion
 
         #region Navigation among items using keyboard
-        private void TryToNavigateAmongItems(ref KeyEventArgs e, bool isFromFilterTextBox)
+        private bool TryToNavigateAmongItems(ref KeyEventArgs e, bool isFromFilterTextBox)
         {
             switch (e.Key)
             {
+                case Key.PageDown:
+                    if (NavigatePageDownItems(e.OriginalSource, isFromFilterTextBox))
+                        e.Handled = true;
+                    return true;
+
                 case Key.Down:
-                    if (NavigateDownItems(e.OriginalSource))
+                    if (NavigateDownItems(e.OriginalSource, isFromFilterTextBox))
                         e.Handled = true;
-                    break;
-
+                    return true;
+                
+                case Key.PageUp:
+                    if (NavigatePageUpItems(e.OriginalSource, isFromFilterTextBox))
+                        e.Handled = true;
+                    return true;
+                
                 case Key.Up:
-                    if (NavigateUpItems(e.Source, isFromFilterTextBox))
+                    if (NavigateUpItems(e.OriginalSource, isFromFilterTextBox))
                         e.Handled = true;
-                    break;
-
-                default:
-                    if (!isFromFilterTextBox && _currentFilterTextBox?.IsFocused == true && Keyboard.Modifiers == ModifierKeys.None)
-                    {
-                        SetFocusOnFilterTextBox();
-                        e.Handled = true;
-                    }
-                    break;
+                    return true;
             }
+
+            return false;
+        }
+
+        private DateTime _lastPageChangeTimeStamp;
+        private bool _lastKeyWasPageChange;
+        
+        private bool ProcessRepetitivePageKeyPressed(ref KeyEventArgs e, bool isFromFilterTextBox)
+        {
+            if (e.Key != Key.PageDown && e.Key != Key.PageUp)
+            {
+                _lastKeyWasPageChange = false;
+                return true;
+            }
+
+            if (isFromFilterTextBox && _lastKeyWasPageChange)
+                return false;
+            
+            _lastKeyWasPageChange = true;
+            
+            var now = DateTime.Now;
+            if ((now - _lastPageChangeTimeStamp) < TimeSpan.FromMilliseconds(200))
+            {
+                e.Handled = true;
+                return false;
+            }
+
+            _lastPageChangeTimeStamp = now;
+
+            return true;
         }
         
-        private bool NavigateDownItems(object originalItemSource)
+        private bool NavigateDownItems(object originalItemSource, bool isFromFilterTextBox)
         {
-            if (!Items.Contains(GetSelectBoxItem(originalItemSource)) &&
+            if (isFromFilterTextBox || Items.IsCurrentAfterLast)
+            {
+                SetFocusOnFirstItem();
+                return true;
+            }
+            
+            if (!(originalItemSource is SingleSelectBox) &&
+                !Items.Contains(GetDataContext(originalItemSource)))
+            {
+                SetFocusOnFirstItem();
+                return true;
+            }
+            
+            var visualItem = GetSelectBoxItem(Items.CurrentItem);
+            if (visualItem != originalItemSource)
+            {
+                SetFocusOnItem(originalItemSource);
+                visualItem = originalItemSource as SelectBoxItem;
+            }
+            
+            if (visualItem != null)
+            {
+                SetFocusOnNextItem();
+                return true;
+            }
+            
+            if (_itemsScrollViewer != null)
+                SetFocusOnItem((int)_itemsScrollViewer.ContentVerticalOffset + 1);
+            
+            return false;
+        }
+        
+        private bool NavigatePageDownItems(object originalItemSource, bool isFromFilterTextBox)
+        {
+            if (isFromFilterTextBox)
+            {
+                SetFocusOnFirstItem();
+                return true;
+            }
+            
+            if (!(originalItemSource is SingleSelectBox) &&
                 !Items.Contains(GetDataContext(originalItemSource)))
             {
                 SetFocusOnFirstItem();
                 return true;
             }
 
-            if (GetSelectBoxItem(Items.CurrentItem)?.IsFocused == true || Items.IsCurrentBeforeFirst)
-            {
-                SetFocusOnNextItem();
-                return true;
-            }
-
+            if (_itemsScrollViewer != null)
+                ExecuteInBackground(() => SetFocusOnItem((int) _itemsScrollViewer.ContentVerticalOffset + (int) _itemsScrollViewer.ViewportHeight - 1));
+    
             return false;
         }
-        
-        private bool NavigateUpItems(object itemSource, bool isFromFilterTextBox)
+
+        private bool NavigateUpItems(object originalItemSource, bool isFromFilterTextBox)
         {
-            var currentItem = GetSelectBoxItem(Items.CurrentItem);
-            if (currentItem == null && isFromFilterTextBox)
+            if (isFromFilterTextBox)
             {
                 SetFocusOnLastItem();
                 return true;
             }
 
-            if (currentItem?.IsFocused == true && currentItem == Items[0])
+            if (Items.IsCurrentBeforeFirst ||
+                (!(originalItemSource is SingleSelectBox) &&
+                !Items.Contains(GetDataContext(originalItemSource))))
             {
-                Items.MoveCurrentToPrevious();
                 SetFocusOnFilterTextBox();
                 return true;
             }
-
-            if (currentItem?.IsFocused == true || Items.IsCurrentAfterLast && !Equals(itemSource, this))
+            
+            var visualItem = GetSelectBoxItem(Items.CurrentItem);
+            if (visualItem != originalItemSource)
+            {
+                SetFocusOnItem(originalItemSource);
+                visualItem = originalItemSource as SelectBoxItem;
+            }
+            
+            if (visualItem != null)
             {
                 SetFocusOnPreviousItem();
                 return true;
             }
+            
+            return false;
+        }
+        
+        private bool NavigatePageUpItems(object originalItemSource, bool isFromFilterTextBox)
+        {
+            if (isFromFilterTextBox)
+            {
+                SetFocusOnLastItem();
+                return true;
+            }
+
+            if (Items.IsCurrentBeforeFirst ||
+                (!(originalItemSource is SingleSelectBox) &&
+                 !Items.Contains(GetDataContext(originalItemSource))))
+            {
+                SetFocusOnFilterTextBox();
+                return true;
+            }
+
+            if (_itemsScrollViewer != null && !_focusOnItemGenerationRequested)
+                ExecuteInBackground(() => SetFocusOnItem((int)_itemsScrollViewer.ContentVerticalOffset));
 
             return false;
         }
-
+        
         private void SetFocusOnFilterTextBox()
         {
             MaintainPopupOpenWhileFocusingOnFilterTextBox();
@@ -329,28 +457,73 @@ namespace MaterialDesignThemes.Wpf.AddOns
             _currentFilterTextBox?.Focus();
         }
         
+        private void SetFocusOnItem(int itemIndex)
+        {
+            if (itemIndex < Items.Count)
+                Items.MoveCurrentToPosition(itemIndex);
+
+            if (_focusOnItemGenerationRequested)
+                return;
+            
+            if (_itemsScrollViewer != null && GetSelectBoxItem(Items.CurrentItem) == null)
+                _itemsScrollViewer.ScrollToVerticalOffset(itemIndex - _itemsScrollViewer.ViewportHeight / 2);
+
+            FocusOnCurrentItemOnceGenerated();
+        }
+        
+        /// <summary>
+        /// Sets the current focus on a given item.
+        /// </summary>
+        /// <param name="item">The item to focus on.</param>
+        protected void SetFocusOnItem(object item)
+        {
+            if (item == null)
+                return;
+            
+            var index = Items.IndexOf(item);
+            if (index < 0)
+            {
+                var casted = GetDataContext(item);
+                if (casted != null)
+                    index = Items.IndexOf(casted);
+            }
+            
+            if (index >= 0)
+                SetFocusOnItem(index);
+        }
+        
         private void SetFocusOnFirstItem()
         {
             Items.MoveCurrentToFirst();
-            GetSelectBoxItem(Items.CurrentItem)?.Focus();
+
+            var current = GetSelectBoxItem(Items.CurrentItem);
+            if (current == null)
+                _itemsScrollViewer?.ScrollToTop();
+
+            FocusOnCurrentItemOnceGenerated();
         }
 
         private void SetFocusOnNextItem()
         {
             Items.MoveCurrentToNext();
-            GetSelectBoxItem(Items.CurrentItem)?.Focus();
+            FocusOnCurrentItemOnceGenerated();
         }
 
         private void SetFocusOnPreviousItem()
         {
             Items.MoveCurrentToPrevious();
-            GetSelectBoxItem(Items.CurrentItem)?.Focus();
+            FocusOnCurrentItemOnceGenerated();
         }
 
         private void SetFocusOnLastItem()
         {
             Items.MoveCurrentToLast();
-            GetSelectBoxItem(Items.CurrentItem)?.Focus();
+            
+            var current = GetSelectBoxItem(Items.CurrentItem);
+            if (current == null)
+                _itemsScrollViewer?.ScrollToBottom();
+
+            FocusOnCurrentItemOnceGenerated();
         }
         
         private static object GetDataContext(object item)
@@ -359,13 +532,41 @@ namespace MaterialDesignThemes.Wpf.AddOns
                 return frameworkElement.DataContext;
             return null;
         }
+        
+        private void ExecuteInBackground(Action action)
+            => Dispatcher.BeginInvoke(DispatcherPriority.Background, action);
+        
+        private bool _focusOnItemGenerationRequested;
+        
+        private void FocusOnCurrentItemOnceGenerated()
+        {
+            var visual = GetSelectBoxItem(Items.CurrentItem);
+            if (visual != null)
+                visual.Focus();
+            else if (!_focusOnItemGenerationRequested)
+            {
+                _focusOnItemGenerationRequested = true;
+                ItemContainerGenerator.StatusChanged += ItemContainerGeneratorOnStatusChanged;
+            }
+        }
+
+        private void ItemContainerGeneratorOnStatusChanged(object sender, EventArgs e)
+        {
+            if (ItemContainerGenerator.Status != GeneratorStatus.ContainersGenerated)
+                return;
+            
+            GetSelectBoxItem(Items.CurrentItem)?.Focus();
+            
+            ItemContainerGenerator.StatusChanged -= ItemContainerGeneratorOnStatusChanged;
+            _focusOnItemGenerationRequested = false;
+        }
         #endregion
         
         #region Popup management
         /// <summary>
         /// Gives focus to the managed popup.
         /// </summary>
-        protected virtual void SetFocusOnPopup()
+        protected void SetFocusOnPopup()
         {
             _popup.Focus();
         }

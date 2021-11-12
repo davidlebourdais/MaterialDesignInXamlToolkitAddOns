@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using MaterialDesignThemes.Wpf.AddOns.Utils.Commands;
 
@@ -9,11 +10,12 @@ namespace MaterialDesignThemes.Wpf.AddOns
     /// <summary>
     /// Displays items to select them quickly through a persistent ComboBox-like popup.
     /// </summary>
-    [StyleTypedProperty(Property = "PART_CopyButton", StyleTargetType = typeof(SelectBoxItem))]
+    [TemplatePart(Name = "PART_CopyButton", Type = typeof(SelectBoxItem))]
     public class SingleSelectBox : SelectBoxWithPopupBase
     {
         private Button _copyButton;
         
+        private bool _itemIsBeingInitialized;
         private bool _internalItemTemplateSyncInProgress;
         private bool _areItemAndSelectedItemTemplateSynced = true;
 
@@ -23,18 +25,18 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         public SingleSelectBox()
         {
-            ClearSelectionCommand = new SimpleCommand(() => { SetAsUnSelected(SelectedItem); SelectedItem = null; }, () => HasASelectedItem);
-            GoToSelectedItemCommand = new SimpleCommand(() => GetSelectBoxItem(SelectedItem)?.Focus(), () => HasASelectedItem);
+            ClearSelectionCommand = new SimpleCommand(() => { SetAsUnSelected(SelectedItem); SetSelectedItem(null); }, () => HasASelectedItem);
+            GoToSelectedItemCommand = new SimpleCommand(() => SetFocusOnItem(SelectedItem), () => HasASelectedItem);
 
             AddHandler(SelectBoxItem.IsSelectedChangedEvent, new RoutedEventHandler((sender, args) =>
             {
-                if (args.OriginalSource is SelectBoxItem selectBoxItem && selectBoxItem.IsSelected)
-                    SelectItem(selectBoxItem);
+                if (!_itemIsBeingInitialized && args.OriginalSource is SelectBoxItem selectBoxItem && selectBoxItem.IsSelected)
+                    SelectItem(selectBoxItem, false);
 
                 args.Handled = true;
             }));
         }
-
+        
         /// <summary>
         /// Static constructor for <see cref="SingleSelectBox"/> type.
         /// Override some base dependency properties.
@@ -102,6 +104,17 @@ namespace MaterialDesignThemes.Wpf.AddOns
         }
         #endregion
         
+        #region Filtering part
+        /// <summary>
+        /// Called whenever the filter value changes and filtering is processed.
+        /// </summary>
+        protected override void OnFilterApplied()
+        {
+            base.OnFilterApplied();
+            IsSelectedItemFilteredOut = SelectedItem != null && !Items.Contains(SelectedItem);
+        }
+        #endregion
+        
         #region Keyboard key pressed management
         /// <summary>
         /// Occurs whenever a key from keyboard is pressed.
@@ -109,6 +122,12 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="e">Event args.</param>
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
+            if (IsOpen != true)
+            {
+                base.OnPreviewKeyDown(e);
+                return;
+            }
+            
             var isFromFilterTextBox = Equals(e.OriginalSource, _currentFilterTextBox);
             
             if (ProcessImmediateToggleSelection(e, isFromFilterTextBox))
@@ -187,7 +206,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             if (e.Key != Key.Enter || Keyboard.Modifiers != ModifierKeys.Control)
                 return false;
 
-            TryToSelectFirstItem();
+            TryToSelectCurrentOrFirstItem();
 
             e.Handled = true;
             base.OnPreviewKeyDown(e);
@@ -195,27 +214,64 @@ namespace MaterialDesignThemes.Wpf.AddOns
             return true;
         }
 
-        private void TryToSelectFirstItem()
+        private void TryToSelectCurrentOrFirstItem()
         {
-            Items.MoveCurrentToFirst();
+            if (Items.IsCurrentBeforeFirst || Items.IsCurrentAfterLast)
+            {
+                Items.MoveCurrentToFirst();
+                SetFocusOnItem(Items.CurrentItem);
+            }
 
-            var selectBoxItem = GetSelectBoxItem(Items.CurrentItem);
-            SelectItem(selectBoxItem);
+            SetCurrentItemSelectedOnceGenerated();
+        }
+        
+        private void SetCurrentItemSelectedOnceGenerated()
+        {
+            var visual = GetSelectBoxItem(Items.CurrentItem);
+            if (visual != null)
+                SelectItem(visual, true);
+            else 
+                ItemContainerGenerator.StatusChanged += ItemContainerGeneratorOnStatusChanged;
+        }
+
+        private void ItemContainerGeneratorOnStatusChanged(object sender, EventArgs e)
+        {
+            if (ItemContainerGenerator.Status != GeneratorStatus.ContainersGenerated)
+                return;
+
+            ItemContainerGenerator.StatusChanged -= ItemContainerGeneratorOnStatusChanged;
+            
+            var visual = GetSelectBoxItem(Items.CurrentItem);
+            if (visual != null)
+                SelectItem(visual, true);
         }
         #endregion
         
         #region Item selection
-        private void SelectItem(FrameworkElement toSelect)
+        private void SelectItem(FrameworkElement toSelect, bool forceClose = false)
         {
             foreach (var item in Items)
             {
                 var selectedValueToAssign = item.Equals(toSelect) || item.Equals(toSelect.DataContext);
 
                 if (selectedValueToAssign)
-                    SelectedItem = item.Equals(toSelect) ? toSelect : toSelect.DataContext;
+                {
+                    var selection = item.Equals(toSelect) ? toSelect : toSelect.DataContext;
+                    SetSelectedItem(selection, forceClose || !Equals(SelectedItem, selection));
+                }
                 else
                     SetAsUnSelected(item);
             }
+        }
+        
+        private void SetSelectedItem(object item, bool close = true)
+        {
+            SelectedItem = item;
+            
+            if (item != null && close)
+                IsOpen = false;
+            
+            ClearAllFilterText();
         }
         #endregion
 
@@ -257,10 +313,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             if (!(sender is SingleSelectBox singleSelectBox))
                 return;
 
-            if (args.NewValue != null)
-                singleSelectBox.IsOpen = false;
             singleSelectBox.HasASelectedItem = singleSelectBox.SelectedItem != null;
-            singleSelectBox.ClearAllFilterText();
         }
 
         /// <summary>
@@ -451,6 +504,25 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         public static readonly DependencyProperty CopySelectedItemCommandProperty
             = DependencyProperty.Register(nameof(CopySelectedItemCommand), typeof(ICommand), typeof(SingleSelectBox), new FrameworkPropertyMetadata(default(ICommand)));
+        #endregion
+        
+        #region ItemContainer management
+        /// <summary>
+        /// Occurs whenever an item visual is being constructed. 
+        /// </summary>
+        /// <param name="element">The visual element in construction.</param>
+        /// <param name="item">The corresponding item from the <see cref="ItemsControl.Items"/> collection.</param>
+        protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
+        {
+            base.PrepareContainerForItemOverride(element, item);
+
+            if (_itemIsSelectedProperty != null || item != SelectedItem || !(element is SelectBoxItem visualItem))
+                return;
+            
+            _itemIsBeingInitialized = true;
+            visualItem.IsSelected = true;
+            _itemIsBeingInitialized = false;
+        }
         #endregion
     }
 }

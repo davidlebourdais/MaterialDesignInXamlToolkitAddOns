@@ -29,8 +29,8 @@ namespace MaterialDesignThemes.Wpf.AddOns.Extensions
             if (string.IsNullOrWhiteSpace(filter))
                 return true;  // always true is filter is unset
 
-            var start = textElement.ContentStart;
-            var end = textElement.ContentEnd;
+            var start = range.Start;
+            var end = range.End;
 
             if (!splitFilterIntoWords)
                 return FindAndHighlightText(start, end, filter, ignoreCase, false, highlightPropertiesAndValues);

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
@@ -41,6 +41,18 @@ namespace MaterialDesignThemes.Wpf.AddOns
 
         #region Source updates
         /// <summary>
+        /// Occurs whenever a property change. Preview event, meaning this is the first
+        /// pass through before value processing.
+        /// </summary>
+        /// <param name="e">Information about the property change.</param>
+        protected override void OnItemsChanged(NotifyCollectionChangedEventArgs e)
+        {
+            if (ItemsSource == null)
+                IsLoadingItemsInBackground = true;
+            base.OnItemsChanged(e);
+        }
+        
+        /// <summary>
         /// Called whenever the <see cref="ItemsControl.ItemsSource"/> property changes.
         /// </summary>
         /// <param name="sender">The object whose property changed.</param>
@@ -49,11 +61,12 @@ namespace MaterialDesignThemes.Wpf.AddOns
         {
             if (!(sender is SelectBoxBase selectBox))
                 return;
-
+            
             selectBox.SetItemFilterSetMemberPaths(selectBox.ItemFilterMemberPaths);
             selectBox.SetItemIsSelectedMemberPath(selectBox.IsSelectedMemberPath);
-            selectBox.ItemsCount = (args.NewValue as IEnumerable<object>)?.Count() ?? 0;
+            selectBox.ItemsCount = selectBox.Items.Count;
             selectBox.OnItemsSourceChanged();
+            selectBox.IsLoadingItemsInBackground = false;
         }
         
         /// <summary>
@@ -369,6 +382,35 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="HasItemsToDisplay"/> as a readonly dependency property.
         /// </summary>
         public static readonly DependencyProperty HasItemsToDisplayProperty = _hasItemsToDisplayPropertyKey.DependencyProperty;
+        
+        /// <summary>
+        /// Gets a boolean indicating if items are being initialized in background.
+        /// </summary>
+        public bool IsLoadingItemsInBackground
+        {
+            get => (bool)GetValue(IsLoadingItemsInBackgroundProperty);
+            protected set => SetValue(_isLoadingItemsInBackgroundPropertyKey, value);
+        }
+        private static readonly DependencyPropertyKey _isLoadingItemsInBackgroundPropertyKey =
+            DependencyProperty.RegisterReadOnly(nameof(IsLoadingItemsInBackground), typeof(bool), typeof(SelectBoxBase), new PropertyMetadata(default(bool)));
+        /// <summary>
+        /// Registers <see cref="IsLoadingItemsInBackground"/> as a readonly dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IsLoadingItemsInBackgroundProperty = _isLoadingItemsInBackgroundPropertyKey.DependencyProperty;
+        
+        /// <summary>
+        /// Gets or sets the hint to be shown when items are being loaded in background.
+        /// </summary>
+        public string IsLoadingItemsInBackgroundHint
+        {
+            get => (string)GetValue(IsLoadingItemsInBackgroundHintProperty);
+            set => SetCurrentValue(IsLoadingItemsInBackgroundHintProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="IsLoadingItemsInBackgroundHint"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IsLoadingItemsInBackgroundHintProperty
+            = DependencyProperty.Register(nameof(IsLoadingItemsInBackgroundHint), typeof(string), typeof(SelectBoxBase), new FrameworkPropertyMetadata("Loading your data..."));
         #endregion
 
         #region ItemContainer management
@@ -390,7 +432,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         {
             return new SelectBoxItem(_filterCache, AlsoMatchWithFirstWordLetters || AlsoMatchFilterWordsAcrossBoundProperties, false, _itemIsSelectedProperty?.Name);
         }
-
+        
         /// <summary>
         /// Gets the visual item of a given source item.
         /// </summary>

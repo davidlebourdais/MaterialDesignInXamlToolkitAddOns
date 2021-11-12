@@ -9,7 +9,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
     /// <summary>
     /// A popup to be used within a <see cref="SingleSelectBox"/>.
     /// </summary>
-    [StyleTypedProperty(Property = "PART_PopupFilterTextBox", StyleTargetType = typeof(TextBox))]
+    [TemplatePart(Name = "PART_PopupFilterTextBox", Type = typeof(TextBox))]
     public class SelectBoxPopup : ComboBoxPopup
     {
         /// <summary>
