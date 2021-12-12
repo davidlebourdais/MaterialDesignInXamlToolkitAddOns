@@ -1,6 +1,8 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using EMA.ExtendedWPFVisualTreeHelper;
 using MaterialDesignThemes.Wpf.AddOns.Extensions;
 
 namespace MaterialDesignThemes.Wpf.AddOns
@@ -33,6 +35,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(ButtonWithIcon), new FrameworkPropertyMetadata(typeof(ButtonWithIcon)));
             ContentTemplateProperty.OverrideMetadata(typeof(ButtonWithIcon), new FrameworkPropertyMetadata(default(DataTemplate), ContentTemplatePropertyChanged));
+            ContentProperty.OverrideMetadata(typeof(ButtonWithIcon), new FrameworkPropertyMetadata(default, IconRelatedPropertyChanged));
             ForegroundProperty.OverrideMetadata(typeof(ButtonWithIcon), new FrameworkPropertyMetadata(default(Brush), IconRelatedPropertyChanged));
             FontWeightProperty.OverrideMetadata(typeof(ButtonWithIcon), new FrameworkPropertyMetadata(default(FontWeight), IconRelatedPropertyChanged));
             HorizontalContentAlignmentProperty.OverrideMetadata(typeof(ButtonWithIcon), new FrameworkPropertyMetadata(default(HorizontalAlignment), IconRelatedPropertyChanged));
@@ -114,7 +117,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             
             var sourceIcon = Icon ?? new PackIcon() { Kind = IconKind.Value, Height = IconSize, Width = IconSize };
             
-            RestoreIconStyleIfHasNone(sourceIcon);
+            RestoreIconVisualIfHasNone(sourceIcon);
             
             foreach (var property in sourceIcon.GetNonReadOnlyDependencyProperties())
             {
@@ -125,8 +128,8 @@ namespace MaterialDesignThemes.Wpf.AddOns
             icon.SetValue(FontWeightProperty, FontWeight);
 
             icon.SetValue(MarginProperty, 
-                          IconPlacement == ButtonIconPlacement.Lead ? new Thickness(0, 0, IconSpacing, 0) : 
-                                                                      new Thickness(IconSpacing, 0, 0, 0));
+                          IconPlacement == ButtonIconPlacement.Lead ? new Thickness(0, 0, Content != null ? IconSpacing : 0, 0) : 
+                                                                      new Thickness(Content != null ? IconSpacing : 0, 0, 0, 0));
             icon.SetValue(IsTabStopProperty, false);
 
             if (Icon != null)
@@ -145,15 +148,40 @@ namespace MaterialDesignThemes.Wpf.AddOns
             contentControl.SetValue(ContentStringFormatProperty, new TemplateBindingExtension(ContentStringFormatProperty));
             contentControl.SetValue(HorizontalContentAlignmentProperty, new TemplateBindingExtension(HorizontalContentAlignmentProperty));
             contentControl.SetValue(VerticalContentAlignmentProperty, new TemplateBindingExtension(VerticalContentAlignmentProperty));
-            contentControl.SetValue(VerticalAlignmentProperty, VerticalAlignment.Center);
 
             return contentControl;
         }
-
-        private void RestoreIconStyleIfHasNone(PackIcon icon)
+        
+        private void RestoreIconVisualIfHasNone(PackIcon icon)
         {
-            if (icon.Style == null)
-                icon.SetValue(StyleProperty, FindResource(typeof(PackIcon)));
+            ApplyIconStyleIfHasNone(icon);
+            ApplyIconControlTemplateIfHasNone(icon);
+        }
+
+        private void ApplyIconStyleIfHasNone(PackIcon icon)
+        {
+            if (icon.Style != null)
+                return;
+            
+            var style = FindResource(typeof(PackIcon)) as Style;
+            icon.SetValue(StyleProperty, style);
+        }
+
+        private void ApplyIconControlTemplateIfHasNone(PackIcon icon)
+        {
+            if (icon.Template != null)
+                return;
+
+            FrameworkElement parent = this;
+            ControlTemplate template;
+            do
+            {
+                var style = parent.FindResource(typeof(PackIcon)) as Style;
+                template = style?.Setters.Cast<Setter>().SingleOrDefault(x => x.Property == TemplateProperty)?.Value as ControlTemplate;
+            } while(template == null && (parent = this.FindParent<FrameworkElement>()) != null);
+           
+            if (template != null)
+                icon.SetValue(TemplateProperty, template);
         }
         
         /// <summary>
@@ -169,7 +197,23 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers the <see cref="Icon"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty IconProperty =
-            DependencyProperty.Register(nameof(Icon), typeof(PackIcon), typeof(ButtonWithIcon), new FrameworkPropertyMetadata(null, IconRelatedPropertyChanged));
+            DependencyProperty.Register(nameof(Icon), typeof(PackIcon), typeof(ButtonWithIcon), new FrameworkPropertyMetadata(null, IconPropertyChanged));
+        
+        /// <summary>
+        /// Called whenever the <see cref="Icon"/> property changes.
+        /// </summary>
+        /// <param name="sender">The object whose property changed.</param>
+        /// <param name="args">Information about the property change.</param>
+        private static void IconPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            if (!(sender is ButtonWithIcon button))
+                return;
+
+            if (button.Icon?.IsLoaded == false)
+                button.Loaded += (_, unused) => button.ReconstructContentTemplate();
+            else
+                button.ReconstructContentTemplate();
+        }
         
         /// <summary>
         /// Gets or sets the kind of the icon to be displayed next to button content.
