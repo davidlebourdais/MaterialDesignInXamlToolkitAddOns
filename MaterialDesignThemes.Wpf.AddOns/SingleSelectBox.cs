@@ -28,7 +28,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             ClearSelectionCommand = new SimpleCommand(() => { SetAsUnSelected(SelectedItem); SetSelectedItem(null); }, () => HasASelectedItem);
             GoToSelectedItemCommand = new SimpleCommand(() => SetFocusOnItem(SelectedItem), () => HasASelectedItem);
 
-            AddHandler(SelectBoxItem.IsSelectedChangedEvent, new RoutedEventHandler((sender, args) =>
+            AddHandler(FilterBoxItem.IsSelectedChangedEvent, new RoutedEventHandler((sender, args) =>
             {
                 if (!_itemIsBeingInitialized && args.OriginalSource is SelectBoxItem selectBoxItem && selectBoxItem.IsSelected)
                     SelectItem(selectBoxItem);

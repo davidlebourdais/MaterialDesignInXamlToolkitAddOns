@@ -290,7 +290,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         }
 
         /// <summary>
-        /// Gets or sets a value indicating the path to item string properties on
+        /// Gets or sets a value indicating the path to item bool property on
         /// which the IsSelected state of items is bound.
         /// </summary>
         public string IsSelectedMemberPath
