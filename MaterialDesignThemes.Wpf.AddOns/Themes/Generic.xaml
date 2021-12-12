@@ -18,6 +18,7 @@
 
     <!-- Default styles setup -->
     <Style TargetType="{x:Type materialDesignInXamlExtender:Banner}" BasedOn="{StaticResource MaterialDesignBanner}"/>
+    <Style TargetType="{x:Type extender:ButtonWithIcon}" BasedOn="{StaticResource {x:Type Button}}" />
     <Style TargetType="{x:Type extender:CustomColorPicker}" BasedOn="{StaticResource MaterialDesignCustomColorPicker}" />
     <Style TargetType="{x:Type extender:PressBorder}" BasedOn="{StaticResource MaterialDesignPressBorder}" />
     <Style TargetType="{x:Type extender:SingleSelectBox}" BasedOn="{StaticResource MaterialDesignSingleSelectBox}"/>
