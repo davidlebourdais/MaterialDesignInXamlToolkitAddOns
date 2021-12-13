@@ -15,7 +15,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
     /// </summary>
     [TemplatePart(Name = "PART_ToggleButton", Type = typeof(ToggleButton))]
     [TemplatePart(Name = "PART_Popup", Type = typeof(ToggleButton))]
-    public class SplitButton : ButtonBase
+    public class SplitButton : ButtonWithIcon
     {
         private ToggleButton _toggle;
         private Popup _popup;
