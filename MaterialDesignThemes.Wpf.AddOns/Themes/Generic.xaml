@@ -12,6 +12,7 @@
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.PressBorder.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.PagedDataGrid.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.SingleSelectBox.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.SplitButton.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.ToastNotificationBar.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.ToggleButton.xaml" />
     </ResourceDictionary.MergedDictionaries>
@@ -24,5 +25,6 @@
     <Style TargetType="{x:Type extender:SingleSelectBox}" BasedOn="{StaticResource MaterialDesignSingleSelectBox}"/>
     <Style TargetType="{x:Type extender:ThreeStateCheckBox}" BasedOn="{StaticResource MaterialDesignCheckBox}" />
     <Style TargetType="{x:Type extender:PagedDataGrid}" BasedOn="{StaticResource MaterialDesignPagedDataGrid}"/>
+    <Style TargetType="{x:Type extender:SplitButton}" BasedOn="{StaticResource MaterialDesignRaisedSplitButton}"/>
     <Style TargetType="{x:Type extender:ToastNotificationBar}" BasedOn="{StaticResource MaterialDesignToastNotification}"/>
 </ResourceDictionary>
