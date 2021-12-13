@@ -148,6 +148,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             contentControl.SetValue(ContentStringFormatProperty, new TemplateBindingExtension(ContentStringFormatProperty));
             contentControl.SetValue(HorizontalContentAlignmentProperty, new TemplateBindingExtension(HorizontalContentAlignmentProperty));
             contentControl.SetValue(VerticalContentAlignmentProperty, new TemplateBindingExtension(VerticalContentAlignmentProperty));
+            contentControl.SetValue(IsTabStopProperty, false);
 
             return contentControl;
         }
