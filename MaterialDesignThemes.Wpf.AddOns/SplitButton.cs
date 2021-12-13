@@ -7,6 +7,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Threading;
 using EMA.ExtendedWPFVisualTreeHelper;
+using MaterialDesignThemes.Wpf.AddOns.Extensions;
 
 namespace MaterialDesignThemes.Wpf.AddOns
 {
@@ -20,7 +21,6 @@ namespace MaterialDesignThemes.Wpf.AddOns
         private ToggleButton _toggle;
         private Popup _popup;
         private bool _commandIsDisabled;  // used to disable command while inner popup is opened.
-        private DispatcherTimer _closePopupWithDelayTimer;
         
         static SplitButton()
         {
@@ -45,32 +45,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             if (_popup == null)
                 throw new Exception(nameof(SplitButton) + " needs a popup named PART_Popup in its template.");
             
-            _popup.AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler(InnerButton_Clicked));
-        }
-        
-        private void InnerButton_Clicked(object sender, RoutedEventArgs e)
-        {
-            if (!CloseIfAnyButtonInPopupIsClicked)
-                return;
-            
-            if (sender == null || Equals(sender, this))
-                return;
-
-            var children = this.FindAllChildrenByType(sender.GetType());
-            if (!children.Contains(sender))
-                return;
-
-            if (_closePopupWithDelayTimer == null)
-                _closePopupWithDelayTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(350), DispatcherPriority.Background, ClosePopup, Dispatcher.CurrentDispatcher);
-            _closePopupWithDelayTimer.Start();
-            
-            e.Handled = true;
-        }
-
-        private void ClosePopup(object sender, EventArgs args)
-        {
-            _closePopupWithDelayTimer.Stop();
-            _popup.IsOpen = false;
+            _popup.CloseOnInnerButtonClicks(() => CloseIfAnyButtonInPopupIsClicked);
         }
         
         /// <summary>
@@ -209,7 +184,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         
         /// <summary>
         /// Gets or sets a value indicating if the popup should be closed
-        /// when one of its inner button is clicked.
+        /// when one of its inner buttons is clicked.
         /// </summary>
         public bool CloseIfAnyButtonInPopupIsClicked
         {

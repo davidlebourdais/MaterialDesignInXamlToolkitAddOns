@@ -26,8 +26,12 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         protected TextBox _currentFilterTextBox;
         
+        /// <summary>
+        /// The control's popup.
+        /// </summary>
+        protected SelectBoxPopup _popup;
+        
         private TextBox _ownFilterTextBox;
-        private SelectBoxPopup _popup;
         private ScrollViewer _itemsScrollViewer;
         
         private readonly TextBoxCache _textBoxCache;
