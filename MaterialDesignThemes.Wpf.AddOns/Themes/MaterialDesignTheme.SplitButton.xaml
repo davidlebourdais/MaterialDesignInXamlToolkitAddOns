@@ -60,7 +60,7 @@
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Padding" Value="13 4 7 4"/>
         <Setter Property="Height" Value="32" />
-        <Setter Property="ToggleStyle" Value="{StaticResource MaterialDesignRaisedSquaredToggleButton}"/>
+        <Setter Property="ToggleStyle" Value="{StaticResource MaterialDesignRaisedRectangularToggleButton}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type extender:SplitButton}">
@@ -168,24 +168,24 @@
         <Setter Property="Background" Value="{DynamicResource PrimaryHueLightBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueLightBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryHueLightForegroundBrush}"/>
-        <Setter Property="ToggleStyle" Value="{DynamicResource MaterialDesignRaisedSquaredLightToggleButton}"/>
+        <Setter Property="ToggleStyle" Value="{DynamicResource MaterialDesignRaisedRectangularLightToggleButton}"/>
     </Style>
 
     <Style x:Key="MaterialDesignRaisedDarkSplitButton" TargetType="{x:Type extender:SplitButton}" BasedOn="{StaticResource MaterialDesignRaisedSplitButton}">
         <Setter Property="Background" Value="{DynamicResource PrimaryHueDarkBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueDarkBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryHueDarkForegroundBrush}"/>
-        <Setter Property="ToggleStyle" Value="{DynamicResource MaterialDesignRaisedSquaredDarkToggleButton}"/>
+        <Setter Property="ToggleStyle" Value="{DynamicResource MaterialDesignRaisedRectangularDarkToggleButton}"/>
     </Style>
 
     <Style x:Key="MaterialDesignRaisedAccentSplitButton" TargetType="{x:Type extender:SplitButton}" BasedOn="{StaticResource MaterialDesignRaisedSplitButton}">
         <Setter Property="Background" Value="{DynamicResource SecondaryAccentBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource SecondaryAccentBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource SecondaryAccentForegroundBrush}"/>
-        <Setter Property="ToggleStyle" Value="{DynamicResource MaterialDesignRaisedSquaredAccentToggleButton}"/>
+        <Setter Property="ToggleStyle" Value="{DynamicResource MaterialDesignRaisedRectangularAccentToggleButton}"/>
     </Style>
     
-    <Style x:Key="MaterialDesignFlatToggleButtonForSplitButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignFlatSquaredToggleButton}">
+    <Style x:Key="MaterialDesignFlatToggleButtonForSplitButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignFlatRectangularToggleButton}">
         <Setter Property="Background" Value="{DynamicResource MaterialDesignTextAreaBorder}" />
         <Setter Property="wpf:RippleAssist.Feedback" Value="{DynamicResource MaterialDesignTextAreaBorder}" />
     </Style>
@@ -312,7 +312,7 @@
         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="wpf:ButtonAssist.CornerRadius" Value="2" />
-        <Setter Property="ToggleStyle" Value="{StaticResource MaterialDesignFlatSquaredToggleButton}"/>
+        <Setter Property="ToggleStyle" Value="{StaticResource MaterialDesignFlatRectangularToggleButton}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type extender:SplitButton}">

@@ -112,7 +112,7 @@
         </Setter>
     </Style>
     
-    <Style x:Key="MaterialDesignRaisedSquaredToggleButton" TargetType="{x:Type ToggleButton}">
+    <Style x:Key="MaterialDesignRaisedRectangularToggleButton" TargetType="{x:Type ToggleButton}">
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
         <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}"/>
@@ -176,25 +176,25 @@
         </Setter>
     </Style>
 
-    <Style x:Key="MaterialDesignRaisedSquaredLightToggleButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignRaisedSquaredToggleButton}">
+    <Style x:Key="MaterialDesignRaisedRectangularLightToggleButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignRaisedRectangularToggleButton}">
         <Setter Property="Background" Value="{DynamicResource PrimaryHueLightBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueLightBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryHueLightForegroundBrush}"/>
     </Style>
 
-    <Style x:Key="MaterialDesignRaisedSquaredDarkToggleButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignRaisedSquaredToggleButton}">
+    <Style x:Key="MaterialDesignRaisedRectangularDarkToggleButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignRaisedRectangularToggleButton}">
         <Setter Property="Background" Value="{DynamicResource PrimaryHueDarkBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueDarkBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryHueDarkForegroundBrush}"/>
     </Style>
 
-    <Style x:Key="MaterialDesignRaisedSquaredAccentToggleButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignRaisedSquaredToggleButton}">
+    <Style x:Key="MaterialDesignRaisedRectangularAccentToggleButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignRaisedRectangularToggleButton}">
         <Setter Property="Background" Value="{DynamicResource SecondaryAccentBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource SecondaryAccentBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource SecondaryAccentForegroundBrush}"/>
     </Style>
     
-    <Style x:Key="MaterialDesignFlatSquaredToggleButton" TargetType="{x:Type ToggleButton}">
+    <Style x:Key="MaterialDesignFlatRectangularToggleButton" TargetType="{x:Type ToggleButton}">
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
         <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}"/>
         <Setter Property="BorderBrush" Value="Transparent"/>
@@ -281,17 +281,17 @@
         </Setter>
     </Style>
     
-    <Style x:Key="MaterialDesignFlatAccentToggleButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignFlatSquaredToggleButton}">
+    <Style x:Key="MaterialDesignFlatAccentToggleButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignFlatRectangularToggleButton}">
         <Setter Property="Foreground" Value="{DynamicResource SecondaryAccentBrush}"/>
     </Style>
     
-    <Style x:Key="MaterialDesignFlatForegroundToggleButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignFlatSquaredToggleButton}">
+    <Style x:Key="MaterialDesignFlatForegroundToggleButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignFlatRectangularToggleButton}">
         <Setter Property="Foreground" Value="{DynamicResource MaterialDesignTextAreaBorder}" />
         <Setter Property="Background" Value="{DynamicResource MaterialDesignTextAreaBorder}" />
         <Setter Property="wpf:RippleAssist.Feedback" Value="{DynamicResource MaterialDesignTextAreaBorder}" />
     </Style>
     
-    <Style x:Key="MaterialDesignOutlinedSquaredToggleButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignFlatSquaredToggleButton}">
+    <Style x:Key="MaterialDesignOutlinedRectangularToggleButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignFlatRectangularToggleButton}">
         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}"/>
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="1"/>
@@ -379,13 +379,13 @@
         </Setter>
     </Style>
 
-    <Style x:Key="MaterialDesignOutlinedSquaredLightToggleButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignOutlinedSquaredToggleButton}">
+    <Style x:Key="MaterialDesignOutlinedRectangularLightToggleButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignOutlinedRectangularToggleButton}">
         <Setter Property="Background" Value="{DynamicResource PrimaryHueLightBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueLightBrush}"/>
         <Setter Property="wpf:RippleAssist.Feedback" Value="{DynamicResource PrimaryHueLightBrush}"/>
     </Style>
 
-    <Style x:Key="MaterialDesignOutlinedSquaredDarkToggleButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignOutlinedSquaredToggleButton}">
+    <Style x:Key="MaterialDesignOutlinedRectangularDarkToggleButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignOutlinedRectangularToggleButton}">
         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueDarkBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryHueDarkBrush}"/>
         <Setter Property="wpf:RippleAssist.Feedback" Value="{DynamicResource PrimaryHueDarkBrush}"/>
