@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
-    <TargetFrameworks>net471;net5.0-windows;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net471;net6.0-windows;netcoreapp3.1</TargetFrameworks>
     <UseWPF>true</UseWPF>
     
     <AssemblyTitle>MaterialDesignThemes.Wpf.AddOns</AssemblyTitle>
