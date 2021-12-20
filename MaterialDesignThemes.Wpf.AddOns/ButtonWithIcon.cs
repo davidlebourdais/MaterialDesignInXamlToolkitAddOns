@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 using EMA.ExtendedWPFVisualTreeHelper;
 using MaterialDesignThemes.Wpf.AddOns.Extensions;
@@ -39,7 +40,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             ForegroundProperty.OverrideMetadata(typeof(ButtonWithIcon), new FrameworkPropertyMetadata(default(Brush), IconRelatedPropertyChanged));
             FontWeightProperty.OverrideMetadata(typeof(ButtonWithIcon), new FrameworkPropertyMetadata(default(FontWeight), IconRelatedPropertyChanged));
             HorizontalContentAlignmentProperty.OverrideMetadata(typeof(ButtonWithIcon), new FrameworkPropertyMetadata(default(HorizontalAlignment), IconRelatedPropertyChanged));
-            VerticalContentAlignmentProperty.OverrideMetadata(typeof(ButtonWithIcon), new FrameworkPropertyMetadata(default(VerticalAlignment), IconRelatedPropertyChanged));
+            VerticalContentAlignmentProperty.OverrideMetadata(typeof(ButtonWithIcon), new FrameworkPropertyMetadata(VerticalAlignment.Center, IconRelatedPropertyChanged));
         }
         
         /// <summary>
@@ -137,6 +138,9 @@ namespace MaterialDesignThemes.Wpf.AddOns
             
             icon.SetValue(HeightProperty, IconSize);
             icon.SetValue(WidthProperty, IconSize);
+            icon.SetValue(HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            icon.SetValue(VerticalAlignmentProperty, 
+                          new Binding(VerticalContentAlignmentProperty.Name)  {  RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) { AncestorType = typeof(ButtonWithIcon)}} );
             return icon;
         }
         
@@ -146,8 +150,12 @@ namespace MaterialDesignThemes.Wpf.AddOns
             contentControl.SetValue(ContentProperty, new TemplateBindingExtension(ContentProperty));
             contentControl.SetValue(ContentTemplateProperty, _originalDataTemplate);
             contentControl.SetValue(ContentStringFormatProperty, new TemplateBindingExtension(ContentStringFormatProperty));
-            contentControl.SetValue(HorizontalContentAlignmentProperty, new TemplateBindingExtension(HorizontalContentAlignmentProperty));
-            contentControl.SetValue(VerticalContentAlignmentProperty, new TemplateBindingExtension(VerticalContentAlignmentProperty));
+            contentControl.SetValue(HorizontalAlignmentProperty, 
+                                    new Binding(HorizontalContentAlignmentProperty.Name)  {  RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) { AncestorType = typeof(ButtonWithIcon)}} );
+            contentControl.SetValue(VerticalAlignmentProperty, 
+                                    new Binding(VerticalContentAlignmentProperty.Name)  {  RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) { AncestorType = typeof(ButtonWithIcon)}} );
+            contentControl.SetValue(MarginProperty, 
+                                    new Binding(ContentMarginProperty.Name)  {  RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) { AncestorType = typeof(ButtonWithIcon)}} );
             contentControl.SetValue(IsTabStopProperty, false);
 
             return contentControl;
@@ -271,6 +279,21 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         public static readonly DependencyProperty IconSizeProperty =
             DependencyProperty.Register(nameof(IconSize), typeof(double), typeof(ButtonWithIcon), new FrameworkPropertyMetadata(20d, IconRelatedPropertyChanged));
+        
+        /// <summary>
+        /// Gets or sets the margin of the main button content.
+        /// </summary>
+        public Thickness ContentMargin
+        {
+            get => (Thickness)GetValue(ContentMarginProperty);
+            set => SetCurrentValue(ContentMarginProperty, value);
+        }
+        /// <summary>
+        /// Registers the <see cref="ContentMargin"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty ContentMarginProperty =
+            DependencyProperty.Register(nameof(ContentMargin), typeof(Thickness), typeof(ButtonWithIcon), 
+                                        new FrameworkPropertyMetadata(new Thickness(0,0,0,1), IconRelatedPropertyChanged));
         
         /// <summary>
         /// Called whenever a dependency property related to the added icon is modified.
