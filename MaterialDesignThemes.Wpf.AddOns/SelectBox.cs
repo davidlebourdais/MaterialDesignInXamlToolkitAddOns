@@ -864,6 +864,22 @@ namespace MaterialDesignThemes.Wpf.AddOns
                                           new FrameworkPropertyMetadata(default(string)));
         
         /// <summary>
+        /// Gets or sets a value indicating if the action in additional
+        /// content must be always shown and not hidden when there is no selection.
+        /// </summary>
+        public bool AdditionalContentActionAlwaysShown
+        {
+            get => (bool)GetValue(AdditionalContentActionAlwaysShownProperty);
+            set => SetCurrentValue(AdditionalContentActionAlwaysShownProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="AdditionalContentActionAlwaysShown"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty AdditionalContentActionAlwaysShownProperty
+            = DependencyProperty.Register(nameof(AdditionalContentActionAlwaysShown), typeof(bool), typeof(SelectBox), 
+                                          new FrameworkPropertyMetadata(default(bool)));
+        
+        /// <summary>
         /// Gets or sets the kind of the icon.
         /// </summary>
         public PackIconKind IconKind

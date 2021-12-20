@@ -268,7 +268,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         {
             SelectedItem = item;
             
-            if (item != null && close)
+            if (item != null && close && ShouldCloseOnSelection)
                 IsOpen = false;
             
             ClearAllFilterText();
@@ -349,6 +349,21 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IsSelectedItemFilteredOut"/> as a readonly dependency property.
         /// </summary>
         public static readonly DependencyProperty IsSelectedItemFilteredOutProperty = _isSelectedItemFilteredOutPropertyKey.DependencyProperty;
+        
+        /// <summary>
+        /// Gets or sets a value indicating if the popup must be automatically
+        /// close on item selection or selection change.
+        /// </summary>
+        public bool ShouldCloseOnSelection
+        {
+            get => (bool)GetValue(ShouldCloseOnSelectionProperty);
+            set => SetValue(ShouldCloseOnSelectionProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="ShouldCloseOnSelection"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty ShouldCloseOnSelectionProperty
+            = DependencyProperty.Register(nameof(ShouldCloseOnSelection), typeof(object), typeof(SingleSelectBox), new FrameworkPropertyMetadata(true));
 
         /// <summary>
         /// Gets or sets the template of the selected item.
@@ -363,7 +378,8 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="SelectedItemTemplate"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty SelectedItemTemplateProperty
-            = DependencyProperty.Register(nameof(SelectedItemTemplate), typeof(DataTemplate), typeof(SingleSelectBox), new FrameworkPropertyMetadata(default(DataTemplate), SelectedItemTemplatePropertyChanged));
+            = DependencyProperty.Register(nameof(SelectedItemTemplate), typeof(DataTemplate), typeof(SingleSelectBox),
+                                          new FrameworkPropertyMetadata(default(DataTemplate), SelectedItemTemplatePropertyChanged));
 
         /// <summary>
         /// Called whenever the <see cref="SelectedItemTemplate"/> property changes.

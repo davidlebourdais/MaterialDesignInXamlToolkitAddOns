@@ -149,10 +149,14 @@
                     Command="{Binding AdditionalContentActionCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}" />
         </Grid>
         <DataTemplate.Triggers>
-            <DataTrigger Binding="{Binding HasASelectedItem, RelativeSource={RelativeSource AncestorType={x:Type extender:SingleSelectBox}}}" Value="0" >
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding AdditionalContentActionAlwaysShown, RelativeSource={RelativeSource AncestorType={x:Type extender:SingleSelectBox}}}" Value="False" />
+                    <Condition Binding="{Binding HasASelectedItem, RelativeSource={RelativeSource AncestorType={x:Type extender:SingleSelectBox}}}" Value="False" />
+                </MultiDataTrigger.Conditions>
                 <Setter TargetName="SelectionActionButton" Property="Visibility" Value="Hidden" />
                 <Setter TargetName="NoSelection" Property="Visibility" Value="Visible" />
-            </DataTrigger>
+            </MultiDataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>
 
@@ -389,8 +393,9 @@
     </Style>
     
     <Style x:Key="MaterialDesignSingleSelectBoxWithAdditionalContent" TargetType="{x:Type extender:SingleSelectBox}" BasedOn="{StaticResource MaterialDesignSingleSelectBox}">
-        <Setter Property="AdditionalContentNoSelectionText" Value="Select items to be added" />
-        <Setter Property="AdditionalContentOnSelectionText" Value="Add item" />
+        <Setter Property="ShouldCloseOnSelection" Value="False" />
+        <Setter Property="AdditionalContentNoSelectionText" Value="Select items to be configured" />
+        <Setter Property="AdditionalContentOnSelectionText" Value="Configure item" />
         <Setter Property="AdditionalContentTemplate" Value="{StaticResource SingleSelectBoxAdditionalContentTemplate}" />
     </Style>
     
