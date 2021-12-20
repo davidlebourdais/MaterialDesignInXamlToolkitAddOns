@@ -21,6 +21,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
     [TemplatePart(Name = "PART_FilterTextBox", Type = typeof(TextBox))]
     [TemplatePart(Name = "PART_Popup", Type = typeof(Popup))]
     [TemplatePart(Name = "ItemsScrollViewer", Type = typeof(ScrollViewer))]
+    [TemplatePart(Name = "PART_PopupHeader", Type = typeof(FrameworkElement))]
     [StyleTypedProperty(Property = "ItemContainerStyle", StyleTargetType = typeof(SelectBoxItem))]
     public abstract class SelectBox : FilterBox
     {
@@ -93,7 +94,9 @@ namespace MaterialDesignThemes.Wpf.AddOns
             _popup.Opened += PopupOnOpened;
             _popup.Closed += PopupOnClosed;
             _popup.FilterTextBoxChanged += PopupOnFilterTextBoxChanged;
-            _popup.CloseOnInnerButtonClicks(() => ShouldCloseOnPopupButtonsClicks);
+            
+            var popupHeader = Template.FindName("PART_PopupHeader", this) as DependencyObject;
+            _popup.CloseOnInnerButtonClicks(() => ShouldCloseOnPopupButtonsClicks, popupHeader);
         }
         
         private void InitializeItemsScrollViewerIfAny()
