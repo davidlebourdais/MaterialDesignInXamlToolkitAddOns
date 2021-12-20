@@ -368,13 +368,13 @@
                                     Value="{Binding IsLoadingItemsInBackgroundHint, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}" />
                         </Trigger>
                         
-                        <MultiDataTrigger>
-                            <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding AdditionalContentTemplate, RelativeSource={RelativeSource AncestorType={x:Type extender:SingleSelectBox}}}" Value="Null" />
-                                <Condition Binding="{Binding AdditionalContentTemplateSelector, RelativeSource={RelativeSource AncestorType={x:Type extender:SingleSelectBox}}}" Value="Null" />
-                            </MultiDataTrigger.Conditions>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="AdditionalContentTemplate" Value="{x:Null}" />
+                                <Condition Property="AdditionalContentTemplateSelector" Value="{x:Null}" />
+                            </MultiTrigger.Conditions>
                             <Setter TargetName="AdditionalContent" Property="Visibility" Value="Collapsed" />
-                        </MultiDataTrigger>
+                        </MultiTrigger>
                         
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
