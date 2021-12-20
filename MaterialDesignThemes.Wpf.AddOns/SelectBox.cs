@@ -93,6 +93,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             _popup.Opened += PopupOnOpened;
             _popup.Closed += PopupOnClosed;
             _popup.FilterTextBoxChanged += PopupOnFilterTextBoxChanged;
+            _popup.CloseOnInnerButtonClicks(() => ShouldCloseOnPopupButtonsClicks);
         }
         
         private void InitializeItemsScrollViewerIfAny()
@@ -587,7 +588,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         }
         #endregion
         
-        #region Popup management
+        #region Popup control
         /// <summary>
         /// Gives focus to the managed popup.
         /// </summary>
@@ -756,6 +757,21 @@ namespace MaterialDesignThemes.Wpf.AddOns
                 GetSelectBoxItem(item)?.TrySetIsSelectedBinding(memberPath);
             }
         }
+        
+        /// <summary>
+        /// Gets or sets a value indicating if popup should automatically close when
+        /// one of its child buttons is pressed. 
+        /// </summary>
+        public bool ShouldCloseOnPopupButtonsClicks
+        {
+            get => (bool)GetValue(ShouldCloseOnPopupButtonsClicksProperty);
+            set => SetCurrentValue(ShouldCloseOnPopupButtonsClicksProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="ShouldCloseOnPopupButtonsClicks"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty ShouldCloseOnPopupButtonsClicksProperty
+            = DependencyProperty.Register(nameof(ShouldCloseOnPopupButtonsClicks), typeof(bool), typeof(SelectBox), new FrameworkPropertyMetadata(true));
         
         /// <summary>
         /// Gets or sets the maximum height for the popup.

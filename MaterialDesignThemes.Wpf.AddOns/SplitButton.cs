@@ -45,7 +45,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             if (_popup == null)
                 throw new Exception(nameof(SplitButton) + " needs a popup named PART_Popup in its template.");
             
-            _popup.CloseOnInnerButtonClicks(() => CloseIfAnyButtonInPopupIsClicked);
+            _popup.CloseOnInnerButtonClicks(() => ShouldCloseOnPopupButtonsClicks);
         }
         
         /// <summary>
@@ -186,15 +186,15 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Gets or sets a value indicating if the popup should be closed
         /// when one of its inner buttons is clicked.
         /// </summary>
-        public bool CloseIfAnyButtonInPopupIsClicked
+        public bool ShouldCloseOnPopupButtonsClicks
         {
-            get => (bool)GetValue(CloseIfAnyButtonInPopupIsClickedProperty);
-            set => SetValue(CloseIfAnyButtonInPopupIsClickedProperty, value);
+            get => (bool)GetValue(ShouldCloseOnPopupButtonsClicksProperty);
+            set => SetValue(ShouldCloseOnPopupButtonsClicksProperty, value);
         }
         /// <summary>
-        /// Registers <see cref="CloseIfAnyButtonInPopupIsClicked"/> as a dependency property.
+        /// Registers <see cref="ShouldCloseOnPopupButtonsClicks"/> as a dependency property.
         /// </summary>
-        public static readonly DependencyProperty CloseIfAnyButtonInPopupIsClickedProperty =
-            DependencyProperty.Register(nameof(CloseIfAnyButtonInPopupIsClicked), typeof(bool), typeof(SplitButton), new PropertyMetadata(true));
+        public static readonly DependencyProperty ShouldCloseOnPopupButtonsClicksProperty =
+            DependencyProperty.Register(nameof(ShouldCloseOnPopupButtonsClicks), typeof(bool), typeof(SplitButton), new PropertyMetadata(true));
     }
 }
