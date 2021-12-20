@@ -28,7 +28,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             ClearSelectionCommand = new SimpleCommand(() => { SetAsUnSelected(SelectedItem); SetSelectedItem(null); }, () => HasASelectedItem);
             GoToSelectedItemCommand = new SimpleCommand(() => SetFocusOnItem(SelectedItem), () => HasASelectedItem);
 
-            AddHandler(FilterBoxItem.IsSelectedChangedEvent, new RoutedEventHandler((sender, args) =>
+            AddHandler(SelectBoxItem.IsSelectedChangedEvent, new RoutedEventHandler((_, args) =>
             {
                 if (!_itemIsBeingInitialized && args.OriginalSource is SelectBoxItem selectBoxItem && selectBoxItem.IsSelected)
                     SelectItem(selectBoxItem);
@@ -63,7 +63,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         {
             _copyButton = Template.FindName("PART_CopyButton", this) as Button;
             if (_copyButton != null)
-                _copyButton.Click += (sender, args) => CopySelectedItemCommand?.Execute(SelectedItem);
+                _copyButton.Click += (_, unused) => CopySelectedItemCommand?.Execute(SelectedItem);
         }
         #endregion
 

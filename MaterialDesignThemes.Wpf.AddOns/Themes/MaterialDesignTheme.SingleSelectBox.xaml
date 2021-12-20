@@ -5,6 +5,7 @@
                     xmlns:converters="clr-namespace:EMA.ExtendedWPFConverters;assembly=ExtendedWPFConverters">
 
     <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.TextBlock.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.TextBox.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.Button.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf.AddOns;component/Themes/MaterialDesignTheme.SelectBoxItem.xaml" />
@@ -130,10 +131,32 @@
             </Grid>
         </Grid>
     </ControlTemplate>
+    
+        
+    <DataTemplate x:Key="SingleSelectBoxAdditionalContentTemplate">
+        <Grid Margin="16, 8">
+            <TextBlock x:Name="NoSelection" 
+                       Visibility="Collapsed"
+                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                       FontStyle="Italic" VerticalAlignment="Center" 
+                       Text="{Binding AdditionalContentNoSelectionText, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}" />
+            <Button x:Name="SelectionActionButton" 
+                    Style="{StaticResource MaterialDesignOutlinedButton}" HorizontalAlignment="Left"
+                    Content="{Binding AdditionalContentOnSelectionText, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}" 
+                    Command="{Binding AdditionalContentActionCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}" />
+        </Grid>
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding HasASelectedItem, RelativeSource={RelativeSource AncestorType={x:Type extender:SingleSelectBox}}}" Value="0" >
+                <Setter TargetName="SelectionActionButton" Property="Visibility" Value="Hidden" />
+                <Setter TargetName="NoSelection" Property="Visibility" Value="Visible" />
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
 
     <Style x:Key="MaterialDesignSingleSelectBox" TargetType="{x:Type extender:SingleSelectBox}">
         <Setter Property="Background" Value="{DynamicResource MaterialDesignTextFieldBoxBackground}" />
         <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+        <Setter Property="IconForeground" Value="{DynamicResource MaterialDesignBodyLight}" />
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="ScrollViewer.CanContentScroll" Value="true"/>
         <Setter Property="ScrollViewer.PanningMode" Value="Both"/>
@@ -157,7 +180,7 @@
 
                         <Button Grid.Column="0"
                                 x:Name="PART_PrefixButton"
-                                Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                Foreground="{TemplateBinding IconForeground}"
                                 Style="{StaticResource MaterialDesignIconForegroundButton}"
                                 wpf:RippleAssist.Feedback="Transparent"
                                 Height="35" Width="35"
@@ -280,6 +303,12 @@
                                                             SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                                         </ScrollViewer>
                                     </Grid>
+                                    
+                                    <StackPanel x:Name="AdditionalContent">
+                                        <Separator Style="{StaticResource MaterialDesignSeparator}" Height="2" Margin="0" />
+                                        <ContentControl ContentTemplate="{TemplateBinding AdditionalContentTemplate}"
+                                                        ContentTemplateSelector="{TemplateBinding AdditionalContentTemplateSelector}" />
+                                    </StackPanel>
                                 </StackPanel>
                             </ContentControl>
                         </extender:SelectBoxPopup>
@@ -327,6 +356,15 @@
                                     Property="wpf:HintAssist.Hint" 
                                     Value="{Binding IsLoadingItemsInBackgroundHint, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}" />
                         </Trigger>
+                        
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding AdditionalContentTemplate, RelativeSource={RelativeSource AncestorType={x:Type extender:SingleSelectBox}}}" Value="Null" />
+                                <Condition Binding="{Binding AdditionalContentTemplateSelector, RelativeSource={RelativeSource AncestorType={x:Type extender:SingleSelectBox}}}" Value="Null" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="AdditionalContent" Property="Visibility" Value="Collapsed" />
+                        </MultiDataTrigger>
+                        
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -343,4 +381,11 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+    
+    <Style x:Key="MaterialDesignSingleSelectBoxWithAdditionalContent" TargetType="{x:Type extender:SingleSelectBox}" BasedOn="{StaticResource MaterialDesignSingleSelectBox}">
+        <Setter Property="AdditionalContentNoSelectionText" Value="Select items to be added" />
+        <Setter Property="AdditionalContentOnSelectionText" Value="Add item" />
+        <Setter Property="AdditionalContentTemplate" Value="{StaticResource SingleSelectBoxAdditionalContentTemplate}" />
+    </Style>
+    
 </ResourceDictionary>

@@ -13,17 +13,12 @@ namespace MaterialDesignThemes.Wpf.AddOns
     /// <summary>
     /// Base class for selectors with filter.
     /// </summary>
-    public abstract class FilterBox : ItemsControl
+    public class FilterBox : ItemsControl
     {
         /// <summary>
         /// Current filter value.
         /// </summary>
         protected string _filterCache;
-
-        /// <summary>
-        /// Holds description of the property bound to item's <see cref="FilterBoxItem.IsSelected"/> property.
-        /// </summary>
-        protected PropertyDescriptor _itemIsSelectedProperty;
         
         private PropertyDescriptor[] _itemFilterMemberPaths = Array.Empty<PropertyDescriptor>();
 
@@ -63,7 +58,6 @@ namespace MaterialDesignThemes.Wpf.AddOns
                 return;
             
             filterBox.SetItemFilterSetMemberPaths(filterBox.ItemFilterMemberPaths);
-            filterBox.SetItemIsSelectedMemberPath(filterBox.IsSelectedMemberPath);
             filterBox.ItemsCount = filterBox.Items.Count;
             filterBox.OnItemsSourceChanged();
             filterBox.IsLoadingItemsInBackground = false;
@@ -81,7 +75,8 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Applies current filter on items. 
         /// </summary>
         /// <param name="force">Forces filtering even if filter value did not change.</param>
-        protected void ApplyFilter(bool force = false)
+        /// <param name="appliedOnOpening">Indicates if filter is being applied on popup opening.</param>
+        protected virtual void ApplyFilter(bool force = false, bool appliedOnOpening = false)
         {
             Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() =>
             {
@@ -109,24 +104,6 @@ namespace MaterialDesignThemes.Wpf.AddOns
         { }
         #endregion
         
-        #region Item selection
-        /// <summary>
-        /// Clears selection state of a given item.
-        /// </summary>
-        /// <param name="item">The item to be unselected.</param>
-        protected void SetAsUnSelected(object item)
-        {
-            if (item == null)
-                return;
-
-            var filterBoxItem = GetFilterBoxItem(item);
-            if (filterBoxItem != null)
-                filterBoxItem.IsSelected = false;
-            else
-                _itemIsSelectedProperty?.SetValue(item, false);
-        }
-        #endregion
-
         #region Dependency properties
         /// <summary>
         /// Gets or sets the string used for filtering.
@@ -288,49 +265,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
 
             ApplyFilter(true);
         }
-
-        /// <summary>
-        /// Gets or sets a value indicating the path to item bool property on
-        /// which the IsSelected state of items is bound.
-        /// </summary>
-        public string IsSelectedMemberPath
-        {
-            get => (string)GetValue(IsSelectedMemberPathProperty);
-            set => SetCurrentValue(IsSelectedMemberPathProperty, value);
-        }
-        /// <summary>
-        /// Registers <see cref="IsSelectedMemberPath"/> as a dependency property.
-        /// </summary>
-        public static readonly DependencyProperty IsSelectedMemberPathProperty
-            = DependencyProperty.Register(nameof(IsSelectedMemberPath), typeof(string), typeof(FilterBox), new FrameworkPropertyMetadata(default(string), ItemIsSelectedMemberPathChanged));
-
-        /// <summary>
-        /// Called whenever the <see cref="IsSelectedMemberPath"/> property changes.
-        /// </summary>
-        /// <param name="sender">The object whose property changed.</param>
-        /// <param name="args">Information about the property change.</param>
-        private static void ItemIsSelectedMemberPathChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
-        {
-            if (!(sender is FilterBox item) || !(args.NewValue is string memberPath))
-                return;
-
-            item.SetItemIsSelectedMemberPath(memberPath);
-        }
-
-        private void SetItemIsSelectedMemberPath(string memberPath)
-        {
-            memberPath = memberPath?.Replace(" ", "") ?? string.Empty;
-
-            var props = TypeDescriptor.GetProperties(Items.SourceCollection.GetGenericType());
-            _itemIsSelectedProperty = props.OfType<PropertyDescriptor>()
-                                           .SingleOrDefault(x => memberPath == x.Name);
-
-            foreach (var item in Items)
-            {
-                GetFilterBoxItem(item)?.TrySetIsSelectedBinding(memberPath);
-            }
-        }
-
+        
         /// <summary>
         /// Gets the total number of items available for selection.
         /// </summary>
@@ -430,22 +365,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <returns>A pre-initialized <see cref="FilterBoxItem"/>.</returns>
         protected override DependencyObject GetContainerForItemOverride()
         {
-            return new FilterBoxItem(_filterCache, AlsoMatchWithFirstWordLetters || AlsoMatchFilterWordsAcrossBoundProperties,  _itemIsSelectedProperty?.Name);
-        }
-        
-        /// <summary>
-        /// Gets the visual item of a given source item.
-        /// </summary>
-        /// <param name="item">The item to be retrieved.</param>
-        /// <returns>The item itself if a visual item or the generated visual item if of other type.</returns>
-        protected FilterBoxItem GetFilterBoxItem(object item)
-        {
-            if (!(item is FilterBoxItem filterBoxItem))
-            {
-                filterBoxItem = ItemContainerGenerator.ContainerFromItem(item) as FilterBoxItem;
-            }
-
-            return filterBoxItem;
+            return new FilterBoxItem(_filterCache, AlsoMatchWithFirstWordLetters || AlsoMatchFilterWordsAcrossBoundProperties);
         }
         #endregion
     }

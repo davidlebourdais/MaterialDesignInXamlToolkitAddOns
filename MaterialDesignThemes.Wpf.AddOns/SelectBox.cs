@@ -1,11 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using EMA.ExtendedWPFVisualTreeHelper;
+using MaterialDesignThemes.Wpf.AddOns.Extensions;
 using MaterialDesignThemes.Wpf.AddOns.Utils.Caching;
 using MaterialDesignThemes.Wpf.AddOns.Utils.Commands;
 
@@ -25,6 +28,11 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// The current <see cref="TextBox"/> holding the filter.
         /// </summary>
         protected TextBox _currentFilterTextBox;
+        
+        /// <summary>
+        /// Holds description of the property bound to item's <see cref="SelectBoxItem.IsSelected"/> property.
+        /// </summary>
+        protected PropertyDescriptor _itemIsSelectedProperty;
         
         /// <summary>
         /// The control's popup.
@@ -57,6 +65,11 @@ namespace MaterialDesignThemes.Wpf.AddOns
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(SelectBox), new FrameworkPropertyMetadata(typeof(SelectBox)));
         }
+        
+        /// <summary>
+        /// Occurs whenever the item source property changes.
+        /// </summary>
+        protected override void OnItemsSourceChanged() => SetItemIsSelectedMemberPath(IsSelectedMemberPath);
 
         /// <summary>
         /// Occurs on template application.
@@ -176,7 +189,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             IsOpen = false;
             DropFocus();
         }
-
+        
         private void DropFocus()
         {
             _isDroppingFocus = true;
@@ -194,7 +207,15 @@ namespace MaterialDesignThemes.Wpf.AddOns
             Keyboard.ClearFocus();
 
             _isDroppingFocus = false;
+            
+            OnFocusDropped();
         }
+        
+        /// <summary>
+        /// Called whenever the control closes on focus drop.
+        /// </summary>
+        protected virtual void OnFocusDropped()
+        { }
         #endregion
 
         #region Keyboard key pressed management
@@ -636,6 +657,24 @@ namespace MaterialDesignThemes.Wpf.AddOns
             return input.X < 0 || input.X > popupChild.ActualWidth || input.Y < 0 || input.Y > popupChild.ActualHeight; 
         }
         #endregion
+        
+        #region Item selection
+        /// <summary>
+        /// Clears selection state of a given item.
+        /// </summary>
+        /// <param name="item">The item to be unselected.</param>
+        protected void SetAsUnSelected(object item)
+        {
+            if (item == null)
+                return;
+
+            var filterBoxItem = GetSelectBoxItem(item);
+            if (filterBoxItem != null)
+                filterBoxItem.IsSelected = false;
+            else
+                _itemIsSelectedProperty?.SetValue(item, false);
+        }
+        #endregion
 
         #region Commands
         /// <summary>
@@ -671,7 +710,51 @@ namespace MaterialDesignThemes.Wpf.AddOns
 
             if (selectBox._popup.IsOpen != newValue)
                 selectBox._popup.IsOpen = newValue;
-            selectBox.ApplyFilter(true);
+            
+            if (selectBox.IsOpen == true)
+                selectBox.ApplyFilter(true, true);
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating the path to item bool property on
+        /// which the IsSelected state of items is bound.
+        /// </summary>
+        public string IsSelectedMemberPath
+        {
+            get => (string)GetValue(IsSelectedMemberPathProperty);
+            set => SetCurrentValue(IsSelectedMemberPathProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="IsSelectedMemberPath"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IsSelectedMemberPathProperty
+            = DependencyProperty.Register(nameof(IsSelectedMemberPath), typeof(string), typeof(SelectBox), new FrameworkPropertyMetadata(default(string), ItemIsSelectedMemberPathChanged));
+
+        /// <summary>
+        /// Called whenever the <see cref="IsSelectedMemberPath"/> property changes.
+        /// </summary>
+        /// <param name="sender">The object whose property changed.</param>
+        /// <param name="args">Information about the property change.</param>
+        private static void ItemIsSelectedMemberPathChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            if (!(sender is SelectBox item) || !(args.NewValue is string memberPath))
+                return;
+
+            item.SetItemIsSelectedMemberPath(memberPath);
+        }
+
+        private void SetItemIsSelectedMemberPath(string memberPath)
+        {
+            memberPath = memberPath?.Replace(" ", "") ?? string.Empty;
+
+            var props = TypeDescriptor.GetProperties(Items.SourceCollection.GetGenericType());
+            _itemIsSelectedProperty = props.OfType<PropertyDescriptor>()
+                                           .SingleOrDefault(x => memberPath == x.Name);
+
+            foreach (var item in Items)
+            {
+                GetSelectBoxItem(item)?.TrySetIsSelectedBinding(memberPath);
+            }
         }
         
         /// <summary>
@@ -688,6 +771,95 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         public static readonly DependencyProperty MaxDropDownHeightProperty
             = DependencyProperty.Register(nameof(MaxDropDownHeight), typeof(double), typeof(SelectBox), new FrameworkPropertyMetadata(SystemParameters.PrimaryScreenHeight / 3));
+        
+        /// <summary>
+        /// Gets or sets the template of the additional content.
+        /// </summary>
+        public DataTemplate AdditionalContentTemplate
+        {
+            get => (DataTemplate)GetValue(AdditionalContentTemplateProperty);
+            set => SetCurrentValue(AdditionalContentTemplateProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="AdditionalContentTemplate"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty AdditionalContentTemplateProperty
+            = DependencyProperty.Register(nameof(AdditionalContentTemplate), typeof(DataTemplate), typeof(SelectBox),
+                                          new FrameworkPropertyMetadata(default(DataTemplate)));
+        
+        /// <summary>
+        /// Gets or sets the template selector of the additional content.
+        /// </summary>
+        public DataTemplateSelector AdditionalContentTemplateSelector
+        {
+            get => (DataTemplateSelector)GetValue(AdditionalContentTemplateSelectorProperty);
+            set => SetCurrentValue(AdditionalContentTemplateSelectorProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="AdditionalContentTemplateSelector"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty AdditionalContentTemplateSelectorProperty
+            = DependencyProperty.Register(nameof(AdditionalContentTemplateSelector), typeof(DataTemplateSelector), typeof(SelectBox), 
+                                          new FrameworkPropertyMetadata(default(DataTemplateSelector)));
+        
+        /// <summary>
+        /// Gets or sets the command to be called when the additional action button is hit.
+        /// </summary>
+        public ICommand AdditionalContentActionCommand
+        {
+            get => (ICommand)GetValue(AdditionalContentActionCommandProperty);
+            set => SetCurrentValue(AdditionalContentActionCommandProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="AdditionalContentActionCommand"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty AdditionalContentActionCommandProperty
+            = DependencyProperty.Register(nameof(AdditionalContentActionCommand), typeof(ICommand), typeof(SelectBox), 
+                                          new FrameworkPropertyMetadata(default(ICommand)));
+        
+        /// <summary>
+        /// Gets or sets the text to be displayed on the additional content when no items are selected.
+        /// </summary>
+        public string AdditionalContentNoSelectionText
+        {
+            get => (string)GetValue(AdditionalContentNoSelectionTextProperty);
+            set => SetCurrentValue(AdditionalContentNoSelectionTextProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="AdditionalContentNoSelectionText"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty AdditionalContentNoSelectionTextProperty
+            = DependencyProperty.Register(nameof(AdditionalContentNoSelectionText), typeof(string), typeof(SelectBox), 
+                                          new FrameworkPropertyMetadata(default(string)));
+
+        /// <summary>
+        /// Gets or sets the text to be displayed on the additional content action button when an item is selected.
+        /// </summary>
+        public string AdditionalContentOnSelectionText
+        {
+            get => (string)GetValue(AdditionalContentOnSelectionTextProperty);
+            set => SetCurrentValue(AdditionalContentOnSelectionTextProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="AdditionalContentOnSelectionText"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty AdditionalContentOnSelectionTextProperty
+            = DependencyProperty.Register(nameof(AdditionalContentOnSelectionText), typeof(string), typeof(SelectBox), 
+                                          new FrameworkPropertyMetadata(default(string)));
+        
+        /// <summary>
+        /// Gets or sets the foreground for toggle icon.
+        /// </summary>
+        public Brush IconForeground
+        {
+            get => (Brush)GetValue(IconForegroundProperty);
+            set => SetCurrentValue(IconForegroundProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="IconForeground"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IconForegroundProperty
+            = DependencyProperty.Register(nameof(IconForeground), typeof(Brush), typeof(SelectBox), new FrameworkPropertyMetadata(default(Brush)));
         #endregion
         
         #region ItemContainer management
@@ -707,7 +879,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <returns>A pre-initialized <see cref="SelectBoxItem"/>.</returns>
         protected override DependencyObject GetContainerForItemOverride()
         {
-            return new SelectBoxItem(_filterCache, AlsoMatchWithFirstWordLetters || AlsoMatchFilterWordsAcrossBoundProperties, false, _itemIsSelectedProperty?.Name);
+            return new SelectBoxItem(_filterCache, AlsoMatchWithFirstWordLetters || AlsoMatchFilterWordsAcrossBoundProperties, _itemIsSelectedProperty?.Name);
         }
         
         /// <summary>
@@ -717,12 +889,12 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <returns>The item itself if a visual item or the generated visual item if of other type.</returns>
         protected SelectBoxItem GetSelectBoxItem(object item)
         {
-            if (!(item is SelectBoxItem selectBoxItem))
+            if (!(item is SelectBoxItem visualItem))
             {
-                selectBoxItem = ItemContainerGenerator.ContainerFromItem(item) as SelectBoxItem;
+                visualItem = ItemContainerGenerator.ContainerFromItem(item) as SelectBoxItem;
             }
 
-            return selectBoxItem;
+            return visualItem;
         }
         #endregion
     }

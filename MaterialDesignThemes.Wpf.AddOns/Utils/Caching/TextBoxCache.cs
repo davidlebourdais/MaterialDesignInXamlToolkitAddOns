@@ -21,6 +21,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils.Caching
         /// <param name="textBox">The <see cref="TextBox"/> to store information from.</param>
         public void Cache(TextBox textBox)
         {
+            if (textBox == null)
+                return;
+            
             _text = textBox.Text;
             _caretIndex = textBox.CaretIndex;
             _selectionStart = textBox.SelectionStart;
