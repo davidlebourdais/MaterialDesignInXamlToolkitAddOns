@@ -864,6 +864,20 @@ namespace MaterialDesignThemes.Wpf.AddOns
                                           new FrameworkPropertyMetadata(default(string)));
         
         /// <summary>
+        /// Gets or sets the kind of the icon.
+        /// </summary>
+        public PackIconKind IconKind
+        {
+            get => (PackIconKind)GetValue(IconKindProperty);
+            set => SetCurrentValue(IconKindProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="IconKind"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IconKindProperty
+            = DependencyProperty.Register(nameof(IconKind), typeof(PackIconKind), typeof(SelectBox), new FrameworkPropertyMetadata(default(PackIconKind)));
+        
+        /// <summary>
         /// Gets or sets the foreground for toggle icon.
         /// </summary>
         public Brush IconForeground
@@ -876,6 +890,20 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         public static readonly DependencyProperty IconForegroundProperty
             = DependencyProperty.Register(nameof(IconForeground), typeof(Brush), typeof(SelectBox), new FrameworkPropertyMetadata(default(Brush)));
+        
+        /// <summary>
+        /// Gets or sets the kind of the icon when the control is open.
+        /// </summary>
+        public PackIconKind IconKindWhenOpen
+        {
+            get => (PackIconKind)GetValue(IconKindWhenOpenProperty);
+            set => SetCurrentValue(IconKindWhenOpenProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="IconKindWhenOpen"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IconKindWhenOpenProperty
+            = DependencyProperty.Register(nameof(IconKindWhenOpen), typeof(PackIconKind), typeof(SelectBox), new FrameworkPropertyMetadata(default(PackIconKind)));
         #endregion
         
         #region ItemContainer management

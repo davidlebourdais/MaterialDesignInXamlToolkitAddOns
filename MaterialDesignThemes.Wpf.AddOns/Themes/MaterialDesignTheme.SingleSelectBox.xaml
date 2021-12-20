@@ -16,7 +16,8 @@
     <converters:NotNullToVisibilityConverter ValueForNull="Collapsed" x:Key="NotNullToVisibilityConverter" />
 
     <ControlTemplate x:Key="SingleSelectBoxPopupFilterTextBoxContentTemplate">
-        <Grid Background="{Binding Background, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}">
+        <Grid DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}" 
+              Background="{Binding Background}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
@@ -24,27 +25,30 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-
+            
             <Button Grid.Row="0" Grid.Column="0"
-                        Foreground="{DynamicResource MaterialDesignBodyLight}"
-                        Style="{StaticResource MaterialDesignIconForegroundButton}"
-                        wpf:RippleAssist.Feedback="Transparent"
-                        Height="35" Width="35"
-                        Content="{wpf:PackIcon Kind=ArrowLeft}"
-                        Command="{Binding ToggleOpenStateCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}" />
+                    Foreground="{DynamicResource MaterialDesignBodyLight}"
+                    Style="{StaticResource MaterialDesignIconForegroundButton}"
+                    wpf:RippleAssist.Feedback="Transparent"
+                    Height="35" Width="35"
+                    Command="{Binding ToggleOpenStateCommand}">
+                <Button.Content>
+                    <wpf:PackIcon Kind="{Binding IconKindWhenOpen}" />
+                </Button.Content>
+            </Button>
 
             <TextBox x:Name="PART_PopupFilterTextBox" Grid.Row="0" Grid.Column="1" Margin="0,1,0,0"
                      Style="{StaticResource MaterialDesignFilledTextBox}"
                      BorderThickness="0" HorizontalAlignment="Stretch" Background="Transparent"
-                     Text="{Binding Filter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}, UpdateSourceTrigger=PropertyChanged}"
+                     Text="{Binding Filter, UpdateSourceTrigger=PropertyChanged}"
                      wpf:TextFieldAssist.DecorationVisibility="Hidden"
-                     wpf:HintAssist.Hint="{Binding FilterHint, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}"
+                     wpf:HintAssist.Hint="{Binding FilterHint}"
                      wpf:HintAssist.IsFloating="False"
                      wpf:TextFieldAssist.HasClearButton="True" />
 
             <wpf:Underline Grid.Row="0" Grid.Column="1"
                            Background="{DynamicResource PrimaryHueMidBrush}"
-                           IsActive="{Binding IsOpen, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}" />
+                           IsActive="{Binding IsOpen}" />
         </Grid>
     </ControlTemplate>
 
@@ -132,7 +136,6 @@
         </Grid>
     </ControlTemplate>
     
-        
     <DataTemplate x:Key="SingleSelectBoxAdditionalContentTemplate">
         <Grid Margin="16, 8">
             <TextBlock x:Name="NoSelection" 
@@ -156,6 +159,8 @@
     <Style x:Key="MaterialDesignSingleSelectBox" TargetType="{x:Type extender:SingleSelectBox}">
         <Setter Property="Background" Value="{DynamicResource MaterialDesignTextFieldBoxBackground}" />
         <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+        <Setter Property="IconKind" Value="MagnifyPlusOutline" />
+        <Setter Property="IconKindWhenOpen" Value="ArrowLeft" />
         <Setter Property="IconForeground" Value="{DynamicResource MaterialDesignBodyLight}" />
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="ScrollViewer.CanContentScroll" Value="true"/>
@@ -184,8 +189,11 @@
                                 Style="{StaticResource MaterialDesignIconForegroundButton}"
                                 wpf:RippleAssist.Feedback="Transparent"
                                 Height="35" Width="35"
-                                Content="{wpf:PackIcon Kind=MagnifyPlusOutline}"
-                                Command="{Binding ToggleOpenStateCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}" />
+                                Command="{Binding ToggleOpenStateCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}">
+                            <Button.Content>
+                                <wpf:PackIcon x:Name="PrefixButtonIcon" Kind="{TemplateBinding IconKind}" />
+                            </Button.Content>
+                        </Button>
                         
                         <ContentControl Grid.Column="0" Grid.ColumnSpan="2"
                                         x:Name="SelectedItemPresenter"
@@ -315,11 +323,9 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger SourceName="PART_Popup" Property="IsOpen" Value="True">
-                            <Setter TargetName="PART_PrefixButton" Property="Content">
-                                <Setter.Value>
-                                    <wpf:PackIcon Kind="ArrowLeft" />
-                                </Setter.Value>
-                            </Setter>
+                            <Setter TargetName="PART_PrefixButton" Property="Foreground" Value="{DynamicResource MaterialDesignBodyLight}" />
+                            <Setter TargetName="PrefixButtonIcon" Property="Kind"
+                                    Value="{Binding IconKindWhenOpen, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:SingleSelectBox}}}" />
                         </Trigger>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
@@ -348,7 +354,7 @@
                             <Setter TargetName="PART_PrefixButton" Property="IsEnabled" Value="False" />
                             <Setter TargetName="PART_PrefixButton" Property="Content">
                                 <Setter.Value>
-                                    <wpf:PackIcon Kind="ReloadAlert" />
+                                    <wpf:PackIcon Kind="ReloadAlert" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                 </Setter.Value>
                             </Setter>
                             <Setter TargetName="PART_FilterTextBox" Property="IsEnabled" Value="False" />
