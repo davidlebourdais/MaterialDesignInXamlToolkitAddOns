@@ -19,18 +19,24 @@ namespace MaterialDesignThemes.Wpf.AddOns.Extensions
         /// </summary>
         /// <param name="popup">The popup to customize.</param>
         /// <param name="isActiveChecker">An optional method to check if this behavior is allowed to run or not.</param>
-        public static void CloseOnInnerButtonClicks(this Popup popup, Func<bool> isActiveChecker = null)
+        /// <param name="rootToDiscard">Optional base element for which children will be discarded from this behavior.</param>
+        public static void CloseOnInnerButtonClicks(this Popup popup, Func<bool> isActiveChecker = null, DependencyObject rootToDiscard = null)
         {
             var weaklyTiedPopup = new WeakReference<Popup>(popup);
+            var weaklyTiedRootToDiscard = rootToDiscard != null ? new WeakReference<DependencyObject>(rootToDiscard) : null;
             var closePopupOnDelayedClick = new Action<object, EventArgs>((timer, _) => ClosePopup(timer, weaklyTiedPopup));
             var closePopupWithDelayTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(350), DispatcherPriority.Background, closePopupOnDelayedClick.Invoke, Dispatcher.CurrentDispatcher);
             
-            popup.AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler((sender, args) => InnerButtonClicked(sender, args, weaklyTiedPopup, isActiveChecker, closePopupWithDelayTimer)));
+            popup.AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler((sender, args) => InnerButtonClicked(sender, args, weaklyTiedPopup, isActiveChecker, closePopupWithDelayTimer, weaklyTiedRootToDiscard)));
         }
         
-        private static void InnerButtonClicked(object sender, RoutedEventArgs e, WeakReference<Popup> weaklyTiedPopup, Func<bool> isActive, DispatcherTimer timer)
+        private static void InnerButtonClicked(object sender, RoutedEventArgs e, WeakReference<Popup> weaklyTiedPopup, Func<bool> isActive, DispatcherTimer timer, WeakReference<DependencyObject> weaklyTiedRootToDiscard)
         {
             if (!weaklyTiedPopup.TryGetTarget(out var popup))
+                return;
+
+            if (weaklyTiedRootToDiscard != null && weaklyTiedRootToDiscard.TryGetTarget(out var rootToDiscard) 
+                                                && rootToDiscard.FindAllChildrenByType(e.OriginalSource?.GetType()).Contains(e.OriginalSource))
                 return;
             
             if (isActive?.Invoke() != true)
