@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.0.4
+Add ButtonWithIcon with header icon and that can be styled with classic Button styles
+Add styles for rectangular toggle buttons
+Add the SplitButton
+More improvements on the SelectBox.
+
 ## v0.0.3
 Improvements on the SelectBox.
 
