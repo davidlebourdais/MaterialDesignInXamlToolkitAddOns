@@ -15,7 +15,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
     /// A button that can display a popup when clicking on its inner toggle button.
     /// </summary>
     [TemplatePart(Name = "PART_ToggleButton", Type = typeof(ToggleButton))]
-    [TemplatePart(Name = "PART_Popup", Type = typeof(ToggleButton))]
+    [TemplatePart(Name = "PART_Popup", Type = typeof(Popup))]
     public class SplitButton : ButtonWithIcon
     {
         private ToggleButton _toggle;
