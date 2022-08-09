@@ -294,13 +294,13 @@ namespace MaterialDesignThemes.Wpf.AddOns
                 return;
 
             item.HasItemsToDisplay = newCount != 0;
-            item.OnItemCountChanged();
+            item.OnItemsCountChanged();
         }
 
         /// <summary>
         /// Called whenever the item count is updated.
         /// </summary>
-        protected virtual void OnItemCountChanged()
+        protected virtual void OnItemsCountChanged()
         { }
 
         /// <summary>
