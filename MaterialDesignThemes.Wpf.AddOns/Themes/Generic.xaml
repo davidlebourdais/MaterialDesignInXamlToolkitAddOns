@@ -26,5 +26,6 @@
     <Style TargetType="{x:Type extender:ThreeStateCheckBox}" BasedOn="{StaticResource MaterialDesignCheckBox}" />
     <Style TargetType="{x:Type extender:PagedDataGrid}" BasedOn="{StaticResource MaterialDesignPagedDataGrid}"/>
     <Style TargetType="{x:Type extender:SplitButton}" BasedOn="{StaticResource MaterialDesignRaisedSplitButton}"/>
+    <Style TargetType="{x:Type extender:ToggleButtonWithIcon}" BasedOn="{StaticResource {x:Type ToggleButton}}" />
     <Style TargetType="{x:Type extender:ToastNotificationBar}" BasedOn="{StaticResource MaterialDesignToastNotification}"/>
 </ResourceDictionary>
