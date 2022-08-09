@@ -101,7 +101,7 @@
                                               Background="Transparent" BorderBrush="Transparent"  
                                               Style="{TemplateBinding ToggleStyle}" 
                                               Width="28" Margin="0" Padding="6,0,6,0">
-                                    <wpf:PackIcon Kind="ChevronDown" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    <wpf:PackIcon Kind="{TemplateBinding ToggleIconKind}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 </ToggleButton>
 
                                 <wpf:PopupEx Grid.Column="0" x:Name="PART_Popup" 
@@ -237,7 +237,7 @@
                                 <ToggleButton x:Name="PART_ToggleButton" Grid.Column="3"
                                               Style="{TemplateBinding ToggleStyle}" 
                                               Width="28" Margin="0" Padding="6,0,6,0">
-                                    <wpf:PackIcon Kind="ChevronDown" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    <wpf:PackIcon Kind="{TemplateBinding ToggleIconKind}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 </ToggleButton>
 
                                 <wpf:PopupEx Grid.Column="0" x:Name="PART_Popup" 
@@ -346,7 +346,7 @@
                                 <ToggleButton x:Name="PART_ToggleButton" Grid.Column="3"
                                               Style="{TemplateBinding ToggleStyle}" 
                                               Width="28" Margin="0" Padding="6,0,6,0">
-                                    <wpf:PackIcon Kind="ChevronDown" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    <wpf:PackIcon Kind="{TemplateBinding ToggleIconKind}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 </ToggleButton>
 
                                 <wpf:PopupEx Grid.Column="0" x:Name="PART_Popup" 

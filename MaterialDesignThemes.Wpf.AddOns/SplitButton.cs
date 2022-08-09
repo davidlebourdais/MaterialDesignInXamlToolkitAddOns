@@ -196,5 +196,19 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         public static readonly DependencyProperty ShouldCloseOnPopupButtonsClicksProperty =
             DependencyProperty.Register(nameof(ShouldCloseOnPopupButtonsClicks), typeof(bool), typeof(SplitButton), new PropertyMetadata(true));
+        
+        /// <summary>
+        /// Gets or sets the kind of the icon to be displayed in the toggle button.
+        /// </summary>
+        public PackIconKind ToggleIconKind
+        {
+            get => (PackIconKind)GetValue(ToggleIconKindProperty);
+            set => SetCurrentValue(ToggleIconKindProperty, value);
+        }
+        /// <summary>
+        /// Registers the <see cref="ToggleIconKind"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty ToggleIconKindProperty =
+            DependencyProperty.Register(nameof(ToggleIconKind), typeof(PackIconKind), typeof(SplitButton), new FrameworkPropertyMetadata(PackIconKind.ChevronDown));
     }
 }
