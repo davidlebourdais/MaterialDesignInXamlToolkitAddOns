@@ -679,6 +679,16 @@ namespace MaterialDesignThemes.Wpf.AddOns
                 _itemIsSelectedProperty?.SetValue(item, false);
         }
         #endregion
+        
+        #region Filtering
+        /// <summary>
+        /// Applies current filter on items. 
+        /// </summary>
+        /// <param name="force">Forces filtering even if filter value did not change.</param>
+        /// <param name="appliedOnOpening">Indicates if filter is being applied on popup opening.</param>
+        protected virtual void ApplyFilter(bool force = false, bool appliedOnOpening = false)
+            => base.ApplyFilter(force);
+        #endregion
 
         #region Commands
         /// <summary>
@@ -759,7 +769,15 @@ namespace MaterialDesignThemes.Wpf.AddOns
             {
                 GetSelectBoxItem(item)?.TrySetIsSelectedBinding(memberPath);
             }
+
+            OnIsSelectedPropertyChanged();
         }
+
+        /// <summary>
+        /// Occurs whenever the <see cref="_itemIsSelectedProperty"/> changes.
+        /// </summary>
+        protected virtual void OnIsSelectedPropertyChanged()
+        { }
         
         /// <summary>
         /// Gets or sets a value indicating if popup should automatically close when
