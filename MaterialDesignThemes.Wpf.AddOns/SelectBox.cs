@@ -751,7 +751,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         {
             memberPath = memberPath?.Replace(" ", "") ?? string.Empty;
 
-            var props = TypeDescriptor.GetProperties(Items.SourceCollection.GetGenericType());
+            var props = TypeDescriptor.GetProperties(Items.SourceCollection.GetGenericType(), new Attribute[] {new PropertyFilterAttribute(PropertyFilterOptions.All) });
             _itemIsSelectedProperty = props.OfType<PropertyDescriptor>()
                                            .SingleOrDefault(x => memberPath == x.Name);
 

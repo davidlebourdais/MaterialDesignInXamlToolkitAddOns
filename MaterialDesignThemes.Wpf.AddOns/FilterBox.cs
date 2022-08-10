@@ -75,8 +75,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Applies current filter on items. 
         /// </summary>
         /// <param name="force">Forces filtering even if filter value did not change.</param>
-        /// <param name="appliedOnOpening">Indicates if filter is being applied on popup opening.</param>
-        protected virtual void ApplyFilter(bool force = false, bool appliedOnOpening = false)
+        protected virtual void ApplyFilter(bool force = false)
         {
             Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() =>
             {
@@ -90,8 +89,9 @@ namespace MaterialDesignThemes.Wpf.AddOns
                                                                        _filterCache, 
                                                                        IgnoreCase, 
                                                                        AlsoMatchFilterWordsAcrossBoundProperties,
-                                                                       AlsoMatchFilterWordsAcrossBoundProperties);
-                
+                                                                       AlsoMatchFilterWordsAcrossBoundProperties,
+                                                                       ConvertValuesToBeFilteredToString);
+
                 ItemsCount = Items.Count;
                 OnFilterApplied();
             }));
@@ -182,6 +182,22 @@ namespace MaterialDesignThemes.Wpf.AddOns
             = DependencyProperty.Register(nameof(AlsoMatchFilterWordsAcrossBoundProperties), typeof(bool), typeof(FilterBox), new FrameworkPropertyMetadata(true, FilterRulesChanged));
         
         /// <summary>
+        /// Gets or sets a value indicating if non-string property values on the target
+        /// items must be converted to string.
+        /// </summary>
+        /// <remarks><see cref="object.ToString"/> method might be called without formatting or culture.</remarks>
+        public bool ConvertValuesToBeFilteredToString
+        {
+            get => (bool)GetValue(ConvertValuesToBeFilteredToStringProperty);
+            set => SetValue(ConvertValuesToBeFilteredToStringProperty, value);
+        }
+        /// <summary>
+        /// Registers <see cref="ConvertValuesToBeFilteredToString"/> as a dependency property.
+        /// </summary>
+        public static readonly DependencyProperty ConvertValuesToBeFilteredToStringProperty
+            = DependencyProperty.Register(nameof(ConvertValuesToBeFilteredToString), typeof(bool), typeof(FilterBox), new FrameworkPropertyMetadata(true, FilterRulesChanged));
+        
+        /// <summary>
         /// Called whenever the <see cref="IgnoreCase"/>, <see cref="AlsoMatchWithFirstWordLetters"/>
         /// or <see cref="AlsoMatchFilterWordsAcrossBoundProperties"/> properties change.
         /// </summary>
@@ -258,7 +274,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
 
             var memberPaths = rawMemberPaths.Replace(" ", "").Split(',').ToArray();
 
-            var props = TypeDescriptor.GetProperties(Items.SourceCollection.GetGenericType());
+            var props = TypeDescriptor.GetProperties(Items.SourceCollection.GetGenericType(), new Attribute[] {new PropertyFilterAttribute(PropertyFilterOptions.All)});
             _itemFilterMemberPaths = props.OfType<PropertyDescriptor>()
                                           .Where(x => memberPaths.Contains(x.Name))
                                           .ToArray();

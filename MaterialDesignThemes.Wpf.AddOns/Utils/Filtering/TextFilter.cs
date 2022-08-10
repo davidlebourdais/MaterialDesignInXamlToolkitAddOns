@@ -16,7 +16,8 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils.Filtering
                                                   string filter, 
                                                   bool ignoreCase = false,
                                                   bool matchFilterWordsWithFirstWordLetters = false,
-                                                  bool matchFilterWordsFirstWordLettersAcrossProperties = false)
+                                                  bool matchFilterWordsFirstWordLettersAcrossProperties = false,
+                                                  bool convertValueToString = false)
         {
             if (string.IsNullOrEmpty(filter))
                 return true;
@@ -28,7 +29,7 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils.Filtering
             var matchingFilterAndWords = new List<(string ItemWord, string FilterWord, PropertyDescriptor Property)>();
             foreach (var propertyPath in propertyMemberPaths)
             {
-                if (!GetString(item, propertyPath, out var value))
+                if (!GetString(item, propertyPath, convertValueToString, out var value))
                     continue;
 
                 if (DoesValueMatchFilter(value, filter, ignoreCase))
@@ -82,10 +83,16 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils.Filtering
         private static string[] GetWords(string input)
             => input?.Split(Array.Empty<char>(), StringSplitOptions.RemoveEmptyEntries).ToArray();
         
-        private static bool GetString(object source, PropertyDescriptor propertyPath, out string value)
+        private static bool GetString(object source, PropertyDescriptor propertyPath, bool convertValueToString, out string value)
         {
             value = null;
-            if (!(propertyPath.GetValue(source) is string valueAsString))
+            
+            var valueAsString = propertyPath.GetValue(source) as string;
+            
+            if (valueAsString == null && convertValueToString)
+                valueAsString = propertyPath.GetValue(source)?.ToString();
+            
+            if (valueAsString == null)
                 return false;
             
             value = valueAsString;
