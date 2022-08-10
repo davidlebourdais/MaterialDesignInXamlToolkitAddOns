@@ -13,20 +13,10 @@
     <converters:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter"  />
     <extenderConverter:BorderClipConverter x:Key="InnerBorderClipConverter" />
 
-    <Style x:Key="FocusVisual">
-        <Setter Property="Control.Template">
-            <Setter.Value>
-                <ControlTemplate>
-                    <Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
     <Style x:Key="MaterialDesignRaisedSplitToggleButton" TargetType="{x:Type extender:SplitToggleButton}" BasedOn="{StaticResource MaterialDesignRaisedRectangularToggleButton}">
         <Setter Property="TextElement.FontWeight" Value="Medium"/>
         <Setter Property="TextElement.FontSize" Value="14"/>
-        <Setter Property="Padding" Value="13, 4"/>
+        <Setter Property="Padding" Value="13, 2"/>
         <Setter Property="TrailingIconKind" Value="ChevronDown" />
         <Setter Property="TrailingIconMargin" Value="-8,0,6,0" />
         <Setter Property="TrailingIconSize" Value="16" />
@@ -43,16 +33,15 @@
                         
                         <wpf:Ripple x:Name="contentControl"
                                     Focusable="False"
-                                    HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                    VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                    HorizontalContentAlignment="Stretch"
+                                    VerticalContentAlignment="Stretch"
                                     SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" >
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <ContentControl  x:Name="MainPart" Grid.ColumnSpan="2" 
+                                <ContentControl  x:Name="MainPart"
                                                      Content="{TemplateBinding Content}" 
                                                      ContentTemplate="{TemplateBinding ContentTemplate}" 
                                                      Margin="{TemplateBinding Padding}"
@@ -61,7 +50,7 @@
                                                      Focusable="False"
                                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
                                 
-                                <Border Grid.Column="2" Margin="0" Padding="2,0" 
+                                <Border Grid.Column="1" Margin="0" Padding="2,0" 
                                         Visibility="{Binding TrailingIconKind, Converter={StaticResource NotNullToVisibilityConverter}}">
                                     <wpf:PackIcon Kind="{TemplateBinding TrailingIconKind}" 
                                                   Width="{TemplateBinding TrailingIconSize}"
@@ -144,7 +133,7 @@
     <Style x:Key="MaterialDesignFlatSplitToggleButton" TargetType="{x:Type extender:SplitToggleButton}" BasedOn="{StaticResource MaterialDesignFlatRectangularToggleButton}">
         <Setter Property="TextElement.FontWeight" Value="Medium"/>
         <Setter Property="TextElement.FontSize" Value="14"/>
-        <Setter Property="Padding" Value="13, 4"/>
+        <Setter Property="Padding" Value="13, 2"/>
         <Setter Property="TrailingIconKind" Value="ChevronDown" />
         <Setter Property="TrailingIconMargin" Value="-8,0,6,0" />
         <Setter Property="TrailingIconSize" Value="16" />
@@ -158,51 +147,53 @@
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}" />
                             
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <ContentControl x:Name="MainPart"
-                                            Content="{TemplateBinding Content}"
-                                            ContentTemplate="{TemplateBinding ContentTemplate}"
-                                            ContentStringFormat="{TemplateBinding ContentStringFormat}"
-                                            Focusable="False" IsTabStop="False"
-                                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                            Margin="{TemplateBinding Padding}"
-                                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                            
-                            <Border Grid.Column="2" Margin="0" Padding="2,0" 
-                                    Visibility="{Binding TrailingIconKind, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource NotNullToVisibilityConverter}}">
-                                <wpf:PackIcon Kind="{TemplateBinding TrailingIconKind}" 
-                                              Width="{TemplateBinding TrailingIconSize}"
-                                              Height="{TemplateBinding TrailingIconSize}"
-                                              Margin="{TemplateBinding TrailingIconMargin}"
-                                              VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            </Border>
+                        <wpf:Ripple VerticalContentAlignment="Stretch" 
+                                    HorizontalContentAlignment="Stretch">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                
+                                <ContentControl x:Name="MainPart"
+                                                Content="{TemplateBinding Content}"
+                                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                                Focusable="False" IsTabStop="False"
+                                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                Margin="{TemplateBinding Padding}"
+                                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                
+                                <Border Grid.Column="1" Margin="0" Padding="2,0" 
+                                        Visibility="{Binding TrailingIconKind, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource NotNullToVisibilityConverter}}">
+                                    <wpf:PackIcon Kind="{TemplateBinding TrailingIconKind}" 
+                                                  Width="{TemplateBinding TrailingIconSize}"
+                                                  Height="{TemplateBinding TrailingIconSize}"
+                                                  Margin="{TemplateBinding TrailingIconMargin}"
+                                                  VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                </Border>
 
-                            <wpf:PopupEx Grid.Column="0" x:Name="PART_Popup" 
-                                         TextElement.Foreground="{Binding (TextElement.Foreground), RelativeSource={RelativeSource FindAncestor, AncestorType=FrameworkElement, AncestorLevel=7}}"
-                                         TextElement.FontSize="{Binding (TextElement.FontSize), RelativeSource={RelativeSource FindAncestor, AncestorType=FrameworkElement, AncestorLevel=7}}"
-                                         TextElement.FontWeight="{Binding (TextElement.FontWeight), RelativeSource={RelativeSource FindAncestor, AncestorType=FrameworkElement, AncestorLevel=7}}"
-                                         StaysOpen="False"
-                                         HorizontalOffset="10"
-                                         VerticalOffset="5"
-                                         PlacementTarget="{Binding ElementName=border}"
-                                         Placement="Bottom"
-                                         PopupAnimation="Fade"
-                                         AllowsTransparency="True">
-                                <wpf:Card Content="{TemplateBinding PopupContent}" 
-                                          ContentTemplate="{TemplateBinding PopupContentTemplate}"
-                                          ContentTemplateSelector="{TemplateBinding PopupContentTemplateSelector}"
-                                          Margin="4"
-                                          wpf:ShadowAssist.ShadowDepth="Depth2"
-                                          RenderOptions.ClearTypeHint="Enabled" />
-                            </wpf:PopupEx>
-                        </Grid>
+                                <wpf:PopupEx Grid.Column="0" x:Name="PART_Popup" 
+                                             TextElement.Foreground="{Binding (TextElement.Foreground), RelativeSource={RelativeSource FindAncestor, AncestorType=FrameworkElement, AncestorLevel=7}}"
+                                             TextElement.FontSize="{Binding (TextElement.FontSize), RelativeSource={RelativeSource FindAncestor, AncestorType=FrameworkElement, AncestorLevel=7}}"
+                                             TextElement.FontWeight="{Binding (TextElement.FontWeight), RelativeSource={RelativeSource FindAncestor, AncestorType=FrameworkElement, AncestorLevel=7}}"
+                                             StaysOpen="False"
+                                             HorizontalOffset="10"
+                                             VerticalOffset="5"
+                                             PlacementTarget="{Binding ElementName=border}"
+                                             Placement="Bottom"
+                                             PopupAnimation="Fade"
+                                             AllowsTransparency="True">
+                                    <wpf:Card Content="{TemplateBinding PopupContent}" 
+                                              ContentTemplate="{TemplateBinding PopupContentTemplate}"
+                                              ContentTemplateSelector="{TemplateBinding PopupContentTemplateSelector}"
+                                              Margin="4"
+                                              wpf:ShadowAssist.ShadowDepth="Depth2"
+                                              RenderOptions.ClearTypeHint="Enabled" />
+                                </wpf:PopupEx>
+                            </Grid>
+                        </wpf:Ripple>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="Button.IsDefaulted" Value="True">
@@ -282,7 +273,7 @@
     <Style x:Key="MaterialDesignOutlinedSplitToggleButton" TargetType="{x:Type extender:SplitToggleButton}" BasedOn="{StaticResource MaterialDesignOutlinedRectangularToggleButton}">
         <Setter Property="TextElement.FontWeight" Value="Medium"/>
         <Setter Property="TextElement.FontSize" Value="14"/>
-        <Setter Property="Padding" Value="13, 4"/>
+        <Setter Property="Padding" Value="13, 2"/>
         <Setter Property="TrailingIconKind" Value="ChevronDown" />
         <Setter Property="TrailingIconMargin" Value="-8,0,6,0" />
         <Setter Property="TrailingIconSize" Value="16" />
@@ -321,8 +312,8 @@
                                                         ContentTemplate="{TemplateBinding ContentTemplate}"
                                                         ContentStringFormat="{TemplateBinding ContentStringFormat}"
                                                         Focusable="False" IsTabStop="False"
-                                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                        HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                        VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
                                                         Margin="{TemplateBinding Padding}"
                                                         SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                                         
