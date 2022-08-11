@@ -22,12 +22,14 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         /// <param name="initialFilter">Initial filter to be applied on the item.</param>
         /// <param name="highlightPerFilterWord">Indicates if highlight must occur on a per filter word basis or on the whole filter string.</param>
+        /// <param name="ignoreCaseWhenFiltering">If true, ignores casing during filtering.</param>
         /// <param name="isSelectedSourceMemberPath">Member path to the <see cref="IsSelected"/> property.</param>
         /// <param name="isPreselected">Initial preselection state.</param>
-        public SelectBoxItem(string initialFilter, bool highlightPerFilterWord, string isSelectedSourceMemberPath = null, bool isPreselected = false) : base (initialFilter, highlightPerFilterWord)
+        public SelectBoxItem(string initialFilter, bool highlightPerFilterWord, bool ignoreCaseWhenFiltering, string isSelectedSourceMemberPath = null, bool isPreselected = false) 
+            : base (initialFilter, highlightPerFilterWord, ignoreCaseWhenFiltering)
         {
             _isSelectedSourceMemberPath = isSelectedSourceMemberPath;
-            Loaded += (_, unused) => Initialize(initialFilter, highlightPerFilterWord, isSelectedSourceMemberPath, isPreselected);
+            Loaded += (_, unused) => Initialize(initialFilter, highlightPerFilterWord, ignoreCaseWhenFiltering, isSelectedSourceMemberPath, isPreselected);
         }
 
         /// <summary>
@@ -41,14 +43,14 @@ namespace MaterialDesignThemes.Wpf.AddOns
         #endregion
 
         #region Initialization with Filtering
-        private void Initialize(string filter, bool highlightPerFilterWord, string isSelectedSourceMemberPath, bool isPreselected)
+        private void Initialize(string filter, bool highlightPerFilterWord, bool ignoreCaseWhenFiltering, string isSelectedSourceMemberPath, bool isPreselected)
         {
             TrySetIsSelectedBinding(isSelectedSourceMemberPath);
             _isPreselected = isPreselected;
             
             UpdateVisualState();
             
-            base.Initialize(filter, highlightPerFilterWord);
+            base.Initialize(filter, highlightPerFilterWord, ignoreCaseWhenFiltering);
         }
         #endregion
 

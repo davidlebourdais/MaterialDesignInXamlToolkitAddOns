@@ -960,7 +960,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <returns>A pre-initialized <see cref="SelectBoxItem"/>.</returns>
         protected override DependencyObject GetContainerForItemOverride()
         {
-            return new SelectBoxItem(_filterCache, AlsoMatchWithFirstWordLetters || AlsoMatchFilterWordsAcrossBoundProperties, _itemIsSelectedProperty?.Name);
+            return new SelectBoxItem(_filterCache, AlsoMatchWithFirstWordLetters || AlsoMatchFilterWordsAcrossBoundProperties, IgnoreCase, _itemIsSelectedProperty?.Name);
         }
         
         /// <summary>

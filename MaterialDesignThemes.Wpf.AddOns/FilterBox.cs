@@ -381,7 +381,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <returns>A pre-initialized <see cref="FilterBoxItem"/>.</returns>
         protected override DependencyObject GetContainerForItemOverride()
         {
-            return new FilterBoxItem(_filterCache, AlsoMatchWithFirstWordLetters || AlsoMatchFilterWordsAcrossBoundProperties);
+            return new FilterBoxItem(_filterCache, AlsoMatchWithFirstWordLetters || AlsoMatchFilterWordsAcrossBoundProperties, IgnoreCase);
         }
         #endregion
     }

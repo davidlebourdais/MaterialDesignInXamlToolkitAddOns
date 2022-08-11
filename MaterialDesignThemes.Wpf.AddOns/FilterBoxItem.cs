@@ -16,8 +16,6 @@ namespace MaterialDesignThemes.Wpf.AddOns
     [TemplatePart(Name = "GridWrapper", Type = typeof(Grid))]
     public class FilterBoxItem : ContentControl
     {
-        private const bool _ignoreCaseWhenFiltering = true;
-
         private static readonly Dictionary<DependencyProperty, object> _highLightPropertiesAndValues = new Dictionary<DependencyProperty, object>()
         {
             { TextElement.BackgroundProperty, new SolidColorBrush(Colors.Yellow) }
@@ -29,14 +27,16 @@ namespace MaterialDesignThemes.Wpf.AddOns
         protected Grid _gridWrapper;
 
         #region Constructors
+
         /// <summary>
         /// Creates a new instance of <see cref="FilterBoxItem"/>.
         /// </summary>
         /// <param name="initialFilter">Initial filter to be applied on the item.</param>
         /// <param name="highlightPerFilterWord">Indicates if highlight must occur on a per filter word basis or on the whole filter string.</param>
-        public FilterBoxItem(string initialFilter, bool highlightPerFilterWord)
+        /// <param name="ignoreCaseWhenFiltering">If true, ignores casing during filtering.</param>
+        public FilterBoxItem(string initialFilter, bool highlightPerFilterWord, bool ignoreCaseWhenFiltering)
         {
-            Loaded += (_, unused) => Initialize(initialFilter, highlightPerFilterWord);
+            Loaded += (_, unused) => Initialize(initialFilter, highlightPerFilterWord, ignoreCaseWhenFiltering);
         }
 
         /// <summary>
@@ -67,14 +67,15 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         /// <param name="filter">Initial filter to be applied on the item.</param>
         /// <param name="highlightPerFilterWord">Indicates if highlight must occur on a per filter word basis or on the whole filter string.</param>
-        protected void Initialize(string filter, bool highlightPerFilterWord)
+        /// <param name="ignoreCaseWhenFiltering">If true, ignores casing during filtering.</param>
+        protected void Initialize(string filter, bool highlightPerFilterWord, bool ignoreCaseWhenFiltering)
         {
             AdaptTextBlockChildren();
 
             var textElements = this.FindAllChildren<TextElement>().ToArray();
             foreach (var textElement in textElements)
             {
-                textElement.FindAndHighlightTextMatches(filter, _highLightPropertiesAndValues, _ignoreCaseWhenFiltering, highlightPerFilterWord);
+                textElement.FindAndHighlightTextMatches(filter, _highLightPropertiesAndValues, ignoreCaseWhenFiltering, highlightPerFilterWord);
             }
         }
 
