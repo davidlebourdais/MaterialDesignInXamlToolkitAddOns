@@ -5,15 +5,15 @@
     
     <AssemblyTitle>MaterialDesignThemes.Wpf.AddOns</AssemblyTitle>
     <PackageId>MaterialDesignInXamlToolkitAddOns</PackageId>
-    <Version>0.0.4</Version>
-    <PackageVersion>0.0.4</PackageVersion>
+    <Version>0.0.5</Version>
+    <PackageVersion>0.0.5</PackageVersion>
     
     <Title>Extensions for MaterialDesignInXamlToolkit</Title>
     <PackageDescription>Offers new features and extra controls to use Material Design in Xaml applications</PackageDescription>
-    <PackageTags>WPF;Xaml;ColorPicker;DataGrid;SelectBox;Filtering;ButtonWithIcon;SplitButton</PackageTags>
+    <PackageTags>WPF;Xaml;ColorPicker;FilterTextBox;SelectBox;Filtering;ButtonWithIcon;SplitButton</PackageTags>
     <Authors>David Le Bourdais</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>Copyright © 2021</Copyright>
+    <Copyright>Copyright © 2022</Copyright>
     <RepositoryUrl>https://github.com/davidlebourdais/MaterialDesignInXamlToolkitAddOns</RepositoryUrl>
     
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
