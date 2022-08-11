@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.0.5
+Minor fixes and improvements for SplitButton and FilterBoxes
+Add ToggleSplitButton that can open popups
+Add FilterTextbox that allows to filter items in an associated ItemsControl
+
 ## v0.0.4
 Add ButtonWithIcon with header icon and that can be styled with classic Button styles
 Add styles for rectangular toggle buttons
