@@ -53,13 +53,13 @@
     </ControlTemplate>
 
     <ControlTemplate x:Key="SingleSelectBoxPopupClassicContentTemplate" TargetType="ContentControl">
-        <Grid MinWidth="{Binding Path=ContentMinWidth, RelativeSource={RelativeSource AncestorType=wpf:ComboBoxPopup}}"
-              Margin="{Binding Path=ContentMargin, RelativeSource={RelativeSource AncestorType=wpf:ComboBoxPopup}}">
+        <Grid MinWidth="{Binding Path=ContentMinWidth, RelativeSource={RelativeSource AncestorType=extender:SelectBoxPopup}}"
+              Margin="{Binding Path=ContentMargin, RelativeSource={RelativeSource AncestorType=extender:SelectBoxPopup}}">
 
             <Border Background="Transparent"
                     BorderBrush="{DynamicResource MaterialDesignShadowBrush}"
                     BorderThickness="1"
-                    CornerRadius="{Binding Path=CornerRadius, RelativeSource={RelativeSource AncestorType=wpf:ComboBoxPopup}}">
+                    CornerRadius="{Binding Path=CornerRadius, RelativeSource={RelativeSource AncestorType=extender:SelectBoxPopup}}">
                 <Border.Effect>
                     <BlurEffect Radius="6"/>
                 </Border.Effect>
@@ -67,7 +67,7 @@
 
             <Border Margin="1"
                     Background="{Binding ElementName=PART_Popup, Path=Background}"
-                    CornerRadius="{Binding Path=CornerRadius, RelativeSource={RelativeSource AncestorType=wpf:ComboBoxPopup}}" />
+                    CornerRadius="{Binding Path=CornerRadius, RelativeSource={RelativeSource AncestorType=extender:SelectBoxPopup}}" />
 
             <ContentPresenter />
 
@@ -75,13 +75,13 @@
     </ControlTemplate>
 
     <ControlTemplate x:Key="SingleSelectBoxPopupDownContentTemplate" TargetType="ContentControl">
-        <Grid MinWidth="{Binding Path=ContentMinWidth, RelativeSource={RelativeSource AncestorType=wpf:ComboBoxPopup}}"
-              Margin="{Binding Path=ContentMargin, RelativeSource={RelativeSource AncestorType=wpf:ComboBoxPopup}}">
+        <Grid MinWidth="{Binding Path=ContentMinWidth, RelativeSource={RelativeSource AncestorType=extender:SelectBoxPopup}}"
+              Margin="{Binding Path=ContentMargin, RelativeSource={RelativeSource AncestorType=extender:SelectBoxPopup}}">
 
             <Border Background="Transparent"
                     BorderBrush="{DynamicResource MaterialDesignShadowBrush}"
                     BorderThickness="1"
-                    CornerRadius="{Binding Path=CornerRadius, RelativeSource={RelativeSource AncestorType=wpf:ComboBoxPopup}}">
+                    CornerRadius="{Binding Path=CornerRadius, RelativeSource={RelativeSource AncestorType=extender:SelectBoxPopup}}">
                 <Border.Effect>
                     <BlurEffect Radius="6"/>
                 </Border.Effect>
@@ -89,7 +89,7 @@
 
             <Border Margin="1"
                     Background="{Binding ElementName=PART_Popup, Path=Background}"
-                    CornerRadius="{Binding Path=CornerRadius, RelativeSource={RelativeSource AncestorType=wpf:ComboBoxPopup}}" />
+                    CornerRadius="{Binding Path=CornerRadius, RelativeSource={RelativeSource AncestorType=extender:SelectBoxPopup}}" />
 
             <Grid>
                 <Grid.RowDefinitions>
@@ -106,13 +106,13 @@
     </ControlTemplate>
 
     <ControlTemplate x:Key="SingleSelectBoxPopupUpContentTemplate" TargetType="ContentControl">
-        <Grid MinWidth="{Binding Path=ContentMinWidth, RelativeSource={RelativeSource AncestorType=wpf:ComboBoxPopup}}"
-              Margin="{Binding Path=ContentMargin, RelativeSource={RelativeSource AncestorType=wpf:ComboBoxPopup}}">
+        <Grid MinWidth="{Binding Path=ContentMinWidth, RelativeSource={RelativeSource AncestorType=extender:SelectBoxPopup}}"
+              Margin="{Binding Path=ContentMargin, RelativeSource={RelativeSource AncestorType=extender:SelectBoxPopup}}">
 
             <Border Background="Transparent"
                     BorderBrush="{DynamicResource MaterialDesignShadowBrush}"
                     BorderThickness="1"
-                    CornerRadius="{Binding Path=CornerRadius, RelativeSource={RelativeSource AncestorType=wpf:ComboBoxPopup}}">
+                    CornerRadius="{Binding Path=CornerRadius, RelativeSource={RelativeSource AncestorType=extender:SelectBoxPopup}}">
                 <Border.Effect>
                     <BlurEffect Radius="6"/>
                 </Border.Effect>
@@ -120,7 +120,7 @@
 
             <Border Margin="1"
                     Background="{Binding ElementName=PART_Popup, Path=Background}"
-                    CornerRadius="{Binding Path=CornerRadius, RelativeSource={RelativeSource AncestorType=wpf:ComboBoxPopup}}" />
+                    CornerRadius="{Binding Path=CornerRadius, RelativeSource={RelativeSource AncestorType=extender:SelectBoxPopup}}" />
 
             <Grid>
                 <Grid.RowDefinitions>
