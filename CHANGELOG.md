@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.6
+Upgrade to MaterialDesignThemes 4.5.0
+Minor fixes to button styles
+
 ## v0.0.5
 Minor fixes and improvements for SplitButton and FilterBoxes
 Add ToggleSplitButton that can open popups
