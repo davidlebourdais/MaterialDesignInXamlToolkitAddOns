@@ -26,8 +26,8 @@
                                    StrokeThickness="{Binding BorderThickness, Converter={StaticResource ThicknessToDoubleConverter}, RelativeSource={RelativeSource TemplatedParent}}" 
                                    Stroke="{TemplateBinding BorderBrush}" 
                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                   RadiusX="{Binding (wpf:ButtonAssist.CornerRadius), Converter={StaticResource CornerRadiusToDoubleConverter}, RelativeSource={RelativeSource TemplatedParent}}"
-                                   RadiusY="{Binding (wpf:ButtonAssist.CornerRadius), Converter={StaticResource CornerRadiusToDoubleConverter}, RelativeSource={RelativeSource TemplatedParent}}" />
+                                   RadiusX="{Binding Path=(wpf:ButtonAssist.CornerRadius), Converter={StaticResource CornerRadiusToDoubleConverter}, RelativeSource={RelativeSource TemplatedParent}}"
+                                   RadiusY="{Binding Path=(wpf:ButtonAssist.CornerRadius), Converter={StaticResource CornerRadiusToDoubleConverter}, RelativeSource={RelativeSource TemplatedParent}}" />
                         
                         <Border Background="{TemplateBinding Background}"
                                 x:Name="border" 

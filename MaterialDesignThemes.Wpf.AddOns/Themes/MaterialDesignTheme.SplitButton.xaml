@@ -63,6 +63,7 @@
         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidForegroundBrush}"/>
         <Setter Property="wpf:RippleAssist.Feedback" Value="White" />
+        <Setter Property="wpf:RippleAssist.IsDisabled" Value="False" />
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="wpf:ShadowAssist.ShadowDepth" Value="Depth1" />
         <Setter Property="TextElement.FontWeight" Value="Medium"/>
@@ -82,7 +83,7 @@
                                 <Border Background="{TemplateBinding Background}" CornerRadius="2"
                                             BorderThickness="{TemplateBinding BorderThickness}"
                                             BorderBrush="{TemplateBinding BorderBrush}"                                    
-                                            x:Name="border"
+                                            x:Name="mainBorder"
                                             Effect="{Binding RelativeSource={RelativeSource TemplatedParent},
                                                              Path=(wpf:ShadowAssist.ShadowDepth), 
                                                              Converter={x:Static wpf:ShadowConverter.Instance}}" />
@@ -96,7 +97,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <ContentControl x:Name="MainPart" 
+                                <ContentControl x:Name="mainPart" 
                                                 Content="{TemplateBinding Content}" 
                                                 ContentTemplate="{TemplateBinding ContentTemplate}" 
                                                 Margin="{TemplateBinding Padding}"
@@ -122,7 +123,7 @@
                                              StaysOpen="False"
                                              HorizontalOffset="10"
                                              VerticalOffset="5"
-                                             PlacementTarget="{Binding ElementName=border}"
+                                             PlacementTarget="{Binding ElementName=mainBorder}"
                                              Placement="Bottom"
                                              PopupAnimation="Fade"
                                              AllowsTransparency="True">
@@ -138,21 +139,20 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="wpf:ShadowAssist.Darken" Value="True" />
+                            <Setter TargetName="mainBorder" Property="wpf:ShadowAssist.Darken" Value="True" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" SourceName="PART_ToggleButton" Value="True">
                             <Setter Property="wpf:RippleAssist.IsDisabled" Value="True" />
                             <Setter Property="wpf:RippleAssist.IsDisabled" TargetName="PART_ToggleButton" Value="False" />
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="border" Property="wpf:ShadowAssist.Darken" Value="True" />
+                            <Setter TargetName="mainBorder" Property="wpf:ShadowAssist.Darken" Value="True" />
                         </Trigger>
                         <Trigger Property="IsOpen" SourceName="PART_Popup" Value="True">
-                            <Setter TargetName="border" Property="wpf:ShadowAssist.Darken" Value="True" />
-                            <Setter TargetName="MainPart" Property="IsEnabled" Value="False"/>
-                            <Setter TargetName="MainPart" Property="Opacity" Value="0.5"/>
+                            <Setter TargetName="mainBorder" Property="wpf:ShadowAssist.Darken" Value="True" />
+                            <Setter TargetName="mainPart" Property="IsEnabled" Value="False"/>
+                            <Setter TargetName="mainPart" Property="Opacity" Value="0.5"/>
                             <Setter Property="wpf:RippleAssist.IsDisabled" Value="True" />
-                            <Setter TargetName="PART_Popup" Property="wpf:RippleAssist.IsDisabled" Value="{Binding (wpf:RippleAssist.IsDisabled), RelativeSource={RelativeSource TemplatedParent}}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.38"/>
@@ -160,7 +160,7 @@
                         <EventTrigger SourceName="PART_Popup" RoutedEvent="Unloaded">
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <BooleanAnimationUsingKeyFrames Storyboard.TargetName="MainPart" 
+                                    <BooleanAnimationUsingKeyFrames Storyboard.TargetName="mainPart" 
                                                                     Storyboard.TargetProperty="IsEnabled" Duration="0:0:6" FillBehavior="HoldEnd">
                                         <DiscreteBooleanKeyFrame Value="False" KeyTime="0:0:0" />
                                         <DiscreteBooleanKeyFrame Value="True" KeyTime="0:0:6" />
@@ -229,6 +229,7 @@
         <Setter Property="BorderBrush" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidBrush}"/>
         <Setter Property="wpf:RippleAssist.Feedback" Value="{DynamicResource MaterialDesignFlatButtonRipple}" />
+        <Setter Property="wpf:RippleAssist.IsDisabled" Value="False" />
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="TextElement.FontWeight" Value="Medium"/>
         <Setter Property="TextElement.FontSize" Value="14"/>
@@ -241,7 +242,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type extender:SplitButton}">
-                    <Border x:Name="border" 
+                    <Border x:Name="mainBorder" 
                             Background="{TemplateBinding Background}" 
                             CornerRadius="2"
                             BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
@@ -253,7 +254,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <ContentControl x:Name="MainPart" 
+                                <ContentControl x:Name="mainPart" 
                                                 Content="{TemplateBinding Content}" 
                                                 ContentTemplate="{TemplateBinding ContentTemplate}" 
                                                 ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
@@ -279,7 +280,7 @@
                                              StaysOpen="False"
                                              HorizontalOffset="10"
                                              VerticalOffset="5"
-                                             PlacementTarget="{Binding ElementName=border}"
+                                             PlacementTarget="{Binding ElementName=mainBorder}"
                                              Placement="Bottom"
                                              PopupAnimation="Fade"
                                              AllowsTransparency="True">
@@ -296,23 +297,22 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="Button.IsDefaulted" Value="True">
-                            <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            <Setter Property="BorderBrush" TargetName="mainBorder" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource MaterialDesignFlatButtonClick}" />
-                            <Setter Property="Background" TargetName="border" Value="{DynamicResource MaterialDesignFlatButtonClick}" />
+                            <Setter Property="BorderBrush" TargetName="mainBorder" Value="{DynamicResource MaterialDesignFlatButtonClick}" />
+                            <Setter Property="Background" TargetName="mainBorder" Value="{DynamicResource MaterialDesignFlatButtonClick}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" SourceName="PART_ToggleButton" Value="True">
                             <Setter Property="wpf:RippleAssist.IsDisabled" Value="True" />
                             <Setter Property="wpf:RippleAssist.IsDisabled" TargetName="PART_ToggleButton" Value="False" />
                         </Trigger>
                         <Trigger Property="IsOpen" SourceName="PART_Popup" Value="True">
-                            <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource MaterialDesignFlatButtonClick}" />
-                            <Setter Property="Background" TargetName="border" Value="{DynamicResource MaterialDesignFlatButtonClick}" />
-                            <Setter TargetName="MainPart" Property="IsEnabled" Value="False"/>
-                            <Setter TargetName="MainPart" Property="Opacity" Value="0.7"/>
+                            <Setter Property="BorderBrush" TargetName="mainBorder" Value="{DynamicResource MaterialDesignFlatButtonClick}" />
+                            <Setter Property="Background" TargetName="mainBorder" Value="{DynamicResource MaterialDesignFlatButtonClick}" />
+                            <Setter TargetName="mainPart" Property="IsEnabled" Value="False"/>
+                            <Setter TargetName="mainPart" Property="Opacity" Value="0.7"/>
                             <Setter Property="wpf:RippleAssist.IsDisabled" Value="True" />
-                            <Setter TargetName="PART_Popup" Property="wpf:RippleAssist.IsDisabled" Value="{Binding (wpf:RippleAssist.IsDisabled), RelativeSource={RelativeSource TemplatedParent}}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.38"/>
@@ -320,7 +320,7 @@
                         <EventTrigger SourceName="PART_Popup" RoutedEvent="Unloaded">
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <BooleanAnimationUsingKeyFrames Storyboard.TargetName="MainPart" 
+                                    <BooleanAnimationUsingKeyFrames Storyboard.TargetName="mainPart" 
                                                                     Storyboard.TargetProperty="IsEnabled" Duration="0:0:6" FillBehavior="HoldEnd">
                                         <DiscreteBooleanKeyFrame Value="False" KeyTime="0:0:0" />
                                         <DiscreteBooleanKeyFrame Value="True" KeyTime="0:0:6" />
@@ -359,7 +359,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type extender:SplitButton}">
-                    <Border x:Name="border" 
+                    <Border x:Name="mainBorder" 
                             Background="{TemplateBinding Background}" 
                             CornerRadius="{Binding Path=(wpf:ButtonAssist.CornerRadius), RelativeSource={RelativeSource TemplatedParent}}"
                             BorderBrush="{TemplateBinding BorderBrush}" 
@@ -372,7 +372,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <ContentControl x:Name="MainPart" 
+                                <ContentControl x:Name="mainPart" 
                                                 Content="{TemplateBinding Content}" 
                                                 ContentTemplate="{TemplateBinding ContentTemplate}" 
                                                 ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
@@ -398,7 +398,7 @@
                                              StaysOpen="False"
                                              HorizontalOffset="10"
                                              VerticalOffset="5"
-                                             PlacementTarget="{Binding ElementName=border}"
+                                             PlacementTarget="{Binding ElementName=mainBorder}"
                                              Placement="Bottom"
                                              PopupAnimation="Fade"
                                              AllowsTransparency="True">
@@ -412,10 +412,10 @@
                             </Grid>
                             <wpf:Ripple.Clip>
                                 <MultiBinding Converter="{StaticResource InnerBorderClipConverter}">
-                                    <Binding ElementName="border" Path="ActualWidth" />
-                                    <Binding ElementName="border" Path="ActualHeight" />
-                                    <Binding ElementName="border" Path="CornerRadius" />
-                                    <Binding ElementName="border" Path="BorderThickness" />
+                                    <Binding ElementName="mainBorder" Path="ActualWidth" />
+                                    <Binding ElementName="mainBorder" Path="ActualHeight" />
+                                    <Binding ElementName="mainBorder" Path="CornerRadius" />
+                                    <Binding ElementName="mainBorder" Path="BorderThickness" />
                                 </MultiBinding>
                             </wpf:Ripple.Clip>
                         </wpf:Ripple>
@@ -423,7 +423,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" TargetName="border" 
+                            <Setter Property="Background" TargetName="mainBorder" 
                                     Value="{Binding Foreground,
                                                     RelativeSource={RelativeSource Mode=TemplatedParent},
                                                     Converter={StaticResource BrushOpacityConverter},
@@ -434,15 +434,14 @@
                             <Setter Property="wpf:RippleAssist.IsDisabled" TargetName="PART_ToggleButton" Value="False" />
                         </Trigger>
                         <Trigger Property="IsOpen" SourceName="PART_Popup" Value="True">
-                            <Setter Property="Background" TargetName="border" 
+                            <Setter Property="Background" TargetName="mainBorder" 
                                     Value="{Binding Foreground,
                                                     RelativeSource={RelativeSource Mode=TemplatedParent},
                                                     Converter={StaticResource BrushOpacityConverter},
                                                     ConverterParameter=0.16}" />
-                            <Setter TargetName="MainPart" Property="IsEnabled" Value="False"/>
-                            <Setter TargetName="MainPart" Property="Opacity" Value="0.7"/>
+                            <Setter TargetName="mainPart" Property="IsEnabled" Value="False"/>
+                            <Setter TargetName="mainPart" Property="Opacity" Value="0.7"/>
                             <Setter Property="wpf:RippleAssist.IsDisabled" Value="True" />
-                            <Setter TargetName="PART_Popup" Property="wpf:RippleAssist.IsDisabled" Value="{Binding (wpf:RippleAssist.IsDisabled), RelativeSource={RelativeSource TemplatedParent}}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.38"/>
@@ -450,7 +449,7 @@
                         <EventTrigger SourceName="PART_Popup" RoutedEvent="Unloaded">
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <BooleanAnimationUsingKeyFrames Storyboard.TargetName="MainPart" 
+                                    <BooleanAnimationUsingKeyFrames Storyboard.TargetName="mainPart" 
                                                                     Storyboard.TargetProperty="IsEnabled" Duration="0:0:6" FillBehavior="HoldEnd">
                                         <DiscreteBooleanKeyFrame Value="False" KeyTime="0:0:0" />
                                         <DiscreteBooleanKeyFrame Value="True" KeyTime="0:0:6" />

@@ -20,6 +20,7 @@
         <Setter Property="TrailingIconKind" Value="ChevronDown" />
         <Setter Property="TrailingIconMargin" Value="-8,0,6,0" />
         <Setter Property="TrailingIconSize" Value="16" />
+        <Setter Property="wpf:RippleAssist.IsDisabled" Value="False" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type extender:SplitToggleButton}">
@@ -35,13 +36,14 @@
                                     Focusable="False"
                                     HorizontalContentAlignment="Stretch"
                                     VerticalContentAlignment="Stretch"
+                                    wpf:RippleAssist.IsDisabled="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(wpf:RippleAssist.IsDisabled)}"
                                     SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" >
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <ContentControl  x:Name="MainPart"
+                                <ContentControl  x:Name="mainPart"
                                                      Content="{TemplateBinding Content}" 
                                                      ContentTemplate="{TemplateBinding ContentTemplate}" 
                                                      Margin="{TemplateBinding Padding}"
@@ -51,7 +53,7 @@
                                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
                                 
                                 <Border Grid.Column="1" Margin="0" Padding="2,0" 
-                                        Visibility="{Binding TrailingIconKind, Converter={StaticResource NotNullToVisibilityConverter}}">
+                                        Visibility="{Binding TrailingIconKind, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource NotNullToVisibilityConverter}}">
                                     <wpf:PackIcon Kind="{TemplateBinding TrailingIconKind}" 
                                                   Width="{TemplateBinding TrailingIconSize}"
                                                   Height="{TemplateBinding TrailingIconSize}"
@@ -92,9 +94,8 @@
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="border" Property="wpf:ShadowAssist.Darken" Value="True" />
-                            <Setter TargetName="MainPart" Property="Opacity" Value="0.5"/>
-                            <Setter Property="wpf:RippleAssist.IsDisabled" Value="True" />
-                            <Setter TargetName="PART_Popup" Property="wpf:RippleAssist.IsDisabled" Value="{Binding (wpf:RippleAssist.IsDisabled), RelativeSource={RelativeSource TemplatedParent}}" />
+                            <Setter TargetName="mainPart" Property="Opacity" Value="0.5"/>
+                            <Setter TargetName="contentControl" Property="wpf:RippleAssist.IsDisabled" Value="True" />
                         </Trigger>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
@@ -137,6 +138,7 @@
         <Setter Property="TrailingIconKind" Value="ChevronDown" />
         <Setter Property="TrailingIconMargin" Value="-8,0,6,0" />
         <Setter Property="TrailingIconSize" Value="16" />
+        <Setter Property="wpf:RippleAssist.IsDisabled" Value="False" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type extender:SplitToggleButton}">
@@ -147,15 +149,17 @@
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}" />
                             
-                        <wpf:Ripple VerticalContentAlignment="Stretch" 
-                                    HorizontalContentAlignment="Stretch">
+                        <wpf:Ripple x:Name="contentControl" 
+                                    VerticalContentAlignment="Stretch" 
+                                    HorizontalContentAlignment="Stretch"
+                                    wpf:RippleAssist.IsDisabled="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(wpf:RippleAssist.IsDisabled)}" >
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 
-                                <ContentControl x:Name="MainPart"
+                                <ContentControl x:Name="mainPart"
                                                 Content="{TemplateBinding Content}"
                                                 ContentTemplate="{TemplateBinding ContentTemplate}"
                                                 ContentStringFormat="{TemplateBinding ContentStringFormat}"
@@ -237,18 +241,17 @@
                                 <Condition Property="IsChecked" Value="True" />
                                 <Condition Property="wpf:ToggleButtonAssist.HasOnContent" Value="True" />
                             </MultiTrigger.Conditions>
-                            <Setter TargetName="MainPart" Property="Content" 
+                            <Setter TargetName="mainPart" Property="Content" 
                                     Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(wpf:ToggleButtonAssist.OnContent)}" />
-                            <Setter TargetName="MainPart" Property="ContentTemplate" 
+                            <Setter TargetName="mainPart" Property="ContentTemplate" 
                                     Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(wpf:ToggleButtonAssist.OnContentTemplate)}" />
                         </MultiTrigger>
                         <Trigger Property="IsOpen" SourceName="PART_Popup" Value="True">
                             <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource MaterialDesignFlatButtonClick}" />
                             <Setter Property="Background" TargetName="border" Value="{DynamicResource MaterialDesignFlatButtonClick}" />
-                            <Setter TargetName="MainPart" Property="IsEnabled" Value="False"/>
-                            <Setter TargetName="MainPart" Property="Opacity" Value="0.7"/>
-                            <Setter Property="wpf:RippleAssist.IsDisabled" Value="True" />
-                            <Setter TargetName="PART_Popup" Property="wpf:RippleAssist.IsDisabled" Value="{Binding (wpf:RippleAssist.IsDisabled), RelativeSource={RelativeSource TemplatedParent}}" />
+                            <Setter TargetName="mainPart" Property="IsEnabled" Value="False"/>
+                            <Setter TargetName="mainPart" Property="Opacity" Value="0.7"/>
+                            <Setter TargetName="contentControl" Property="wpf:RippleAssist.IsDisabled" Value="True" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.5"/>
@@ -256,7 +259,7 @@
                         <EventTrigger SourceName="PART_Popup" RoutedEvent="Unloaded">
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <BooleanAnimationUsingKeyFrames Storyboard.TargetName="MainPart" 
+                                    <BooleanAnimationUsingKeyFrames Storyboard.TargetName="mainPart" 
                                                                     Storyboard.TargetProperty="IsEnabled" Duration="0:0:6" FillBehavior="HoldEnd">
                                         <DiscreteBooleanKeyFrame Value="False" KeyTime="0:0:0" />
                                         <DiscreteBooleanKeyFrame Value="True" KeyTime="0:0:6" />
@@ -277,6 +280,7 @@
         <Setter Property="TrailingIconKind" Value="ChevronDown" />
         <Setter Property="TrailingIconMargin" Value="-8,0,6,0" />
         <Setter Property="TrailingIconSize" Value="16" />
+        <Setter Property="wpf:RippleAssist.IsDisabled" Value="False" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type extender:SplitToggleButton}">
@@ -288,6 +292,7 @@
                                 BorderThickness="{TemplateBinding BorderThickness}">
                             <wpf:Ripple x:Name="contentControl"
                                         Focusable="False"
+                                        wpf:RippleAssist.IsDisabled="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(wpf:RippleAssist.IsDisabled)}"
                                         HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
                                         VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
                                         SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" >
@@ -307,7 +312,7 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                             
-                                        <ContentControl x:Name="MainPart"
+                                        <ContentControl x:Name="mainPart"
                                                         Content="{TemplateBinding Content}"
                                                         ContentTemplate="{TemplateBinding ContentTemplate}"
                                                         ContentStringFormat="{TemplateBinding ContentStringFormat}"
@@ -402,15 +407,14 @@
                                                     RelativeSource={RelativeSource Mode=TemplatedParent},
                                                     Converter={StaticResource BrushOpacityConverter},
                                                     ConverterParameter=0.16}" />
-                            <Setter TargetName="MainPart" Property="IsEnabled" Value="False"/>
-                            <Setter TargetName="MainPart" Property="Opacity" Value="0.7"/>
-                            <Setter Property="wpf:RippleAssist.IsDisabled" Value="True" />
-                            <Setter TargetName="PART_Popup" Property="wpf:RippleAssist.IsDisabled" Value="{Binding (wpf:RippleAssist.IsDisabled), RelativeSource={RelativeSource TemplatedParent}}" />
+                            <Setter TargetName="mainPart" Property="IsEnabled" Value="False"/>
+                            <Setter TargetName="mainPart" Property="Opacity" Value="0.7"/>
+                            <Setter TargetName="contentControl" Property="wpf:RippleAssist.IsDisabled" Value="True" />
                         </Trigger>
                         <EventTrigger SourceName="PART_Popup" RoutedEvent="Unloaded">
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <BooleanAnimationUsingKeyFrames Storyboard.TargetName="MainPart" 
+                                    <BooleanAnimationUsingKeyFrames Storyboard.TargetName="mainPart" 
                                                                     Storyboard.TargetProperty="IsEnabled" Duration="0:0:6" FillBehavior="HoldEnd">
                                         <DiscreteBooleanKeyFrame Value="False" KeyTime="0:0:0" />
                                         <DiscreteBooleanKeyFrame Value="True" KeyTime="0:0:6" />
