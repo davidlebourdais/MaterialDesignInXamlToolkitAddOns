@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using MaterialDesignThemes.Wpf.AddOns.Utils;
 using MaterialDesignThemes.Wpf.AddOns.Utils.Filtering;
 using MaterialDesignThemes.Wpf.AddOns.Utils.Reflection;
 
@@ -55,7 +56,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         {
             if (!(sender is FilterBox filterBox))
                 return;
-            
+
             filterBox.SetItemFilterSetMemberPaths(filterBox.ItemFilterMemberPaths);
             filterBox.ItemsCount = filterBox.Items.Count;
             filterBox.OnItemsSourceChanged();
@@ -239,19 +240,20 @@ namespace MaterialDesignThemes.Wpf.AddOns
             = DependencyProperty.Register(nameof(NothingToDisplayHint), typeof(string), typeof(FilterBox), new FrameworkPropertyMetadata("Nothing to display"));
 
         /// <summary>
-        /// Gets or sets a value indicating the path to item string properties on
-        /// which filtering must be applied. Use ',' to separate member paths.
+        /// Gets or sets the paths to item string properties on
+        /// which filtering must be applied.
         /// </summary>
-        public string ItemFilterMemberPaths
+        /// <remarks>You can either bind a collection or use ',' to separate member paths.</remarks>
+        public object ItemFilterMemberPaths
         {
-            get => (string)GetValue(ItemFilterMemberPathsProperty);
+            get => GetValue(ItemFilterMemberPathsProperty);
             set => SetCurrentValue(ItemFilterMemberPathsProperty, value);
         }
         /// <summary>
         /// Registers <see cref="ItemFilterMemberPaths"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty ItemFilterMemberPathsProperty
-            = DependencyProperty.Register(nameof(ItemFilterMemberPaths), typeof(string), typeof(FilterBox), new FrameworkPropertyMetadata(default(string), FilterMemberPathsChanged));
+            = DependencyProperty.Register(nameof(ItemFilterMemberPaths), typeof(object), typeof(FilterBox), new FrameworkPropertyMetadata(null, FilterMemberPathsChanged));
 
         /// <summary>
         /// Called whenever the <see cref="ItemFilterMemberPaths"/> property changes.
@@ -260,18 +262,17 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// <param name="args">Information about the property change.</param>
         private static void FilterMemberPathsChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if (!(sender is FilterBox item) || !(args.NewValue is string rawMemberPaths))
+            if (!(sender is FilterBox item))
                 return;
 
-            item.SetItemFilterSetMemberPaths(rawMemberPaths);
+            item.SetItemFilterSetMemberPaths(args.NewValue);
         }
 
-        private void SetItemFilterSetMemberPaths(string rawMemberPaths)
+        private void SetItemFilterSetMemberPaths(object rawMemberPaths)
         {
-            if (string.IsNullOrEmpty(rawMemberPaths))
+            var memberPaths = MemberPaths.ExtractFromCollectionOrCharacterSeparatedInput(rawMemberPaths);
+            if (memberPaths.Length == 0)
                 return;
-
-            var memberPaths = rawMemberPaths.Replace(" ", "").Split(',').ToArray();
 
             _itemFilterPropertyGetters = ItemPropertyExtractor.BuildPropertyGetters(Items.SourceCollection)
                                                               .Where(x => memberPaths.Contains(x.PropertyName))

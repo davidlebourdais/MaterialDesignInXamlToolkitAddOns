@@ -296,19 +296,20 @@ namespace MaterialDesignThemes.Wpf.AddOns
         
         #region Item filtering
         /// <summary>
-        /// Gets or sets a value indicating the path to item string properties on
-        /// which filtering must be applied. Use ',' to separate member paths.
+        /// Gets or sets the paths to item string properties on
+        /// which filtering must be applied.
         /// </summary>
-        public string ItemFilterMemberPaths
+        /// <remarks>You can either bind a collection or use ',' to separate member paths.</remarks>
+        public object ItemFilterMemberPaths
         {
-            get => (string)GetValue(ItemFilterMemberPathsProperty);
+            get => GetValue(ItemFilterMemberPathsProperty);
             set => SetCurrentValue(ItemFilterMemberPathsProperty, value);
         }
         /// <summary>
         /// Registers <see cref="ItemFilterMemberPaths"/> as a dependency property.
         /// </summary>
         public static readonly DependencyProperty ItemFilterMemberPathsProperty
-            = DependencyProperty.Register(nameof(ItemFilterMemberPaths), typeof(string), typeof(FilterTextBox), new FrameworkPropertyMetadata(default(string), FilterMemberPathsChanged));
+            = DependencyProperty.Register(nameof(ItemFilterMemberPaths), typeof(object), typeof(FilterTextBox), new FrameworkPropertyMetadata(null, FilterMemberPathsChanged));
 
         /// <summary>
         /// Called whenever the <see cref="ItemFilterMemberPaths"/> property changes.
@@ -323,12 +324,14 @@ namespace MaterialDesignThemes.Wpf.AddOns
             item.SetItemFilterSetMemberPaths(rawMemberPaths);
         }
 
-        private void SetItemFilterSetMemberPaths(string rawMemberPaths)
+        private void SetItemFilterSetMemberPaths(object rawMemberPaths)
         {
-            if (string.IsNullOrEmpty(rawMemberPaths) || AssociatedItemsControl == null)
+            if (AssociatedItemsControl == null)
                 return;
-
-            var memberPaths = rawMemberPaths.Replace(" ", "").Split(',').ToArray();
+            
+            var memberPaths = MemberPaths.ExtractFromCollectionOrCharacterSeparatedInput(rawMemberPaths);
+            if (memberPaths.Length == 0)
+                return;
 
             _itemFilterPropertyGetters = ItemPropertyExtractor.BuildPropertyGetters(AssociatedItemsControl.Items.SourceCollection)
                                                               .Where(x => memberPaths.Contains(x.PropertyName))
