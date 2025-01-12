@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
-using MaterialDesignThemes.Wpf.AddOns.Extensions;
 using MaterialDesignThemes.Wpf.AddOns.Utils.Filtering;
+using MaterialDesignThemes.Wpf.AddOns.Utils.Reflection;
 
 namespace MaterialDesignThemes.Wpf.AddOns
 {
@@ -20,7 +19,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         protected string _filterCache;
         
-        private PropertyDescriptor[] _itemFilterMemberPaths = Array.Empty<PropertyDescriptor>();
+        private PropertyGetter[] _itemFilterPropertyGetters = Array.Empty<PropertyGetter>();
 
         #region Constructors and initializations
         /// <summary>
@@ -85,7 +84,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
 
                 _filterCache = trimmedFilter;
                 Items.Filter = item => TextFilter.IsItemMatchingFilter(item, 
-                                                                       _itemFilterMemberPaths, 
+                                                                       _itemFilterPropertyGetters, 
                                                                        _filterCache, 
                                                                        IgnoreCase, 
                                                                        AlsoMatchFilterWordsAcrossBoundProperties,
@@ -274,10 +273,9 @@ namespace MaterialDesignThemes.Wpf.AddOns
 
             var memberPaths = rawMemberPaths.Replace(" ", "").Split(',').ToArray();
 
-            var props = TypeDescriptor.GetProperties(Items.SourceCollection.GetGenericType(), new Attribute[] {new PropertyFilterAttribute(PropertyFilterOptions.All)});
-            _itemFilterMemberPaths = props.OfType<PropertyDescriptor>()
-                                          .Where(x => memberPaths.Contains(x.Name))
-                                          .ToArray();
+            _itemFilterPropertyGetters = ItemPropertyExtractor.BuildPropertyGetters(Items.SourceCollection)
+                                                              .Where(x => memberPaths.Contains(x.PropertyName))
+                                                              .ToArray();
 
             ApplyFilter(true);
         }

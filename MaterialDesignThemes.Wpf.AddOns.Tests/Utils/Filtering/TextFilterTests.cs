@@ -1,20 +1,18 @@
-using System.ComponentModel;
 using System.Linq;
 using MaterialDesignThemes.Wpf.AddOns.Utils.Filtering;
+using MaterialDesignThemes.Wpf.AddOns.Utils.Reflection;
 using NUnit.Framework;
 
 namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
 {
     public class TextFilterTests
     {
-        private PropertyDescriptor[] _testDataProperties;
+        private PropertyGetter[] _testDataProperties;
         
         [SetUp]
         public void Setup()
         {
-            _testDataProperties = TypeDescriptor.GetProperties(typeof(TestData))
-                                                .OfType<PropertyDescriptor>()
-                                                .ToArray();
+            _testDataProperties = ItemPropertyExtractor.BuildPropertyGetters(new TestData("")).ToArray();
         }
         
         [Test]
