@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.61
+Minor fixes on FilterTextbox
+Make members paths bindable to collections
+
 ## v0.0.6
 Upgrade to MaterialDesignThemes 4.5.0
 Minor fixes to button styles
