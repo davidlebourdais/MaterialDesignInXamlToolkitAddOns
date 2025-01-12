@@ -67,7 +67,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
                 ItemsCount = AssociatedItemsControl.Items.Count;
                 UpdateItemsCountSummary();
                 OnFilterApplied();
-                ApplyFilterPropertiesOnAssociatedItemsControlItems();
+                TryToApplyFilterPropertiesOnAssociatedItemsControlItems();
 
                 IsFilterActive = !string.IsNullOrWhiteSpace(_filterCache);
                 _sourceCollectionListener?.Resume();
@@ -86,9 +86,11 @@ namespace MaterialDesignThemes.Wpf.AddOns
                 selector.SetCurrentValue(Selector.SelectedItemProperty, selector.Items[0]);
         }
         
-        private void ApplyFilterPropertiesOnAssociatedItemsControlItems()
+        private void TryToApplyFilterPropertiesOnAssociatedItemsControlItems()
         {
             var itemStyle = AssociatedItemsControl.ItemContainerStyle;
+            if (itemStyle == null)
+                return;
 
             var overridenStyle = new Style(itemStyle.TargetType, itemStyle);
             if (itemStyle.Setters
