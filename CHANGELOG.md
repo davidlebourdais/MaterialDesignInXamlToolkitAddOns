@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.0.62
+Update to NET 9.0
+
 ## v0.0.61
 Minor fixes on FilterTextbox
 Make members paths bindable to collections

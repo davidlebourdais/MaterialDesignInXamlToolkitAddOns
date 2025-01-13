@@ -20,9 +20,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some good text");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "");
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "");
 
-            Assert.IsTrue(result);
+            Assert.That(match);
         }
 
         [Test]
@@ -30,9 +30,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some good text");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "good text");
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "good text");
 
-            Assert.IsTrue(result);
+            Assert.That(match);
         }
 
         [Test]
@@ -40,9 +40,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
            var testData = new TestData("Some good text");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "wrong text");
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "wrong text");
             
-            Assert.IsFalse(result);
+            Assert.That(!match);
         }
         
         [Test]
@@ -50,9 +50,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some TEXT");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "some text", ignoreCase: false);
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "some text", ignoreCase: false);
             
-            Assert.IsFalse(result);
+            Assert.That(!match);
         }
         
         [Test]
@@ -60,9 +60,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some TEXT");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "some text", ignoreCase: true);
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "some text", ignoreCase: true);
             
-            Assert.IsTrue(result);
+            Assert.That(match);
         }
         
         [Test]
@@ -70,9 +70,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some text");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So t", matchFilterWordsWithFirstWordLetters: false);
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So t", matchFilterWordsWithFirstWordLetters: false);
             
-            Assert.IsFalse(result);
+            Assert.That(!match);
         }
         
         [Test]
@@ -80,9 +80,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some text");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So t", matchFilterWordsWithFirstWordLetters: true);
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So t", matchFilterWordsWithFirstWordLetters: true);
             
-            Assert.IsTrue(result);
+            Assert.That(match);
         }
         
         [Test]
@@ -90,9 +90,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some text");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "t So", matchFilterWordsWithFirstWordLetters: true);
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "t So", matchFilterWordsWithFirstWordLetters: true);
             
-            Assert.IsFalse(result);
+            Assert.That(!match);
         }
         
         [Test]
@@ -100,9 +100,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some     text");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So t", matchFilterWordsWithFirstWordLetters: true);
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So t", matchFilterWordsWithFirstWordLetters: true);
             
-            Assert.IsTrue(result);
+            Assert.That(match);
         }
         
         [Test]
@@ -110,9 +110,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some (text)");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So t", matchFilterWordsWithFirstWordLetters: true);
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So t", matchFilterWordsWithFirstWordLetters: true);
             
-            Assert.IsTrue(result);
+            Assert.That(match);
         }
         
                 
@@ -121,9 +121,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some (text)");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So (t", matchFilterWordsWithFirstWordLetters: true);
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So (t", matchFilterWordsWithFirstWordLetters: true);
             
-            Assert.IsTrue(result);
+            Assert.That(match);
         }
         
         [Test]
@@ -131,9 +131,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some (text)");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So ( t", matchFilterWordsWithFirstWordLetters: true);
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So ( t", matchFilterWordsWithFirstWordLetters: true);
             
-            Assert.IsFalse(result);
+            Assert.That(!match);
         }
         
         [Test]
@@ -141,9 +141,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some crazy", " and incredible text");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So text", matchFilterWordsFirstWordLettersAcrossProperties: false);
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So text", matchFilterWordsFirstWordLettersAcrossProperties: false);
             
-            Assert.IsFalse(result);
+            Assert.That(!match);
         }
         
         [Test]
@@ -151,9 +151,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some crazy", " and incredible text");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So text", matchFilterWordsFirstWordLettersAcrossProperties: true);
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So text", matchFilterWordsFirstWordLettersAcrossProperties: true);
             
-            Assert.IsTrue(result);
+            Assert.That(match);
         }
         
         [Test]
@@ -161,9 +161,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some crazy", " and incredible text");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "Some text", matchFilterWordsFirstWordLettersAcrossProperties: true);
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "Some text", matchFilterWordsFirstWordLettersAcrossProperties: true);
             
-            Assert.IsTrue(result);
+            Assert.That(match);
         }
         
         [Test]
@@ -171,9 +171,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some crazy", " and incredible text");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "text So", matchFilterWordsFirstWordLettersAcrossProperties: true);
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "text So", matchFilterWordsFirstWordLettersAcrossProperties: true);
             
-            Assert.IsTrue(result);
+            Assert.That(match);
         }
         
         [Test]
@@ -181,9 +181,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some crazy", " and incredible text");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "me crazy and", matchFilterWordsFirstWordLettersAcrossProperties: true);
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "me crazy and", matchFilterWordsFirstWordLettersAcrossProperties: true);
             
-            Assert.IsFalse(result);
+            Assert.That(!match);
         }
         
         [Test]
@@ -191,9 +191,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some   ", "  text");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So t", matchFilterWordsFirstWordLettersAcrossProperties: true);
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So t", matchFilterWordsFirstWordLettersAcrossProperties: true);
             
-            Assert.IsTrue(result);
+            Assert.That(match);
         }
         
         [Test]
@@ -201,9 +201,9 @@ namespace MaterialDesignThemes.Wpf.AddOns.Tests.Utils.Filtering
         {
             var testData = new TestData("Some", "(text)");
 
-            var result = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So t", matchFilterWordsFirstWordLettersAcrossProperties: true);
+            var match = TextFilter.IsItemMatchingFilter(testData, _testDataProperties, "So t", matchFilterWordsFirstWordLettersAcrossProperties: true);
             
-            Assert.IsTrue(result);
+            Assert.That(match);
         }
         
         private class TestData
