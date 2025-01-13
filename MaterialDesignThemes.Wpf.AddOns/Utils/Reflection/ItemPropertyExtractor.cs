@@ -2,7 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Dynamic;
 using System.Linq;
+using System.Linq.Expressions;
 using MaterialDesignThemes.Wpf.AddOns.Extensions;
 
 namespace MaterialDesignThemes.Wpf.AddOns.Utils.Reflection
@@ -19,25 +21,30 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils.Reflection
         /// <returns>Property getters for static or dynamic properties.</returns>
         public static PropertyGetter[] BuildPropertyGetters(object source)
         {
-            PropertyDescriptorCollection propertyDescriptors;
+            var propertyGetters = new List<PropertyGetter>();
 
             if (source == null)
-                return Array.Empty<PropertyGetter>();
+                return propertyGetters.ToArray();
+
+            var type = (source as IEnumerable)?.GetGenericType() ?? source.GetType();
+            var propertyDescriptors = TypeDescriptor.GetProperties(type, new Attribute[] { new PropertyFilterAttribute(PropertyFilterOptions.All) });
+            foreach (var property in propertyDescriptors.Cast<PropertyDescriptor>())
+            {
+                propertyGetters.Add(new PropertyGetter(property.Name));
+            }
 
             if (source is ITypedList typedList)
             {
-                propertyDescriptors = typedList.GetItemProperties(null);
-            }
-            else
-            {
-                var type = (source as IEnumerable)?.GetGenericType() ?? source.GetType();
-                propertyDescriptors = TypeDescriptor.GetProperties(type, new Attribute[] { new PropertyFilterAttribute(PropertyFilterOptions.All) });
+                foreach (var property in typedList.GetItemProperties(null).Cast<PropertyDescriptor>())
+                {
+                    propertyGetters.Add(new PropertyGetter(property.Name));
+                }
             }
 
-            var propertyGetters = new List<PropertyGetter>();
-            foreach (var propertyDescriptor in propertyDescriptors.Cast<PropertyDescriptor>())
+            if (source is IDynamicMetaObjectProvider dynamicMetaObjectProvider)
             {
-                propertyGetters.Add(new PropertyGetter(propertyDescriptor.Name));
+                var dynamicProperties = dynamicMetaObjectProvider.GetMetaObject(Expression.Constant(dynamicMetaObjectProvider)).GetDynamicMemberNames().ToArray();
+                propertyGetters.AddRange(dynamicProperties.Select(x => new PropertyGetter(x)));
             }
 
             return propertyGetters.ToArray();
