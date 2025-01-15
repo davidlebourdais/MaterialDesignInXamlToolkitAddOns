@@ -5,8 +5,8 @@
     
     <AssemblyTitle>MaterialDesignThemes.Wpf.AddOns</AssemblyTitle>
     <PackageId>MaterialDesignInXamlToolkitAddOns</PackageId>
-    <Version>0.0.62</Version>
-    <PackageVersion>0.0.62</PackageVersion>
+    <Version>0.0.63</Version>
+    <PackageVersion>0.0.63</PackageVersion>
     
     <Title>Extensions for MaterialDesignInXamlToolkit</Title>
     <PackageDescription>Offers new features and extra controls to use Material Design in Xaml applications</PackageDescription>

@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.0.63
+Enhance filtering in FilterTextbox
+
 ## v0.0.62
 Update to NET 9.0
 
