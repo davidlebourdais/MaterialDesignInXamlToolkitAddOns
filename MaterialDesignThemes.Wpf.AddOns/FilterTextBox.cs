@@ -29,6 +29,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
 
         private int _totalAssociatedControlItemsCount;
 
+        private Predicate<object> _filter;
         private PropertyGetter[] _itemFilterPropertyGetters = Array.Empty<PropertyGetter>();
 
         #region Constructors and initializations
@@ -41,10 +42,10 @@ namespace MaterialDesignThemes.Wpf.AddOns
             DefaultStyleKeyProperty.OverrideMetadata(typeof(FilterTextBox), new FrameworkPropertyMetadata(typeof(FilterTextBox)));
         }
         #endregion
-        
+
         #region Filtering part
         /// <summary>
-        /// Applies current filter on items. 
+        /// Applies current filter on items.
         /// </summary>
         /// <param name="force">Forces filtering even if filter value did not change.</param>
         protected virtual void ApplyFilter(bool force = false)
@@ -57,13 +58,22 @@ namespace MaterialDesignThemes.Wpf.AddOns
 
                 _sourceCollectionListener?.Pause();
                 _filterCache = trimmedFilter;
-                AssociatedItemsControl.Items.Filter = item => TextFilter.IsItemMatchingFilter(item, 
-                                                                                              _itemFilterPropertyGetters, 
-                                                                                              _filterCache, 
-                                                                                              IgnoreCase, 
-                                                                                              AlsoMatchFilterWordsAcrossBoundProperties,
-                                                                                              AlsoMatchFilterWordsAcrossBoundProperties,
-                                                                                              ConvertValuesToBeFilteredToString);
+
+                ResetFilter();
+
+                _filter = item => TextFilter.IsItemMatchingFilter(item,
+                                                                  _itemFilterPropertyGetters,
+                                                                  _filterCache,
+                                                                  IgnoreCase,
+                                                                  AlsoMatchFilterWordsAcrossBoundProperties,
+                                                                  AlsoMatchFilterWordsAcrossBoundProperties,
+                                                                  ConvertValuesToBeFilteredToString);
+                
+                var groupFilter = (GroupFilter)AssociatedItemsControl.Items.Filter;
+                groupFilter += _filter;
+
+                AssociatedItemsControl.Items.Filter = groupFilter;
+
                 ItemsCount = AssociatedItemsControl.Items.Count;
                 UpdateItemsCountSummary();
                 OnFilterApplied();
@@ -81,11 +91,11 @@ namespace MaterialDesignThemes.Wpf.AddOns
         {
             if (!(AssociatedItemsControl is Selector selector))
                 return;
-            
+
             if (selector.SelectedItem != null && !selector.Items.Contains(selector.SelectedItem) && selector.Items.Count > 0)
                 selector.SetCurrentValue(Selector.SelectedItemProperty, selector.Items[0]);
         }
-        
+
         private void TryToApplyFilterPropertiesOnAssociatedItemsControlItems()
         {
             var itemStyle = AssociatedItemsControl.ItemContainerStyle;
@@ -98,22 +108,22 @@ namespace MaterialDesignThemes.Wpf.AddOns
                          .Cast<Setter>()
                          .Any(x => x.Property == FilterTextBoxHelper.TextFilterProperty))
                 overridenStyle = new Style(itemStyle.TargetType, itemStyle.BasedOn);
-            
+
             overridenStyle.Setters.Add(new Setter(FilterTextBoxHelper.TextFilterProperty, _filterCache));
             overridenStyle.Setters.Add(new Setter(FilterTextBoxHelper.HighlightPerWordProperty, AlsoMatchWithFirstWordLetters || AlsoMatchFilterWordsAcrossBoundProperties));
             overridenStyle.Setters.Add(new Setter(FilterTextBoxHelper.IgnoreCaseProperty, IgnoreCase));
-            
+
             AssociatedItemsControl.ItemContainerStyle = overridenStyle;
         }
         #endregion
-        
+
         #region Associated control' source updates
         private void UnsubscribeFromAssociatedControlItemsEvents(FrameworkElement itemsControl)
         {
             itemsControl.Loaded -= OnAssociatedControlLoaded;
             itemsControl.DataContextChanged -= OnAssociatedControlItemsSourcePropertyChanged;
         }
-        
+
         private void SubscribeToAssociatedControlItemsEvents()
         {
             if (!AssociatedItemsControl.IsLoaded)
@@ -139,43 +149,51 @@ namespace MaterialDesignThemes.Wpf.AddOns
         private void HandleAssociatedControlSourceChange()
         {
             SetItemFilterSetMemberPaths(ItemFilterMemberPaths);
-            
+
             _sourceCollectionListener?.Dispose();
-            
+
             OnSourceCollectionChange(null);
-            
+
             if (AssociatedItemsControl != null)
                 _sourceCollectionListener = new CollectionChangedWeakEventListener(AssociatedItemsControl.Items, OnSourceCollectionChange);
-            
+
             IsLoadingItemsInBackground = false;
         }
-        
+
         private void OnSourceCollectionChange(IEnumerable obj)
         {
             _sourceCollectionListener?.Pause();
-            
+
             ResetFilterAndSetSourceCollectionCounts();
-            
+
             ApplyFilter(true);
-            
+
             OnItemsSourceChanged();
         }
 
         private void ResetFilterAndSetSourceCollectionCounts()
         {
-            AssociatedItemsControl.Items.Filter = null;
-            
+            ResetFilter();
+
             _totalAssociatedControlItemsCount = AssociatedItemsControl.Items.Count;
             AssociatedItemsControlIsEmpty = _totalAssociatedControlItemsCount == 0;
         }
-        
+
+        private void ResetFilter()
+        {
+            var groupFilter = (GroupFilter)AssociatedItemsControl.Items.Filter;
+            groupFilter -= _filter;
+
+            AssociatedItemsControl.Items.Filter = groupFilter;
+        }
+
         /// <summary>
         /// Occurs whenever the item source property changes.
         /// </summary>
         protected virtual void OnItemsSourceChanged()
         { }
         #endregion
-        
+
         #region Keyboard key pressed management
         /// <summary>
         /// Occurs whenever a key from keyboard is pressed.
@@ -199,7 +217,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             return true;
         }
         #endregion
-        
+
         #region Dependency properties
         #region Associated control
         /// <summary>
@@ -230,11 +248,11 @@ namespace MaterialDesignThemes.Wpf.AddOns
             {
                 filterTextBox.UnsubscribeFromAssociatedControlItemsEvents(oldAssociatedItemsControl);
             }
-            
+
             filterTextBox.SubscribeToAssociatedControlItemsEvents();
             filterTextBox.ApplyFilter();
         }
-        
+
         /// <summary>
         /// Gets a boolean indicating if the associated control has no items to be filtered.
         /// </summary>
@@ -249,7 +267,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="AssociatedItemsControlIsEmpty"/> as a readonly dependency property.
         /// </summary>
         public static readonly DependencyProperty AssociatedItemsControlIsEmptyProperty = _associatedItemsControlIsEmptyPropertyKey.DependencyProperty;
-        
+
         /// <summary>
         /// Gets or sets the hint to be shown when they are no items to be filtered.
         /// </summary>
@@ -263,7 +281,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         public static readonly DependencyProperty AssociatedItemsControlIsEmptyHintProperty
             = DependencyProperty.Register(nameof(AssociatedItemsControlIsEmptyHint), typeof(string), typeof(FilterTextBox), new FrameworkPropertyMetadata("No items to be searched"));
-        
+
         /// <summary>
         /// Gets a boolean indicating if items are being initialized in background.
         /// </summary>
@@ -278,7 +296,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IsLoadingItemsInBackground"/> as a readonly dependency property.
         /// </summary>
         public static readonly DependencyProperty IsLoadingItemsInBackgroundProperty = _isLoadingItemsInBackgroundPropertyKey.DependencyProperty;
-        
+
         /// <summary>
         /// Gets or sets the hint to be shown when items are being loaded in background.
         /// </summary>
@@ -293,7 +311,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         public static readonly DependencyProperty IsLoadingItemsInBackgroundHintProperty
             = DependencyProperty.Register(nameof(IsLoadingItemsInBackgroundHint), typeof(string), typeof(FilterTextBox), new FrameworkPropertyMetadata("Loading your data..."));
         #endregion
-        
+
         #region Item filtering
         /// <summary>
         /// Gets or sets the paths to item string properties on
@@ -328,7 +346,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         {
             if (AssociatedItemsControl == null)
                 return;
-            
+
             var memberPaths = MemberPaths.ExtractFromCollectionOrCharacterSeparatedInput(rawMemberPaths);
             if (memberPaths.Length == 0)
                 return;
@@ -340,7 +358,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             ApplyFilter(true);
         }
         #endregion
-        
+
         #region Filtering configuration
         /// <summary>
         /// Gets or sets the string used for filtering.
@@ -355,7 +373,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         public static readonly DependencyProperty FilterProperty
             = DependencyProperty.Register(nameof(Filter), typeof(string), typeof(FilterTextBox), new FrameworkPropertyMetadata(default(string), FilterRulesChanged));
-        
+
         /// <summary>
         /// Gets or sets the hint to be set on the filter.
         /// </summary>
@@ -399,13 +417,13 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         public static readonly DependencyProperty AlsoMatchWithFirstWordLettersProperty
             = DependencyProperty.Register(nameof(AlsoMatchWithFirstWordLetters), typeof(bool), typeof(FilterTextBox), new FrameworkPropertyMetadata(true, FilterRulesChanged));
-        
+
         /// <summary>
         /// Gets or sets a value indicating if text comparisons during
         /// filtering can work only on a per member path basis for a given item,
         /// and or across member paths, thus allowing to select a word into one property
         /// and another into another property.
-        /// Ex: Bound item is Data { Property1="Some data", Property2="other date"), filter "Some oth" will match
+        /// Ex: Bound item is Data { Property1="Some data", Property2="other date" }, filter "Some oth" will match
         /// if this option is true.
         /// </summary>
         public bool AlsoMatchFilterWordsAcrossBoundProperties
@@ -418,7 +436,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         public static readonly DependencyProperty AlsoMatchFilterWordsAcrossBoundPropertiesProperty
             = DependencyProperty.Register(nameof(AlsoMatchFilterWordsAcrossBoundProperties), typeof(bool), typeof(FilterTextBox), new FrameworkPropertyMetadata(true, FilterRulesChanged));
-        
+
         /// <summary>
         /// Gets or sets a value indicating if non-string property values on the target
         /// items must be converted to string.
@@ -434,7 +452,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         public static readonly DependencyProperty ConvertValuesToBeFilteredToStringProperty
             = DependencyProperty.Register(nameof(ConvertValuesToBeFilteredToString), typeof(bool), typeof(FilterTextBox), new FrameworkPropertyMetadata(true, FilterRulesChanged));
-        
+
         /// <summary>
         /// Called whenever the <see cref="Filter"/>, <see cref="IgnoreCase"/>, <see cref="AlsoMatchWithFirstWordLetters"/>
         /// or <see cref="AlsoMatchFilterWordsAcrossBoundProperties"/> properties change.
@@ -449,7 +467,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             filterTextBox.ApplyFilter(true);
         }
         #endregion
-        
+
         #region Filtering results
         /// <summary>
         /// Gets the total number of items available for selection.
@@ -467,7 +485,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="ItemsCount"/> as a readonly dependency property.
         /// </summary>
         public static readonly DependencyProperty ItemsCountProperty = _itemsCountPropertyKey.DependencyProperty;
-        
+
         /// <summary>
         /// Called whenever the <see cref="ItemsCountChanged"/> property changes.
         /// </summary>
@@ -495,7 +513,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="HasItemsToDisplay"/> as a readonly dependency property.
         /// </summary>
         public static readonly DependencyProperty HasItemsToDisplayProperty = _hasItemsToDisplayPropertyKey.DependencyProperty;
-        
+
         /// <summary>
         /// Gets or sets the hint to be set when there is no items to be displayed.
         /// </summary>
@@ -509,7 +527,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         public static readonly DependencyProperty NothingToDisplayHintProperty
             = DependencyProperty.Register(nameof(NothingToDisplayHint), typeof(string), typeof(FilterTextBox), new FrameworkPropertyMetadata("Nothing to display"));
-        
+
         /// <summary>
         /// Gets a string displaying the summary of currently filtered items vs. total items.
         /// </summary>
@@ -530,7 +548,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
             ItemsCountSummary = ItemsCount + " / " + _totalAssociatedControlItemsCount;
         }
         #endregion
-        
+
         #region Icons
         /// <summary>
         /// Gets or sets the kind of the icon.
@@ -545,7 +563,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         public static readonly DependencyProperty IconKindProperty
             = DependencyProperty.Register(nameof(IconKind), typeof(PackIconKind), typeof(FilterTextBox), new FrameworkPropertyMetadata(default(PackIconKind)));
-        
+
         /// <summary>
         /// Gets or sets the foreground for toggle icon.
         /// </summary>
@@ -559,12 +577,12 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         public static readonly DependencyProperty IconForegroundProperty
             = DependencyProperty.Register(nameof(IconForeground), typeof(Brush), typeof(FilterTextBox), new FrameworkPropertyMetadata(default(Brush)));
-        
+
         /// <summary>
         /// Gets or sets the kind of the icon when the control is open.
         /// </summary>
 
-        
+
         /// <summary>
         /// Gets a boolean indicating if filtering is currently active.
         /// </summary>
@@ -579,7 +597,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// Registers <see cref="IsFilterActive"/> as a readonly dependency property.
         /// </summary>
         public static readonly DependencyProperty IsFilterActiveProperty = _isFilterActivePropertyKey.DependencyProperty;
-        
+
         /// <summary>
         /// Gets or sets the kind of the icon to display when the filter is active.
         /// </summary>
@@ -593,7 +611,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         public static readonly DependencyProperty IconKindWhenFilterIsActiveProperty
             = DependencyProperty.Register(nameof(IconKindWhenFilterIsActive), typeof(PackIconKind), typeof(FilterTextBox), new FrameworkPropertyMetadata(default(PackIconKind)));
-        
+
         /// <summary>
         /// Gets or sets the kind of the icon to display when the filter is active but all items are filtered out.
         /// </summary>
@@ -607,7 +625,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         public static readonly DependencyProperty IconKindWhenNoItemAfterFilteringProperty
             = DependencyProperty.Register(nameof(IconKindWhenNoItemAfterFiltering), typeof(PackIconKind), typeof(FilterTextBox), new FrameworkPropertyMetadata(default(PackIconKind)));
-        
+
         /// <summary>
         /// Gets or sets the kind of the icon when the associated control is open (used for results in popup).
         /// </summary>

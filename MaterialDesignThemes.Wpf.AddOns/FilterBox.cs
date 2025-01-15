@@ -20,6 +20,7 @@ namespace MaterialDesignThemes.Wpf.AddOns
         /// </summary>
         protected string _filterCache;
         
+        private Predicate<object> _filter;
         private PropertyGetter[] _itemFilterPropertyGetters = Array.Empty<PropertyGetter>();
 
         #region Constructors and initializations
@@ -84,13 +85,21 @@ namespace MaterialDesignThemes.Wpf.AddOns
                     return;
 
                 _filterCache = trimmedFilter;
-                Items.Filter = item => TextFilter.IsItemMatchingFilter(item, 
-                                                                       _itemFilterPropertyGetters, 
-                                                                       _filterCache, 
-                                                                       IgnoreCase, 
-                                                                       AlsoMatchFilterWordsAcrossBoundProperties,
-                                                                       AlsoMatchFilterWordsAcrossBoundProperties,
-                                                                       ConvertValuesToBeFilteredToString);
+                
+                var groupFilter = (GroupFilter)Items.Filter;
+                groupFilter -= _filter;
+                
+                _filter = item => TextFilter.IsItemMatchingFilter(item, 
+                                                                  _itemFilterPropertyGetters, 
+                                                                  _filterCache, 
+                                                                  IgnoreCase, 
+                                                                  AlsoMatchFilterWordsAcrossBoundProperties,
+                                                                  AlsoMatchFilterWordsAcrossBoundProperties,
+                                                                  ConvertValuesToBeFilteredToString);
+                
+                groupFilter += _filter;
+
+                Items.Filter = groupFilter;
 
                 ItemsCount = Items.Count;
                 OnFilterApplied();

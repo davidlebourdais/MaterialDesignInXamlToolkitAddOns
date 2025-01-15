@@ -84,12 +84,16 @@
                                     Value="{Binding IsLoadingItemsInBackgroundHint, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:FilterTextBox}}}" />
                         </Trigger>
                         
-                        <Trigger Property="AssociatedItemsControlIsEmpty" Value="True">
-                            <Setter TargetName="PART_FilterTextBox" Property="IsEnabled" Value="False" />
-                            <Setter TargetName="PART_FilterTextBox" 
-                                    Property="wpf:HintAssist.Hint" 
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="AssociatedItemsControlIsEmpty" Value="True" />
+                                <Condition Property="IsFilterActive" Value="False" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="PART_FilterTextBox" Property="IsEnabled" Value="True" />
+                            <Setter TargetName="PART_FilterTextBox"
+                                    Property="wpf:HintAssist.Hint"
                                     Value="{Binding AssociatedItemsControlIsEmptyHint, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type extender:FilterTextBox}}}" />
-                        </Trigger>
+                        </MultiTrigger>
                         
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.66" />
