@@ -6,13 +6,18 @@ using System.Runtime.CompilerServices;
 
 namespace MaterialDesignThemes.Wpf.AddOns.Utils.Reflection
 {
-    /// <summary>
+/// <summary>
     /// A class specialized in getting property values from objects.
     /// </summary>
     public class PropertyGetter
     {
         private Func<object, object> _staticGetter;
         private CallSite<Func<CallSite, object, object>> _dynamicGetter;
+
+        /// <summary>
+        /// The type of the property that can be retrieved through the getter.
+        /// </summary>
+        public Type PropertyType { get; }
 
         /// <summary>
         /// The name of the property that can be retrieved through the getter.
@@ -22,9 +27,11 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils.Reflection
         /// <summary>
         /// Initiates a new instance of <see cref="PropertyGetter"/>.
         /// </summary>
-        /// <param name="propertyName"></param>
-        public PropertyGetter(string propertyName)
+        /// <param name="propertyType">The type of the property to get.</param>
+        /// <param name="propertyName">The name of the property to get.</param>
+        public PropertyGetter(Type propertyType, string propertyName)
         {
+            PropertyType = propertyType;
             PropertyName = propertyName;
         }
 
@@ -58,7 +65,7 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils.Reflection
                     _staticGetter = descriptor.GetValue;
             }
         }
-        
+
         private class GetMemberBinderForDynamicObject : GetMemberBinder
         {
             public GetMemberBinderForDynamicObject(string propertyName)

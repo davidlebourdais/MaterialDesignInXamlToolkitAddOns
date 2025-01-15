@@ -12,7 +12,7 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils.Reflection
     /// <summary>
     /// A helper class to extract properties from an object.
     /// </summary>
-    public static class ItemPropertyExtractor 
+    public static class ItemPropertyExtractor
     {
         /// <summary>
         /// Gets getters that will ensure the retrieval of object values through reflection.
@@ -30,21 +30,24 @@ namespace MaterialDesignThemes.Wpf.AddOns.Utils.Reflection
             var propertyDescriptors = TypeDescriptor.GetProperties(type, new Attribute[] { new PropertyFilterAttribute(PropertyFilterOptions.All) });
             foreach (var property in propertyDescriptors.Cast<PropertyDescriptor>())
             {
-                propertyGetters.Add(new PropertyGetter(property.Name));
+                propertyGetters.Add(new PropertyGetter(property.PropertyType, property.Name));
             }
 
             if (source is ITypedList typedList)
             {
                 foreach (var property in typedList.GetItemProperties(null).Cast<PropertyDescriptor>())
                 {
-                    propertyGetters.Add(new PropertyGetter(property.Name));
+                    propertyGetters.Add(new PropertyGetter(property.PropertyType, property.Name));
                 }
             }
 
             if (source is IDynamicMetaObjectProvider dynamicMetaObjectProvider)
             {
-                var dynamicProperties = dynamicMetaObjectProvider.GetMetaObject(Expression.Constant(dynamicMetaObjectProvider)).GetDynamicMemberNames().ToArray();
-                propertyGetters.AddRange(dynamicProperties.Select(x => new PropertyGetter(x)));
+                var provider = dynamicMetaObjectProvider.GetMetaObject(Expression.Constant(dynamicMetaObjectProvider));
+
+                var dynamicProperties = provider.GetDynamicMemberNames().ToArray();
+
+                propertyGetters.AddRange(dynamicProperties.Select(x => new PropertyGetter(provider.LimitType, x)));
             }
 
             return propertyGetters.ToArray();
